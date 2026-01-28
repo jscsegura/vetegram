@@ -1,0 +1,139 @@
+<?php
+
+namespace App\Http\Controllers\Wpanel;
+
+use App\Http\Controllers\Controller;
+use App\Models\RecipeTakes;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class RecipeTakeController extends Controller {
+
+    public function __construct() {}
+    
+    public function index() {
+        return view('wpanel.recipe-take.index');
+    }
+
+    public function list(Request $request) {
+        $draw = $request->get('draw');
+        $start = $request->get("start");
+        $rowperpage = $request->get("length");
+
+        $columnIndex_arr = $request->get('order');
+        $columnName_arr = $request->get('columns');
+
+        $order_arr = $request->get('order');
+        $search_arr = $request->get('search');
+
+        $columnIndex = $columnIndex_arr[0]['column'];
+        $columnName = $columnName_arr[$columnIndex]['data'];
+        $columnSortOrder = $order_arr[0]['dir'];
+        $searchValue = $search_arr['value'];
+
+        $records = [];
+        $totalRecordswithFilter = 0;
+        if (Auth::guard('admin')->user()->rol_id == 1) {
+            $totalRecordswithFilter = RecipeTakes::select('count(*) as allcount')->search($searchValue)->count();
+
+            $records = RecipeTakes::orderBy($columnName, $columnSortOrder)
+                ->search($searchValue)
+                ->select('id', 'title_es', 'enabled')
+                ->skip($start)
+                ->take($rowperpage)
+                ->get();
+        }
+
+        $result = array();
+        foreach ($records as $row) {
+            $result[] = array(
+                'id' => $row->id,
+                'title_es' => $row->title_es,
+                'enabled' => $row->enabled
+            );
+        }
+
+        $response = array(
+            "draw" => intval($draw),
+            "iTotalDisplayRecords" => $totalRecordswithFilter,
+            "aaData" => $result
+        );
+
+        echo json_encode($response);
+        exit;
+    }
+
+    public function create() {
+        return view('wpanel.recipe-take.create');
+    }
+
+    public function store(Request $request) {
+        if (Auth::guard('admin')->user()->rol_id == 1) {
+                            
+            $type = new RecipeTakes();
+            $type->title_es = $request->title_es;
+            $type->title_en = $request->title_en;
+            $type->enabled  = 1;
+            $type->save();
+
+            session()->flash('success', 'Tipo de toma creada exitosamente!');
+
+            return redirect(route('wp.recipe-take.index'));
+        }
+        die;
+    }
+
+    public function edit($id) {
+        if (Auth::guard('admin')->user()->rol_id == 1) {
+            $type = RecipeTakes::where('id', '=', $id)->first();
+            
+            return view('wpanel.recipe-take.edit', compact('type'));
+        }
+    }
+
+    public function update(Request $request, $id) {
+        if (Auth::guard('admin')->user()->rol_id == 1) {
+            $types = RecipeTakes::where('id', '=', $id)->first();
+
+            $types->title_es = $request->title_es;
+            $types->title_en = $request->title_en;
+            $types->update();
+
+            session()->flash('success', 'Tipo de toma actualizada exitosamente!');
+
+            return redirect(route('wp.recipe-take.index'));
+        }
+    }
+
+    public function enabled(Request $request) {
+        if (Auth::guard('admin')->user()->rol_id == 1) {
+            $id = $request->id;
+
+            $type = RecipeTakes::select('id', 'enabled')->where('id', '=', $id)->first();
+
+            $enabled = 0;
+            if(isset($type->id)) {
+                if($type->enabled == 1) {
+                    $type->enabled = 0;
+                    $type->update();
+                    $enabled = 0;
+                }else{
+                    $type->enabled = 1;
+                    $type->update();
+                    $enabled = 1;
+                }
+
+                return view('wpanel.generic.enabled', compact('enabled', 'id'));
+            }
+        }
+        die;
+    }
+
+    public function delete(Request $request) {
+        if (Auth::guard('admin')->user()->rol_id == 1) {
+            RecipeTakes::where('id', '=', $request->id)->delete();
+        }
+        return response()->json(array('type' => '200'));
+    }
+
+}

@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'label.Inicio' => 'Inicio',
+    'label.Servicios' => 'Servicios',
+    'label.Nosotros' => 'Nosotros',
+    'label.Contacto' => 'Contacto',
+    'label.Ingresar' => 'Ingresar',
+    'label.Nuestros' => 'Nuestros',
+    'label.servicios' => 'servicios',
+    'label.Sobre' => 'Sobre',
+    'label.nosotros' => 'nosotros',
+    'label.Contacto' => 'Contacto',
+    'label.Nombre.completo' => 'Nombre completo',
+    'Correo.electronico' => 'Correo electrónico',
+    'label.Mensaje' => 'Mensaje',
+    'label.Enviar' => 'Enviar',
+    'label.Enviando' => 'Enviando...',
+    'label.Enviado' => '¡Enviado!',
+    'contact.success' => 'Hemos recibido su contacto, pronto nos pondremos en contacto.',
+    'label.Informacion' => 'Información',
+    'label.Siguenos' => 'Síguenos',
+    'label.footer' => 'Vetegram ©2024. Todos los derechos reservados.',
+    'label.veterinaries' => 'Veterinarios',
+    'menu.search' => 'Buscar',
+    'placeholder.search' => 'Veterinaria, nombre doctor',
+];
