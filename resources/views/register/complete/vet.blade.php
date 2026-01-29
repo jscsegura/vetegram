@@ -28,6 +28,7 @@
     $vetDistrict = $user->district ?? ($vet->district ?? null);
     $vetCode = $user->code ?? ($vet->code ?? '');
     $myCodeValue = ($vetCode !== '' && $vetCode !== null) ? 1 : 2;
+    $isProfileComplete = (isset($user->complete) && $user->complete == 1);
 @endphp
 
 <div class="container-fluid">
@@ -745,6 +746,13 @@
         if (!activeStep) {
             return;
         }
+        if (window._isProfileComplete) {
+            const btn = document.querySelector(`.wizard-next-btn[data-step="${activeStep}"]`);
+            if (btn) {
+                btn.disabled = false;
+            }
+            return;
+        }
         const ready = stepIsReady(activeStep);
         const btn = document.querySelector(`.wizard-next-btn[data-step="${activeStep}"]`);
         if (btn) {
@@ -1082,6 +1090,8 @@
         updateActionButtons();
     });
     updateActionButtons();
+
+    window._isProfileComplete = @json($isProfileComplete);
 
     const phoneInput = document.getElementById('phone');
     if (phoneInput && window.intlTelInput) {
