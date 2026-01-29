@@ -25,6 +25,8 @@ use App\Models\ClinicService;
 use App\Models\UserVetDoctor;
 use App\Models\VeterinaryCredential;
 use App\Models\Vets;
+use App\Models\Schedule;
+use App\Models\ScheduleDetails;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -308,7 +310,7 @@ class RegisterController extends Controller {
             $languages   = Language::select('id', 'title_es', 'title_en')->where('enabled', '=', 1)->get();
             $species     = Species::select('id', 'title_es', 'title_en')->where('enabled', '=', 1)->orderBy('id', 'ASC')->get();
             $clinicServices = ClinicService::select('id', 'title_es', 'title_en')->where('enabled', '=', 1)->orderBy('id', 'ASC')->get();
-            $vet         = Vets::select('id', 'type_dni', 'dni', 'country', 'code', 'social_name', 'company', 'address', 'province', 'canton', 'district', 'phone', 'specialities', 'species', 'languages', 'services', 'email', 'website', 'schedule', 'resume')
+            $vet         = Vets::select('id', 'type_dni', 'dni', 'country', 'code', 'social_name', 'company', 'address', 'province', 'canton', 'district', 'phone', 'specialities', 'species', 'languages', 'services', 'email', 'website', 'schedule', 'resume', 'lat', 'lng')
                 ->where('id', '=', $user->id_vet)
                 ->first();
 
@@ -388,7 +390,9 @@ class RegisterController extends Controller {
                 ];
             }
 
-            return view('register.complete.vet', compact('countries', 'provinces', 'user', 'specialties', 'languages', 'species', 'clinicServices', 'specialtyGroupsView', 'vet'));
+            $schedule = Schedule::with('scheduleDetails')->where('id_user', $user->id)->first();
+
+            return view('register.complete.vet', compact('countries', 'provinces', 'user', 'specialties', 'languages', 'species', 'clinicServices', 'specialtyGroupsView', 'vet', 'schedule'));
         }
 
         if ($user->rol_id == 8) {
@@ -445,8 +449,10 @@ class RegisterController extends Controller {
             $vet->website      = $request->website_clinic;
             $vet->schedule     = nl2br($request->schedule_clinic);
             $vet->resume       = nl2br($request->resume_clinic);
-            $vet->lat          = $request->lat;
-            $vet->lng          = $request->lng;
+            if (!$isDraft || ($request->lat !== null && $request->lat !== '' && $request->lng !== null && $request->lng !== '')) {
+                $vet->lat      = $request->lat;
+                $vet->lng      = $request->lng;
+            }
             if($request->hasfile('clinicLogo')) {
                 $file = $request->file('clinicLogo');
                 $imageName = uniqid().time().'.'.$file->extension();
@@ -511,6 +517,28 @@ class RegisterController extends Controller {
                 $userrow->photo = null;
             }
             $userrow->update();
+
+            if ($request->boolean('schedule_enabled')) {
+                $scheduleInput = $request->input('schedule', []);
+                $schedule = Schedule::firstOrCreate(
+                    ['id_user' => $user->id],
+                    ['description' => 'Horario de ' . ($user->name ?? 'usuario'), 'status' => '1']
+                );
+                $schedule->scheduleDetails()->delete();
+                foreach ($scheduleInput as $day => $times) {
+                    foreach ($times as $time) {
+                        if (empty($time['from']) || empty($time['to'])) {
+                            continue;
+                        }
+                        $schedule->scheduleDetails()->create([
+                            'day_of_week' => $day,
+                            'start_time'  => $time['from'],
+                            'end_time'    => $time['to'],
+                            'status'      => '1',
+                        ]);
+                    }
+                }
+            }
 
             if($isDraft) {
                 return response()->json(['type' => 'success']);

@@ -58,6 +58,7 @@
                 <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step2" onclick="changeTab('step2')">2. {{ trans('auth.register.complete.step.clinic') }}</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step3" onclick="changeTab('step3')">3. {{ trans('auth.register.complete.step.specialties') }}</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step4" onclick="changeTab('step4')">4. {{ trans('auth.register.complete.step.location') }}</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step5" onclick="changeTab('step5')">5. {{ trans('auth.register.complete.step.schedule') }}</button>
             </div>
 
             <div class="tab-content" id="formSteps">
@@ -345,6 +346,27 @@
                     @include('register.complete.action-bar', [
                         'step' => 'step4',
                         'backStep' => 'step3',
+                        'nextStep' => 'step5',
+                        'nextLabel' => trans('auth.register.complete.next.save')
+                    ])
+                </div>
+
+                <div class="tab-pane fade" id="step5">
+                    <div class="row g-4 g-xl-5">
+                        <div class="col-12">
+                            <h2 class="h5 text-uppercase mb-1">{{ trans('auth.register.complete.step.schedule') }}</h2>
+                            <p class="text-muted mb-2">{{ trans('auth.register.complete.schedule.hint') }}</p>
+                        </div>
+                        <div class="col-12">
+                            <input type="hidden" id="schedule_enabled" name="schedule_enabled" value="{{ isset($schedule) && $schedule ? 1 : 0 }}">
+                            <div class="border rounded-3 p-3 bg-white">
+                                @include('schedule.schedule._fields', ['schedule' => $schedule ?? null])
+                            </div>
+                        </div>
+                    </div>
+                    @include('register.complete.action-bar', [
+                        'step' => 'step5',
+                        'backStep' => 'step4',
                         'submit' => true,
                         'nextLabel' => trans('auth.register.complete.finish')
                     ])
@@ -421,6 +443,9 @@
     }
     .map-hidden {
         visibility: hidden;
+    }
+    .clinic-pin {
+        z-index: 1000;
     }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
@@ -546,13 +571,19 @@
         if (tabId === 'step4' && window._clinicMap) {
             setTimeout(() => {
                 window._clinicMap.invalidateSize();
-                const lat = parseFloat($('#lat').val());
-                const lng = parseFloat($('#lng').val());
-                if (!isNaN(lat) && !isNaN(lng) && window._setClinicMarker) {
-                    window._setClinicMarker(lat, lng);
-                    window._clinicMap.setView([lat, lng], 16);
+                if (window._syncMapToStoredPin) {
+                    window._syncMapToStoredPin();
                 }
+                setTimeout(() => {
+                    window._clinicMap.invalidateSize();
+                    if (window._syncMapToStoredPin) {
+                        window._syncMapToStoredPin();
+                    }
+                }, 350);
             }, 200);
+        }
+        if (tabId === 'step5') {
+            $('#schedule_enabled').val('1');
         }
         updateActionButtons();
     }
@@ -567,12 +598,16 @@
         changeTab(nextStepId, { skipDraft: true });
     }
 
-    async function saveDraft() {
+    async function saveDraft(options = {}) {
         const form = document.getElementById('frmProfile');
         if (!form) {
             return;
         }
         const formData = new FormData(form);
+        if (options.omitFiles) {
+            formData.delete('profilePhoto');
+            formData.delete('clinicLogo');
+        }
         formData.append('draft', '1');
         try {
             await fetch(form.action, {
@@ -580,6 +615,7 @@
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                 },
+                credentials: 'same-origin',
                 body: formData
             });
         } catch (e) {}
@@ -979,13 +1015,26 @@
 
     function validSend() {
         var validate = true;
+        let firstInvalid = null;
+        const markInvalid = (elem) => {
+            if (!elem) return;
+            if (!firstInvalid) {
+                firstInvalid = elem;
+            }
+        };
 
         $('.requerido').each(function(i, elem){
             var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
+            var valueText = '';
+            if (Array.isArray(value)) {
+                valueText = value.join(',').trim();
+            } else {
+                valueText = (value === null || value === undefined) ? '' : value.toString().trim();
+            }
+            if(valueText == ''){
                 $(elem).addClass('is-invalid');
                 validate = false;
+                markInvalid(elem);
             }else{
                 $(elem).removeClass('is-invalid');
             }
@@ -995,6 +1044,7 @@
             if($('#vcode').val().trim() == ''){
                 $('#vcode').addClass('is-invalid');
                 validate = false;
+                markInvalid($('#vcode').get(0));
             }else{
                 $('#vcode').removeClass('is-invalid');
             }
@@ -1005,6 +1055,7 @@
             $('#speciesGroup').addClass('border-danger');
             $('#speciesError').show();
             validate = false;
+            markInvalid($('#speciesGroup').get(0));
         } else {
             $('#speciesGroup').removeClass('border-danger');
             $('#speciesError').hide();
@@ -1017,6 +1068,7 @@
             if($('#province').val() == ''){
                 $('#province').addClass('is-invalid');
                 validate = false;
+                markInvalid($('#province').get(0));
             }else{
                 $('#province').removeClass('is-invalid');
             }
@@ -1024,6 +1076,7 @@
             if($('#canton').val() == ''){
                 $('#canton').addClass('is-invalid');
                 validate = false;
+                markInvalid($('#canton').get(0));
             }else{
                 $('#canton').removeClass('is-invalid');
             }
@@ -1031,6 +1084,7 @@
             if($('#district').val() == ''){
                 $('#district').addClass('is-invalid');
                 validate = false;
+                markInvalid($('#district').get(0));
             }else{
                 $('#district').removeClass('is-invalid');
             }
@@ -1038,6 +1092,7 @@
             if($('#province_alternate').val() == ''){
                 $('#province_alternate').addClass('is-invalid');
                 validate = false;
+                markInvalid($('#province_alternate').get(0));
             }else{
                 $('#province_alternate').removeClass('is-invalid');
             }
@@ -1045,6 +1100,7 @@
             if($('#canton_alternate').val() == ''){
                 $('#canton_alternate').addClass('is-invalid');
                 validate = false;
+                markInvalid($('#canton_alternate').get(0));
             }else{
                 $('#canton_alternate').removeClass('is-invalid');
             }
@@ -1054,6 +1110,7 @@
             if (!window._itiPhone.isValidNumber()) {
                 $('#phone').addClass('is-invalid');
                 validate = false;
+                markInvalid($('#phone').get(0));
             } else {
                 $('#phone').removeClass('is-invalid');
             }
@@ -1061,20 +1118,45 @@
         } else if($('#phone').val().trim() === '' || $('#phone').val() == '+' + phonecode) {
             $('#phone').addClass('is-invalid');
             validate = false;
+            markInvalid($('#phone').get(0));
         }
 
         if($('#lat').val() == '' || $('#lng').val() == '') {
             $('#clinicMap').addClass('border-danger');
             validate = false;
+            markInvalid($('#clinicMap').get(0));
         } else {
             $('#clinicMap').removeClass('border-danger');
         }
 
-        if(validate == true) {
-            setCharge();
+        if ($('#schedule_enabled').val() === '1' && window.validateSchedule) {
+            if (!window.validateSchedule()) {
+                validate = false;
+            }
         }
 
-        return validate;
+        if(validate == true) {
+            setCharge();
+            return true;
+        }
+
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        if (window.Swal) {
+            Swal.fire({
+                title: '{{ trans("auth.register.complete.error.title") }}',
+                text: '{{ trans("auth.register.complete.error.required") }}',
+                icon: 'error',
+                confirmButtonText: '{{ trans("auth.register.complete.ok") }}',
+                confirmButtonColor: '#4bc6f9',
+                buttonsStyling: true
+            });
+        } else {
+            alert('{{ trans("auth.register.complete.error.required") }}');
+        }
+
+        return false;
 
     }
 
@@ -1091,7 +1173,22 @@
     });
     updateActionButtons();
 
+    $('#step5').on('change', 'select[name^="schedule["]', function() {
+        $('#schedule_enabled').val('1');
+    });
+
+
     window._isProfileComplete = @json($isProfileComplete);
+
+    let step4SaveTimer = null;
+    $('#step4').on('input change', 'input, select, textarea', function() {
+        if (step4SaveTimer) {
+            clearTimeout(step4SaveTimer);
+        }
+        step4SaveTimer = setTimeout(() => {
+            saveDraft({ omitFiles: true });
+        }, 800);
+    });
 
     const phoneInput = document.getElementById('phone');
     if (phoneInput && window.intlTelInput) {
@@ -1121,16 +1218,16 @@
     const initialLng = parseFloat($('#lng').val() || '0');
     const defaultCenter = (initialLat && initialLng) ? [initialLat, initialLng] : [9.933, -84.083];
 
-    if (mapEl && typeof L !== 'undefined') {
-        map = L.map('clinicMap').setView(defaultCenter, (initialLat && initialLng) ? 16 : 12);
-        window._clinicMap = map;
+        if (mapEl && typeof L !== 'undefined') {
+            map = L.map('clinicMap').setView(defaultCenter, (initialLat && initialLng) ? 16 : 12);
+            window._clinicMap = map;
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
         const markerIcon = L.divIcon({
-            className: '',
+            className: 'clinic-pin',
             html: '<div style="width:16px;height:16px;background:#4bc6f9;border:3px solid #152630;border-radius:50%;box-shadow:0 0 0 4px rgba(75,198,249,.25);"></div>',
             iconSize: [16, 16],
             iconAnchor: [8, 8]
@@ -1143,12 +1240,15 @@
                     const pos = e.target.getLatLng();
                     $('#lat').val(pos.lat.toFixed(6));
                     $('#lng').val(pos.lng.toFixed(6));
+                    $('#lat, #lng').trigger('change');
                 });
             } else {
                 marker.setLatLng([lat, lng]);
+                marker.setIcon(markerIcon);
             }
             $('#lat').val(lat.toFixed(6));
             $('#lng').val(lng.toFixed(6));
+            $('#lat, #lng').trigger('change');
         }
         window._setClinicMarker = setMarker;
 
@@ -1191,6 +1291,48 @@
             return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), bbox };
         }
 
+        function syncMapToStoredPin() {
+            const latRaw = $('#lat').val();
+            const lngRaw = $('#lng').val();
+            if (!latRaw || !lngRaw) {
+                return false;
+            }
+            const lat = parseFloat(latRaw);
+            const lng = parseFloat(lngRaw);
+            if (isNaN(lat) || isNaN(lng)) {
+                return false;
+            }
+            if (map) {
+                map.invalidateSize();
+            }
+            setMarker(lat, lng);
+            map.setView([lat, lng], 16);
+            if (marker) {
+                marker.setZIndexOffset(1000);
+            }
+            if (map) {
+                if (!window._pinDot) {
+                    window._pinDot = L.circleMarker([lat, lng], {
+                        radius: 6,
+                        color: '#152630',
+                        weight: 2,
+                        fillColor: '#4bc6f9',
+                        fillOpacity: 0.95
+                    }).addTo(map);
+                } else {
+                    window._pinDot.setLatLng([lat, lng]);
+                }
+            }
+            if (map) {
+                setTimeout(() => {
+                    map.invalidateSize();
+                    map.setView([lat, lng], 16);
+                }, 250);
+            }
+            return true;
+        }
+        window._syncMapToStoredPin = syncMapToStoredPin;
+
         async function updateMapFromAddress() {
             const countryText = $('#country option:selected').text();
             const provinceText = $('#province option:selected').text();
@@ -1201,7 +1343,8 @@
             const address = $('#vetaddress').val();
             const hasSavedPin = $('#lat').val() !== '' && $('#lng').val() !== '';
             if (hasSavedPin) {
-                setMarker(parseFloat($('#lat').val()), parseFloat($('#lng').val()));
+                syncMapToStoredPin();
+                return;
             }
 
             const parts = [];
@@ -1252,13 +1395,19 @@
         window._updateMapFromAddress = updateMapFromAddress;
 
         const mapEl = document.getElementById('clinicMap');
-        const latNow = parseFloat($('#lat').val() || '0');
-        const lngNow = parseFloat($('#lng').val() || '0');
-        if (mapEl && (!latNow || !lngNow)) {
-            setMapLoading(true);
-            updateMapFromAddress().finally(() => {
-                setMapLoading(false);
-            });
+        if (mapEl) {
+            const hadPin = syncMapToStoredPin();
+            if (!hadPin) {
+                setMapLoading(true);
+                updateMapFromAddress().finally(() => {
+                    setMapLoading(false);
+                });
+            }
+            if (map && map.whenReady) {
+                map.whenReady(() => {
+                    syncMapToStoredPin();
+                });
+            }
         }
     }
 
@@ -1271,4 +1420,6 @@
         }
     }
 </script>
+
+@include('schedule.schedule._script')
 @endpush
