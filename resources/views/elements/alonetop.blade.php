@@ -32,7 +32,7 @@
                 <path style="fill:#4BC6F9;"
                     d="M103.9,73c-0.5,1.4-1.9,2.3-3.5,2.1c-1.6-0.2-2.8-1.5-2.9-3.1c-0.1-1.4,0.7-2.7,1.9-3.3 c0.4-0.2,0.9-0.3,1.4-0.3c1.9,0,3.4,1.5,3.4,3.4C104.2,72.2,104.1,72.6,103.9,73" />
             </svg> -->
-            <object data="{{asset('img/logo.svg')}}" style="height: 64px; mix-blend-mode: multiply;"></object>
+            <object data="{{asset('img/logo.svg')}}" style="height: 64px;"></object>
         </div>
     </header>
 </div>

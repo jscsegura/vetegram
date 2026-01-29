@@ -14,8 +14,9 @@ class Vets extends Model implements Auditable {
     protected $table = 'vets';
 
     protected $fillable = [
-        'id', 'country', 'code', 'social_name', 'company', 'address', 'province', 
-        'canton', 'district', 'phone', 'specialities', 'languages', 'created_at', 'updated_at'
+        'id', 'country', 'code', 'social_name', 'company', 'address', 'province',
+        'canton', 'district', 'phone', 'specialities', 'species', 'languages', 'services',
+        'email', 'website', 'schedule', 'resume', 'logo', 'lat', 'lng', 'created_at', 'updated_at'
     ];
 
     public $searchable = [

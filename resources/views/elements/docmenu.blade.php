@@ -25,7 +25,7 @@
                         <polygon style="fill:#152630;" points="948.1,162.8 945.5,117.8 925.9,162.8 913.7,162.8 894.2,118 891.5,162.8 868.1,162.8 874.4,78.9 900.6,78.9 919.8,124 939.1,78.9 965.3,78.9 971.5,162.8 "/>
                         <path style="fill:#4BC6F9;" d="M103.9,73c-0.5,1.4-1.9,2.3-3.5,2.1c-1.6-0.2-2.8-1.5-2.9-3.1c-0.1-1.4,0.7-2.7,1.9-3.3 c0.4-0.2,0.9-0.3,1.4-0.3c1.9,0,3.4,1.5,3.4,3.4C104.2,72.2,104.1,72.6,103.9,73"/>
                     </svg> -->
-                    <object data="{{asset('img/logo.svg')}}" style="height: 64px; mix-blend-mode: multiply;"></object>
+                    <object data="{{asset('img/logo.svg')}}" style="height: 64px;"></object>
                 </a>
                 <ul class="navbar-nav">
                     <li class="nav-item"><a href="{{ route('dash') }}" class="nav-link px-0 px-lg-3 py-1 py-lg-2 text-uppercase {{ ((isset($thismenu))&&($thismenu == 'dash')) ? 'active' : '' }}"><small>{{ trans('dash.menu.dashboard') }}</small></a></li>

@@ -8,6 +8,7 @@ composer.phar
 /storage/framework/
 /public/storage
 /public/hot
+/public/files/
 /npm-debug.log
 /yarn-error.log
 /.phpunit.result.cache

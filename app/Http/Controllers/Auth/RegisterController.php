@@ -20,6 +20,8 @@ use App\Models\Pet;
 use App\Models\Province;
 use App\Models\Setting;
 use App\Models\Specialties;
+use App\Models\Species;
+use App\Models\ClinicService;
 use App\Models\UserVetDoctor;
 use App\Models\VeterinaryCredential;
 use App\Models\Vets;
@@ -27,6 +29,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\File;
 use Laravel\Socialite\Facades\Socialite;
 
 class RegisterController extends Controller {
@@ -303,8 +306,89 @@ class RegisterController extends Controller {
             $provinces   = Province::select('id', 'title')->where('enabled', '=', 1)->orderBy('id', 'ASC')->get();
             $specialties = Specialties::select('id', 'title_es', 'title_en')->where('enabled', '=', 1)->get();
             $languages   = Language::select('id', 'title_es', 'title_en')->where('enabled', '=', 1)->get();
+            $species     = Species::select('id', 'title_es', 'title_en')->where('enabled', '=', 1)->orderBy('id', 'ASC')->get();
+            $clinicServices = ClinicService::select('id', 'title_es', 'title_en')->where('enabled', '=', 1)->orderBy('id', 'ASC')->get();
+            $vet         = Vets::select('id', 'type_dni', 'dni', 'country', 'code', 'social_name', 'company', 'address', 'province', 'canton', 'district', 'phone', 'specialities', 'species', 'languages', 'services', 'email', 'website', 'schedule', 'resume')
+                ->where('id', '=', $user->id_vet)
+                ->first();
 
-            return view('register.complete.vet', compact('countries', 'provinces', 'user', 'specialties', 'languages'));
+            $lang = app()->getLocale();
+            $specialtyLookup = [];
+            foreach ($specialties as $specialty) {
+                $key = strtolower(trim($specialty->title_en));
+                $specialtyLookup[$key] = $specialty;
+            }
+
+            $specialtyGroups = [
+                [
+                    'label' => trans('auth.register.complete.specialties.group.core'),
+                    'items' => [
+                        'General Practice',
+                        'Preventive Care',
+                        'Vaccination & Wellness',
+                        'Internal Medicine',
+                        'Surgery (General)',
+                        'Dentistry',
+                        'Emergency & Urgent Care',
+                    ],
+                ],
+                [
+                    'label' => trans('auth.register.complete.specialties.group.clinical'),
+                    'items' => [
+                        'Dermatology',
+                        'Cardiology',
+                        'Neurology',
+                        'Oncology',
+                        'Ophthalmology',
+                        'Orthopedics',
+                        'Anesthesiology',
+                        'Radiology/Diagnostic Imaging',
+                        'Rehabilitation & Physical Therapy',
+                        'Pain Management',
+                    ],
+                ],
+                [
+                    'label' => trans('auth.register.complete.specialties.group.diagnostics'),
+                    'items' => [
+                        'Laboratory Diagnostics',
+                        'Ultrasound',
+                        'X-Ray',
+                        'Endoscopy',
+                        'Pathology',
+                    ],
+                ],
+                [
+                    'label' => trans('auth.register.complete.specialties.group.behavioral'),
+                    'items' => [
+                        'Behavioral Medicine',
+                        'Nutrition',
+                        'Integrative Medicine',
+                        'Acupuncture',
+                        'Chiropractic Care',
+                    ],
+                ],
+            ];
+
+            $specialtyGroupsView = [];
+            foreach ($specialtyGroups as $group) {
+                $items = [];
+                foreach ($group['items'] as $titleEn) {
+                    $key = strtolower(trim($titleEn));
+                    if (isset($specialtyLookup[$key])) {
+                        $spec = $specialtyLookup[$key];
+                        $items[] = [
+                            'id' => $spec->id,
+                            'label' => $spec->{'title_' . $lang} ?? $spec->title_en,
+                        ];
+                    }
+                }
+                $specialtyGroupsView[] = [
+                    'label' => $group['label'],
+                    'items' => $items,
+                ];
+            }
+
+            return view('register.complete.vet', compact('countries', 'provinces', 'user', 'specialties', 'languages', 'species', 'clinicServices', 'specialtyGroupsView', 'vet'));
         }
 
         if ($user->rol_id == 8) {
@@ -335,9 +419,13 @@ class RegisterController extends Controller {
 
     public function completeProfileSave(Request $request) {
         $user = Auth::guard('web')->user();
+        $isDraft = $request->boolean('draft');
 
         if ($user->rol_id == 3) {
-            $vet = new Vets();
+            $vet = Vets::where('id', '=', $user->id_vet)->first();
+            if(!isset($vet->id)) {
+                $vet = new Vets();
+            }
             $vet->type_dni     = $request->idtypevet;
             $vet->dni          = $request->idnumbervet;
             $vet->country      = $request->country;
@@ -350,16 +438,45 @@ class RegisterController extends Controller {
             $vet->district     = ($request->country == 53) ? $request->district : $request->district_alternate;
             $vet->phone        = $request->phone;
             $vet->specialities = json_encode($request->specialty);
+            $vet->species      = json_encode($request->species);
             $vet->languages    = json_encode($request->language);
+            $vet->services     = json_encode($request->services);
             $vet->email        = $request->email_clinic;
             $vet->website      = $request->website_clinic;
             $vet->schedule     = nl2br($request->schedule_clinic);
             $vet->resume       = nl2br($request->resume_clinic);
+            $vet->lat          = $request->lat;
+            $vet->lng          = $request->lng;
+            if($request->hasfile('clinicLogo')) {
+                $file = $request->file('clinicLogo');
+                $imageName = uniqid().time().'.'.$file->extension();
+
+                if(!File::isDirectory(public_path('files/vet/logo'))) {
+                    File::makeDirectory(public_path('files/vet/logo'), 0777, true, true);
+                    chmod(public_path('files/vet/logo'), 0777);
+                }
+
+                if(isset($vet->logo) && $vet->logo != '' && File::exists(public_path($vet->logo))) {
+                    File::delete(public_path($vet->logo));
+                }
+
+                if($file->move(public_path('files/vet/logo'), $imageName)) {
+                    $vet->logo = 'files/vet/logo/' . $imageName;
+                }
+            }
+            if($request->removeClinicLogo == 1) {
+                if(isset($vet->logo) && $vet->logo != '' && File::exists(public_path($vet->logo))) {
+                    File::delete(public_path($vet->logo));
+                }
+                $vet->logo = null;
+            }
             $vet->save();
 
             $userrow = User::select('id', 'id_vet', 'type_dni', 'dni', 'code', 'complete')->where('id', '=', $user->id)->first();
             $userrow->id_vet   = $vet->id;
-            $userrow->complete = 1;
+            if(!$isDraft) {
+                $userrow->complete = 1;
+            }
             $userrow->type_dni = $request->idtype;
             $userrow->dni      = $request->idnumber;
             $userrow->country  = $request->country;
@@ -370,14 +487,42 @@ class RegisterController extends Controller {
             if($request->mycode == 1) {
                 $userrow->code = $request->vcode;
             }
+            if($request->hasfile('profilePhoto')) {
+                $file = $request->file('profilePhoto');
+                $imageName = uniqid().time().'.'.$file->extension();
+
+                if(!File::isDirectory(public_path('files/user/image'))) {
+                    File::makeDirectory(public_path('files/user/image'), 0777, true, true);
+                    chmod(public_path('files/user/image'), 0777);
+                }
+
+                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
+                    File::delete(public_path($userrow->photo));
+                }
+
+                if($file->move(public_path('files/user/image'), $imageName)) {
+                    $userrow->photo = 'files/user/image/' . $imageName;
+                }
+            }
+            if($request->removeProfilePhoto == 1) {
+                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
+                    File::delete(public_path($userrow->photo));
+                }
+                $userrow->photo = null;
+            }
             $userrow->update();
 
+            if($isDraft) {
+                return response()->json(['type' => 'success']);
+            }
             return redirect()->route('dash');
         }
 
         if ($user->rol_id == 8) {
-            $userrow = User::select('id', 'type_dni', 'dni', 'country', 'province', 'canton', 'district', 'phone', 'complete')->where('id', '=', $user->id)->first();
-            $userrow->complete = 1;
+            $userrow = User::select('id', 'type_dni', 'dni', 'country', 'province', 'canton', 'district', 'phone', 'complete', 'photo')->where('id', '=', $user->id)->first();
+            if(!$isDraft) {
+                $userrow->complete = 1;
+            }
             $userrow->type_dni = $request->idtype;
             $userrow->dni      = $request->idnumber;
             $userrow->country  = $request->country;
@@ -385,9 +530,32 @@ class RegisterController extends Controller {
             $userrow->canton   = ($request->country == 53) ? $request->canton : $request->canton_alternate;
             $userrow->district = ($request->country == 53) ? $request->district : $request->district_alternate;
             $userrow->phone    = $request->phone;
+            if($request->hasfile('profilePhoto')) {
+                $file = $request->file('profilePhoto');
+                $imageName = uniqid().time().'.'.$file->extension();
+
+                if(!File::isDirectory(public_path('files/user/image'))) {
+                    File::makeDirectory(public_path('files/user/image'), 0777, true, true);
+                    chmod(public_path('files/user/image'), 0777);
+                }
+
+                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
+                    File::delete(public_path($userrow->photo));
+                }
+
+                if($file->move(public_path('files/user/image'), $imageName)) {
+                    $userrow->photo = 'files/user/image/' . $imageName;
+                }
+            }
+            if($request->removeProfilePhoto == 1) {
+                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
+                    File::delete(public_path($userrow->photo));
+                }
+                $userrow->photo = null;
+            }
             $userrow->update();
 
-            if(isset($_POST['petname'])){
+            if(!$isDraft && isset($_POST['petname'])){
                 for($i = 0;$i < count($_POST['petname']);$i++){
                     if($_POST['petname'][$i] != ""){
                         $pet = new Pet();
@@ -400,12 +568,17 @@ class RegisterController extends Controller {
                 }
             }
 
+            if($isDraft) {
+                return response()->json(['type' => 'success']);
+            }
             return redirect()->route('dash');
         }
 
         if (in_array($user->rol_id, [4,5,6,7])) {
-            $userrow = User::select('id', 'type_dni', 'dni', 'country', 'province', 'canton', 'district', 'phone', 'complete')->where('id', '=', $user->id)->first();
-            $userrow->complete = 1;
+            $userrow = User::select('id', 'type_dni', 'dni', 'country', 'province', 'canton', 'district', 'phone', 'complete', 'photo')->where('id', '=', $user->id)->first();
+            if(!$isDraft) {
+                $userrow->complete = 1;
+            }
             $userrow->code     = (isset($request->vcode)) ? $request->vcode : '';
             $userrow->name     = $request->name;
             $userrow->type_dni = $request->idtype;
@@ -415,8 +588,34 @@ class RegisterController extends Controller {
             $userrow->canton   = ($request->country == 53) ? $request->canton : $request->canton_alternate;
             $userrow->district = ($request->country == 53) ? $request->district : $request->district_alternate;
             $userrow->phone    = $request->phone;
+            if($request->hasfile('profilePhoto')) {
+                $file = $request->file('profilePhoto');
+                $imageName = uniqid().time().'.'.$file->extension();
+
+                if(!File::isDirectory(public_path('files/user/image'))) {
+                    File::makeDirectory(public_path('files/user/image'), 0777, true, true);
+                    chmod(public_path('files/user/image'), 0777);
+                }
+
+                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
+                    File::delete(public_path($userrow->photo));
+                }
+
+                if($file->move(public_path('files/user/image'), $imageName)) {
+                    $userrow->photo = 'files/user/image/' . $imageName;
+                }
+            }
+            if($request->removeProfilePhoto == 1) {
+                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
+                    File::delete(public_path($userrow->photo));
+                }
+                $userrow->photo = null;
+            }
             $userrow->update();
 
+            if($isDraft) {
+                return response()->json(['type' => 'success']);
+            }
             return redirect()->route('dash');
         }
     }
