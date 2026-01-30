@@ -215,7 +215,7 @@
                                         </tbody>
                                     </table>
                                     <div class="d-flex gap-2 justify-content-end">
-                                        <a onclick="setIdAppointmentToSendRecipe('{{ $recipe->id }}');" class="btn btn-outline-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#sendModal"><i class="fa-regular fa-envelope me-2"></i>{{ trans('dash.btn.label.send') }}</a>
+                                        <a data-action="Appointments.setIdAppointmentToSendRecipe" data-action-event="click" data-action-args="{{ $recipe->id }}" class="btn btn-outline-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#sendModal"><i class="fa-regular fa-envelope me-2"></i>{{ trans('dash.btn.label.send') }}</a>
                                         <a href="{{ route('appoinment.printrecipe', App\Models\User::encryptor('encrypt', $recipe->id)) }}" target="_blank" class="btn btn-outline-primary btn-sm mt-3"><i class="fa-solid fa-print me-2"></i>{{ trans('dash.btn.label.printer') }}</a>
                                     </div>
                                 </div>
@@ -259,7 +259,7 @@
                                                     <p class="small lh-sm"><small>{{ date('d', strtotime($attach->created_at)) . ' de ' . strtolower(trans('dash.month.num' . (int)date('m', strtotime($attach->created_at)))) . ', ' . date('Y', strtotime($attach->created_at)) }}</small></p>
                                                 </div>
                                             </a>
-                                            <button type="button" class="btn btn-link p-2 opacity-75" title="Enviar" onclick="setIdAppointmentToSendAttach('{{ $attach->id }}', '{{ $appointment['getClient']['email'] }}')" data-bs-toggle="modal" data-bs-target="#sendAttachModal"><i class="fa-regular fa-envelope"></i></button>
+                                            <button type="button" class="btn btn-link p-2 opacity-75" title="Enviar" data-action="Appointments.setIdAppointmentToSendAttach" data-action-event="click" data-action-args="{{ $attach->id }}|{{ $appointment['getClient']['email'] }}" data-bs-toggle="modal" data-bs-target="#sendAttachModal"><i class="fa-regular fa-envelope"></i></button>
                                         </div>
                                     </div>        
                                 @endforeach

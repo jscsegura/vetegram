@@ -65,7 +65,7 @@
                                     </p>
                                     <div>
                                         @if(in_array($appointment->status, [0,1]))
-                                        <button class="apIcon last d-md-inline-block m-0 p-0" onclick="startAppointment('{{ route('appointment.start', App\Models\User::encryptor('encrypt', $appointment->id)) }}');">
+                                        <button class="apIcon last d-md-inline-block m-0 p-0" data-action="Home.startAppointment" data-action-event="click" data-action-args="{{ route('appointment.start', App\Models\User::encryptor('encrypt', $appointment->id)) }}">
                                             <i class="fa-regular fa-circle-play"></i>
                                             <span>{{ trans('dash.label.start') }}</span>
                                         </button>
@@ -214,35 +214,14 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-   })
-
-   function startAppointment(url) {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.msg.start.appoinment') }}',
-            text: '{{ trans('dash.msg.confir.start.appoinment') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.label.yes.start') }}',
-            cancelButtonText: '{{ trans('dash.label.not') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                location.href = url;
-            }
-        });
-    }
+    window.HOME_DASH_CONFIG = {
+        texts: {
+            title: @json(trans('dash.msg.start.appoinment')),
+            text: @json(trans('dash.msg.confir.start.appoinment')),
+            confirm: @json(trans('dash.label.yes.start')),
+            cancel: @json(trans('dash.label.not'))
+        }
+    };
 </script>
+<script src="{{ asset('js/home/dash.js') }}"></script>
 @endpush

@@ -10,11 +10,11 @@
           <input type="hidden" name="IdUserAppointmentToCancel" id="IdUserAppointmentToCancel" value="0">
           <div class="mb-2" id="divoptions">
             <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="opcionesModalCancel" id="opcionesModalCancel1" value="cancelar" checked>
+              <input class="form-check-input" type="radio" name="opcionesModalCancel" id="opcionesModalCancel1" value="cancelar" checked data-appoint-action="cancel-option">
               <label class="form-check-label" for="opcionesModalCancel1">{{ trans('dash.label.btn.cancel') }}</label>
             </div>
             <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" name="opcionesModalCancel" id="opcionesModalCancel2" value="reagendar">
+              <input class="form-check-input" type="radio" name="opcionesModalCancel" id="opcionesModalCancel2" value="reagendar" data-appoint-action="cancel-option">
               <label class="form-check-label" for="opcionesModalCancel2">{{ trans('dash.label.reschedule') }}</label>
             </div>
           </div>
@@ -26,7 +26,7 @@
               </div>
               <div>
                   <label for="dtime" class="form-label small">{{ trans('dash.label.hour') }}</label>
-                  <select id="hourModalCancelRe" name="hourModalCancelRe" class="form-select fc requerido" onchange="reserverHourAppointmentToCancel(this);">
+                  <select id="hourModalCancelRe" name="hourModalCancelRe" class="form-select fc requerido" data-appoint-action="cancel-hour">
                       <option value="">{{ trans('dash.label.selected') }}</option>
                   </select>
               </div>
@@ -34,7 +34,7 @@
           </div>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button type="button" onclick="confirmSaveActionCancel();" class="btn btn-primary btn-sm px-4">{{ trans('dash.text.btn.save') }}</button>
+          <button type="button" class="btn btn-primary btn-sm px-4" data-appoint-action="cancel-save">{{ trans('dash.text.btn.save') }}</button>
         </div>
       </div>
     </div>
@@ -42,213 +42,37 @@
 
 @push('scriptBottom')
 <script>
-    var dateModalCancel = document.getElementById('dateModalCancel');
-    
-    // Obtiene los elementos de las opciones de radio
-    var radioCancelar  = document.getElementById('opcionesModalCancel1');
-    var radioReagendar = document.getElementById('opcionesModalCancel2');
-    
-    // Agrega un evento de cambio a las opciones de radio
-    radioCancelar.addEventListener('change', function() {
-      dateModalCancel.style.display = 'none';
-    });
-    
-    radioReagendar.addEventListener('change', function() {
-      dateModalCancel.style.display = 'block';
-    });
-
-    function setIdAppointmentToCancel(id, user_id, onlyReagend = 0) {
-      $('#cancelIdAppointment').val(id);
-      $('#IdUserAppointmentToCancel').val(user_id);
-
-      new dateDropper({
-          selector: '.dDropperCancelModal',
-          format: 'd/m/y',
-          expandable: true,
-          showArrowsOnHover: true,
-          onDropdownExit: getHoursAppointmentToCancel
-      });
-
-      if(onlyReagend == 1) {
-        $("input[type='radio'][name='opcionesModalCancel'][value='reagendar']").prop('checked',true);
-        $('#divoptions').hide();
-        dateModalCancel.style.display = 'block';
-      }else{
-        $("input[type='radio'][name='opcionesModalCancel'][value='cancelar']").prop('checked',true);
-        $('#divoptions').show();
-        dateModalCancel.style.display = 'none';
-      }
+  window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+  window.APPOINT_MODAL_CONFIG.cancel = {
+    ids: {
+      modal: 'cancelModal',
+      idField: 'cancelIdAppointment',
+      userField: 'IdUserAppointmentToCancel',
+      dateWrap: 'dateModalCancel',
+      dateInput: 'dateModalCancelRe',
+      hourSelect: 'hourModalCancelRe',
+      optionsWrap: 'divoptions'
+    },
+    routes: {
+      getHours: '{{ route('appoinment.getHours') }}',
+      reserveHour: '{{ route('appoinment.reserveHour') }}',
+      cancelOrReschedule: '{{ route('appoinment.cancelOrReschedule') }}'
+    },
+    labels: {
+      selected: '{{ trans('dash.label.selected') }}',
+      selectedNotAvailable: '{{ trans('dash.label.selected.notavailable') }}',
+      hourNotAvailable: '{{ trans('dash.msg.appoinment.hour.not') }}',
+      titleCancel: '{{ trans('dash.msg.appoinment.title.cancel') }}',
+      textCancel: '{{ trans('dash.msg.appoinment.confir.cancel') }}',
+      btnCancel: '{{ trans('dash.label.yes.delete') }}',
+      titleReschedule: '{{ trans('dash.msg.appoinment.title.reeschedule') }}',
+      textReschedule: '{{ trans('dash.msg.appoinment.confir.reeschedule') }}',
+      btnReschedule: '{{ trans('dash.msg.yes.reeschedule') }}',
+      btnCancelReturn: '{{ trans('dash.msg.not.return') }}',
+      errorPermit: '{{ trans('dash.msg.appoinment.error.permit') }}',
+      errorHour: '{{ trans('dash.msg.appoinment.error.hour') }}',
+      errorReschedule: '{{ trans('dash.msg.appoinment.error.reeschedule') }}'
     }
-
-    function getHoursAppointmentToCancel() {
-        var userid = $('#IdUserAppointmentToCancel').val();
-        var date = $('#dateModalCancelRe').val();
-
-        if((userid != '')&&(date != '')) {
-            
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                }
-            });
-            
-            $.post('{{ route('appoinment.getHours') }}', {userid:userid, date:date},
-                function (data){
-                    var existHours = 0;
-
-                    var html = '<option value="">{{ trans('dash.label.selected') }}</option>';
-                    $.each(data.rows, function(i, item) {
-                        html = html + '<option value="'+item.id+'">'+item.hour+'</option>';
-                        existHours = 1;
-                    });
-
-                    if(existHours == 0) {
-                        var html = '<option value="">{{ trans('dash.label.selected.notavailable') }}</option>';
-                    }
-
-                    $('#hourModalCancelRe').html(html);
-                }
-            );
-        }else{
-            var html = '<option value="">{{ trans('dash.label.selected') }}</option>';
-            $('#hourModalCancelRe').html(html);
-        }
-    }
-
-    function reserverHourAppointmentToCancel(obj) {
-        var id = $(obj).val();
-        if(id != '') {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                }
-            });
-            
-            $.post('{{ route('appoinment.reserveHour') }}', {id:id},
-                function (data){
-                    if(data.reserve != '1') {
-                        $.toast({
-                            text: '{{ trans('dash.msg.appoinment.hour.not') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'warning'
-                        });
-                        getHours();
-                    }
-                }
-            );
-        }
-    }
-
-    function confirmSaveActionCancel() {
-      var valid = true;
-
-      var id = $('#cancelIdAppointment').val();
-      var user_id = $('#IdUserAppointmentToCancel').val();
-      var date = '';
-      var time = '';
-
-      var option = $('input[name="opcionesModalCancel"]:checked').val();
-
-      let title = '';
-      let text = '';
-      let btn = '';
-
-      if(option == 'cancelar') {
-        title = '{{ trans('dash.msg.appoinment.title.cancel') }}';
-        text = '{{ trans('dash.msg.appoinment.confir.cancel') }}';
-        btn = '{{ trans('dash.label.yes.delete') }}';
-      }else if(option == 'reagendar') {
-        var date = $('#dateModalCancelRe').val();
-        var time = $('#hourModalCancelRe').val();
-
-        if(date == ''){
-            $('#dateModalCancelRe').addClass('is-invalid');
-            valid = false;
-        }else{
-            $('#dateModalCancelRe').removeClass('is-invalid');
-        }
-
-        if(time == ''){
-            $('#hourModalCancelRe').addClass('is-invalid');
-            valid = false;
-        }else{
-            $('#hourModalCancelRe').removeClass('is-invalid');
-        }
-
-        title = '{{ trans('dash.msg.appoinment.title.reeschedule') }}';
-        text = '{{ trans('dash.msg.appoinment.confir.reeschedule') }}';
-        btn = '{{ trans('dash.msg.yes.reeschedule') }}';
-      }
-
-      if(valid == true) {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: title,
-            text: text,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: btn,
-            cancelButtonText: '{{ trans('dash.msg.not.return') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('appoinment.cancelOrReschedule') }}', {id:id, user_id:user_id, date:date, time:time, option:option},
-                    function (data){
-                      if(data.process == '1') {
-                        location.reload();
-                      }else if(data.process == '500') {
-                        $.toast({
-                            text: '{{ trans('dash.msg.appoinment.error.permit') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'error'
-                        });
-                      }else if(data.process == '401') {
-                        $.toast({
-                            text: '{{ trans('dash.msg.appoinment.error.hour') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'warning'
-                        });
-                      }else{
-                        $.toast({
-                            text: '{{ trans('dash.msg.appoinment.error.reeschedule') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'error'
-                        });
-                      }
-
-                      hideCharge();
-                    }
-                );
-            }
-        });
-      }
-    }
+  };
 </script>
 @endpush

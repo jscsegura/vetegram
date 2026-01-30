@@ -48,65 +48,21 @@
     <script src="https://cdn.datatables.net/v/bs/dt-1.13.4/datatables.min.js"></script>
 
     <script>
-        var dataTable = $('#tableList').DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            order: [[0, 'desc']],
-            ajax: "{{ route('wp.physical.list') }}",
-            paging: true,
-            pageLength: 25,
-            columns: [
-                {data:'id'},
-                {data:'title_es'},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<span id="enabledRow'+row.id+'"><a data="' + row.id + '" onclick="enabledRow(this);">';
-                    if(row.enabled == 1) {
-                        btn += '<img src="{{ asset('img/wpanel/enabled.png') }}">';
-                    } else {
-                        btn += '<img src="{{ asset('img/wpanel/disabled.png') }}">';
-                    }
-                    btn += '</a></span>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<a href="{{ url('wpanel/physical/options') }}/'+row.id+'"><img src="{{ asset('img/wpanel/menu.png') }}"></a>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<a href="{{ url('wpanel/physical') }}/'+row.id+'/edit"><img src="{{ asset('img/wpanel/edit.png') }}"></a>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<a data="' + row.id + '" onclick="deleteRow(this);"><img src="{{ asset('img/wpanel/delete.png') }}"></a>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-            ],
-            language: {
-                sLengthMenu: '',
-                sZeroRecords: 'No se encontraron resultados',
-                sEmptyTable: 'Ningún dato disponible en esta tabla',
-                sInfo: 'Registro _START_ al _END_ de un total de _TOTAL_ registros',
-                sInfoEmpty: 'Mostrando registros del 0 al 0 de un total de 0 registros',
-                sInfoFiltered: '',
-                sSearch: 'Buscar:',
-                oPaginate: {
-                    "sFirst": 'Primero',
-                    "sLast":  'Último',
-                    "sNext": 'Siguiente',
-                    "sPrevious": 'Anterior',
-                },
+        window.WPANEL_PHYSICAL_INDEX_CONFIG = {
+            listUrl: "{{ route('wp.physical.list') }}",
+            enabledUrl: "{{ route('wp.physical.enabled') }}",
+            deleteUrl: "{{ route('wp.physical.delete') }}",
+            optionsBaseUrl: "{{ url('wpanel/physical/options') }}",
+            editBaseUrl: "{{ url('wpanel/physical') }}",
+            assets: {
+                menu: "{{ asset('img/wpanel/menu.png') }}",
+                enabled: "{{ asset('img/wpanel/enabled.png') }}",
+                disabled: "{{ asset('img/wpanel/disabled.png') }}",
+                edit: "{{ asset('img/wpanel/edit.png') }}",
+                delete: "{{ asset('img/wpanel/delete.png') }}"
             }
-        });
-
-        function enabledRow(obj) {
-            var id = $(obj).attr('data');
-            enabledRegister('{{ route('wp.physical.enabled') }}', 'id=' + id, 'enabledRow' + id);
-        }
-        function deleteRow(obj) {
-            var id = $(obj).attr('data');
-            var row = $(obj).parent().parent('tr');
-            eliminateRegister('{{ route('wp.physical.delete') }}', 'id=' + id, row);
-        }
+        };
     </script>
+    <script src="{{ asset('js/wpanel/common.js') }}"></script>
+    <script src="{{ asset('js/wpanel/physical/index.js') }}"></script>
 @stop

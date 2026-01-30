@@ -52,7 +52,7 @@
                                         <li><a class="dropdown-item small" href="{{ route('invoice.detail', ['id' => $invoice['CLAVE'], 'doctype' => 1]) }}">{{ trans('dash.label.detail') }}</a></li>
                                         
                                         @if($invoice['APPROVED'] != 1)
-                                            <li><a class="dropdown-item small" onclick="resendDocument(1, '{{ $invoice['CLAVE'] }}');">{{ trans('dash.invoice.index.btn.resend') }}</a></li>
+                                            <li><a class="dropdown-item small" data-invoice-action="resend" data-type="1" data-clave="{{ $invoice['CLAVE'] }}">{{ trans('dash.invoice.index.btn.resend') }}</a></li>
                                         @endif
                                                                                 
                                         @if($invoice['CLAVE'] != '')

@@ -18,12 +18,12 @@
             <div class="row justify-content-end mb-3 mt-3 mt-lg-0">
                 <div class="col-md-3 col-xl-2 order-1 order-md-0 mt-3 mt-md-0 selTimeCalendar" id="selTimeCalendarSemanal"></div>
                 <div class="col-md-6 col-xl-8 order-0 order-md-1 d-flex gap-2 justify-content-center">
-                    <a onclick="prevWeek();" class="circleArrow"><i class="fa-solid fa-angle-left"></i></a>
+                    <a href="#" class="circleArrow" data-schedule-nav="week" data-direction="prev"><i class="fa-solid fa-angle-left"></i></a>
                     <h2 class="h4 fw-normal px-2 mb-0">{{ date('d', strtotime($params['from2'])) . ' - ' . date('d', strtotime($params['to2'])) . ' ' . trans('dash.month.num' . (int)date('m', strtotime($params['to2']))) . ', ' . date('Y', strtotime($params['to2'])) }}</h2>
-                    <a onclick="nextWeek();" class="circleArrow"><i class="fa-solid fa-angle-right"></i></a>
+                    <a href="#" class="circleArrow" data-schedule-nav="week" data-direction="next"><i class="fa-solid fa-angle-right"></i></a>
                 </div>
                 <div class="col-md-3 col-xl-2 order-2 mt-3 mt-md-0">
-                    <select name="useridselectW" id="useridselectW" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" onchange="getUserAppoinmentWeek();">
+                    <select name="useridselectW" id="useridselectW" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" data-schedule-user="week">
                         @foreach ($vets as $vet)
                             <option value="{{ $vet->id }}" @if($vet->id == $params['userid2']) selected='selected' @endif>{{ ($vet->id == $user->id) ? $vet->name . ' ('. trans('dash.its.me') . ')' : $vet->name }}</option>    
                         @endforeach
@@ -113,37 +113,7 @@ $endNextWeek   = $thisFrom2->copy()->addWeek()->endOfWeek();
 $startNextWeek = $startNextWeek->toDateString();
 $endNextWeek   = $endNextWeek->toDateString();
 @endphp
-
-<script>
-    function prevWeek() {
-        var from = '{{ $startLastWeek }}';
-        var to   = '{{ $endLastWeek }}';
-        
-        $('#from2').val(from);
-        $('#to2').val(to);
-
-        getUserAppoinmentWeek();
-    }
-
-    function nextWeek() {
-        var from = '{{ $startNextWeek }}';
-        var to   = '{{ $endNextWeek }}';
-        
-        $('#from2').val(from);
-        $('#to2').val(to);
-
-        getUserAppoinmentWeek();
-    }
-
-    function getUserAppoinmentWeek() {
-        var time = $("#selTime").val();
-        var from = $("#from2").val();
-        var to   = $("#to2").val();
-
-        setCharge();
-
-        var userid = $('#useridselectW').val();
-
-        location.href = '{{ route('appointment.schedule') }}/' + btoa(userid) + '/' + btoa(from) + '/' + btoa(to) + '/2';
-    }
-</script>
+<input type="hidden" id="weekPrevFrom" value="{{ $startLastWeek }}">
+<input type="hidden" id="weekPrevTo" value="{{ $endLastWeek }}">
+<input type="hidden" id="weekNextFrom" value="{{ $startNextWeek }}">
+<input type="hidden" id="weekNextTo" value="{{ $endNextWeek }}">

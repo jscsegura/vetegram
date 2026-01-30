@@ -16,7 +16,7 @@
             </h1>
             <div class="d-flex gap-2 align-items-center">
                 <input class="form-control fc" type="text" name="searchUser" id="searchUser" placeholder="{{ trans('dashadmin.label.inventory.searh') }}" aria-label="default input example" value="{{ $search }}">
-                <button type="button" onclick="searchRows();" class="btn btn-light btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <button type="button" data-action="Users.searchRows" data-action-event="click" class="btn btn-light btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
             <a href="{{ route('adminpatient.add') }}" class="btn btn-primary btn-sm d-block text-uppercase px-4">{{ trans('dash.label.add.patient') }}</a>
         </div>
@@ -86,10 +86,11 @@
 
 @push('scriptBottom')
 <script>
-    function searchRows() {
-        var search = $('#searchUser').val();
-
-        location.href = '{{ url('adminpatient/list') }}/' + btoa(search);
-    }
+    window.USERS_PATIENT_CONFIG = {
+        routes: {
+            searchBase: @json(url('adminpatient/list'))
+        }
+    };
 </script>
+<script src="{{ asset('js/users/patient.js') }}"></script>
 @endpush

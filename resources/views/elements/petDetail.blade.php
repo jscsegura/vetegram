@@ -2,7 +2,7 @@
 
 <div class="docCol card rounded-3 border-2 border-secondary">
     <div class="card-body p-3 p-lg-4">
-        <button id="notiPet" type="button" class="btn py-1 px-2 position-absolute" onclick="setIdAppointmentToReminder('{{ $pet->id }}', '0', '0', '1', 'sms-whatsapp');" data-bs-toggle="modal" data-bs-target="#reminderModal">
+        <button id="notiPet" type="button" class="btn py-1 px-2 position-absolute" data-pet-action="reminder" data-reminder-id="{{ $pet->id }}" data-reminder-only="0" data-reminder-reload="0" data-reminder-pet="1" data-reminder-channel="sms-whatsapp" data-bs-toggle="modal" data-bs-target="#reminderModal">
             <span>
                 <i class="fa-solid fa-bell fs-5"></i>
                 <span class="position-absolute start-50 translate-middle text-white" style="font-size: .6rem; top:14px;"><i class="fa-solid fa-plus"></i></span>
@@ -92,14 +92,14 @@
 </div>
 
 @if((Auth::guard('web')->user()->rol_id != 8) && ($credentials['access'] == false))
-<a href="javascript:void(0);" onclick="getAccessToPet('{{ App\Models\User::encryptor('encrypt', $pet->id) }}');" class="btn btn-outline-success btn-sm text-uppercase px-3 py-2 d-block mt-3 w-100">
+<a href="javascript:void(0);" data-pet-action="access" data-pet-access-id="{{ App\Models\User::encryptor('encrypt', $pet->id) }}" class="btn btn-outline-success btn-sm text-uppercase px-3 py-2 d-block mt-3 w-100">
     <i class="fa-solid fa-fingerprint me-1"></i>
     {{ trans('dash.msg.access.pet') }}
 </a>
 @endif
 
 @if(Auth::guard('web')->user()->rol_id == 8)
-<a href="javascript:void(0);" onclick="removePet('{{ $pet->id }}');" class="btn btn-outline-danger btn-sm text-uppercase px-3 py-2 d-block mt-3">
+<a href="javascript:void(0);" data-pet-action="delete" data-pet-id="{{ $pet->id }}" class="btn btn-outline-danger btn-sm text-uppercase px-3 py-2 d-block mt-3">
     <i class="fa-solid fa-remove me-1"></i>
     {{ trans('dash.msg.delete.pet') }}
 </a>
@@ -113,7 +113,7 @@
           <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-3 p-md-4">
-            <form name="frmEditPet" id="frmEditPet" method="post" action="{{ route('pets.editPet') }}" enctype="multipart/form-data" onsubmit="return sendFormEdit();">
+            <form name="frmEditPet" id="frmEditPet" method="post" action="{{ route('pets.editPet') }}" enctype="multipart/form-data">
                 @csrf
 
                 <input type="hidden" name="petId" id="petId" value="{{ $pet->id }}">
@@ -124,7 +124,7 @@
 
                 <div class="mb-3">
                     <label for="animaltype" class="form-label small">{{ trans('dash.label.element.type.pet') }}</label>
-                    <select name="animaltype" id="animaltype" class="form-select fc select4 requerido" onchange="getBreed();">
+                    <select name="animaltype" id="animaltype" class="form-select fc select4 requerido" data-pet-action="breed-change">
                         <option value="">{{ trans('auth.register.complete.select') }}</option>
                         @foreach ($allTypes as $type)
                             <option value="{{ $type->id }}" @if($type->id == $pet->type) selected='selected' @endif>{{ $type['title_' . $weblang] }}</option>
@@ -218,7 +218,7 @@
             </form>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button onclick="sendFormEditValidate();" id="agendarBtn" type="button" class="btn btn-primary btn-sm fw-medium px-4">{{ trans('dash.text.btn.save') }}</button>
+          <button id="agendarBtn" type="button" class="btn btn-primary btn-sm fw-medium px-4" data-pet-action="edit-submit">{{ trans('dash.text.btn.save') }}</button>
         </div>
       </div>
     </div>
@@ -232,7 +232,7 @@
           <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-3 p-md-4">
-            <form method="post" id="formPhoto" name="formPhoto" enctype="multipart/form-data" method="post" action="{{ route('pets.savePhoto') }}" onsubmit="return validaImage();">
+            <form method="post" id="formPhoto" name="formPhoto" enctype="multipart/form-data" method="post" action="{{ route('pets.savePhoto') }}">
                 @csrf
                 
                 <input type="hidden" name="petIdImg" id="petIdImg" value="{{ $pet->id }}">
@@ -243,7 +243,7 @@
             </form>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button type="button" onclick="sendFormPhoto();" class="btn btn-primary btn-sm px-4">{{ trans('dash.text.btn.save') }}</button>
+          <button type="button" class="btn btn-primary btn-sm px-4" data-pet-action="photo-submit">{{ trans('dash.text.btn.save') }}</button>
         </div>
       </div>
     </div>
@@ -251,206 +251,34 @@
 
 @push('scriptBottom')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <script>
-        function sendFormPhoto() {
-            $('#formPhoto').submit();
-        }
-
-        @php
+    @php
         $exts = explode(',', App\Models\AppointmentAttachment::getExtensions(true));
-        @endphp
-        function validaImage() {
-            var extValid = <?php echo json_encode($exts); ?>;
-
-            var validate = true;
-
-            var img = document.getElementById('petPhoto');
-
-            if (img.files.length > 0) {
-                
-                var nameFile = img.files[0].name;
-                
-                var extension = nameFile.split('.').pop();
-                
-                var position = jQuery.inArray(extension, extValid);
-                if(position == -1) {
-                    validate = false;
-                    
-                    $.toast({
-                    text: '{{ trans('dash.msg.ext.not.valid') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'warning'
-                    });
-                }
-            }else{
-                validate = false;
-
-                $.toast({
-                text: '{{ trans('dash.msg.select.image') }}',
-                position: 'bottom-right',
-                textAlign: 'center',
-                loader: false,
-                hideAfter: 4000,
-                icon: 'warning'
-                });
-            }
-
-            if(validate == true) {
-                setCharge2();
-
-                return true;
-            }else{
-                return false;
-            }
-
-        }
-
-        function getBreed(obj) {
-
-            var type = $('#animaltype').val();
-
-            $.ajax({
-                type: 'POST',
-                url: '{{ route('get.breed') }}',
-                dataType: "json",
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-                },
-                data: {
-                    type: type
-                },
-                beforeSend: function(){},
-                success: function(data){
-                    var html = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-                    $.each(data.rows, function(i, item) {
-                        html = html + '<option value="'+item.id+'">'+item.title+'</option>';
-                    });
-
-                    $('#breed').html(html);
-                }
-            });
-        }
-
-        function sendFormEditValidate() {
-            $('#frmEditPet').submit();
-        }
-
-        function sendFormEdit() {
-            var validate = true;
-
-            $('.requerido').each(function(i, elem){
-                var value = $(elem).val();
-                var value = value.trim();
-                if(value == ''){
-                    $(elem).addClass('is-invalid');
-                    validate = false;
-                }else{
-                    $(elem).removeClass('is-invalid');
-                }
-            });
-
-            if(validate == true) {
-                setCharge2();
-
-                return true;
-            }
-
-            return false;
-        }
-
-        function removePet(id) {
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                    cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-                },
-                buttonsStyling: false
-            });
-
-            swalWithBootstrapButtons.fire({
-                title: '{{ trans('dash.msg.delete.pet') }}',
-                text: '{{ trans('dash.msg.confir.delete.pet') }}',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '{{ trans('dash.label.yes.delete') }}',
-                cancelButtonText: '{{ trans('dash.label.no.cancel') }}',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                        }
-                    });
-
-                    setCharge();
-                    
-                    $.post('{{ route('pets.delete') }}', {id:id},
-                        function (data){
-                            if(data.process == '1') {
-                                location.href = '{{ route('pets.index') }}';
-                            }else{
-                                $.toast({
-                                    text: '{{ trans('dash.msg.error.delete.pet') }}',
-                                    position: 'bottom-right',
-                                    textAlign: 'center',
-                                    loader: false,
-                                    hideAfter: 4000,
-                                    icon: 'error'
-                                });
-                            }
-
-                            hideCharge();
-                        }
-                    );
-                }
-            });
-        }
-
-        function getAccessToPet(id) {
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                    cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-                },
-                buttonsStyling: false
-            });
-
-            swalWithBootstrapButtons.fire({
-                title: '{{ trans('dash.msg.access.pet') }}',
-                text: '{{ trans('dash.msg.confir.access.pet') }}',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '{{ trans('dash.label.yes.access') }}',
-                cancelButtonText: '{{ trans('dash.label.no.cancel') }}',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                        }
-                    });
-
-                    setCharge();
-                    
-                    $.post('{{ route('pets.getAccess') }}', {id:id},
-                        function (data){
-                            hideCharge();
-
-                            if(data.message == '1') {
-                                swal.fire("{{ trans('dash.swal.msg.success') }}", "{{ trans('dash.swal.msg.access.complete') }}", "success");
-                            }else{
-                                swal.fire("{{ trans('dash.swal.msg.error') }}", "{{ trans('dash.swal.msg.access.error') }}", "error");
-                            }
-                        }
-                    );
-                }
-            });
-        }
+    @endphp
+    <script>
+        window.PET_DETAIL_CONFIG = {
+            routes: {
+                deletePet: "{{ route('pets.delete') }}",
+                getAccess: "{{ route('pets.getAccess') }}",
+                petsIndex: "{{ route('pets.index') }}"
+            },
+            labels: {
+                extNotValid: "{{ trans('dash.msg.ext.not.valid') }}",
+                selectImage: "{{ trans('dash.msg.select.image') }}",
+                deleteTitle: "{{ trans('dash.msg.delete.pet') }}",
+                deleteConfirm: "{{ trans('dash.msg.confir.delete.pet') }}",
+                deleteYes: "{{ trans('dash.label.yes.delete') }}",
+                deleteNo: "{{ trans('dash.label.no.cancel') }}",
+                deleteError: "{{ trans('dash.msg.error.delete.pet') }}",
+                accessTitle: "{{ trans('dash.msg.access.pet') }}",
+                accessConfirm: "{{ trans('dash.msg.confir.access.pet') }}",
+                accessYes: "{{ trans('dash.label.yes.access') }}",
+                accessNo: "{{ trans('dash.label.no.cancel') }}",
+                accessSuccessTitle: "{{ trans('dash.swal.msg.success') }}",
+                accessSuccessText: "{{ trans('dash.swal.msg.access.complete') }}",
+                accessErrorTitle: "{{ trans('dash.swal.msg.error') }}",
+                accessErrorText: "{{ trans('dash.swal.msg.access.error') }}"
+            },
+            allowedExtensions: <?php echo json_encode($exts); ?>
+        };
     </script>
 @endpush

@@ -23,12 +23,12 @@
                 <div class="col-md-6 col-xl-8 d-flex gap-2 justify-content-center">
                     <input type="hidden" name="monthCalendar" id="monthCalendar" value="{{ (int)$month }}">
                     <input type="hidden" name="yearCalendar" id="yearCalendar" value="{{ $year }}">
-                    <a onclick="prevMonth();" class="circleArrow"><i class="fa-solid fa-angle-left"></i></a>
+                    <a data-action="Appointments.prevMonth" data-action-event="click" class="circleArrow"><i class="fa-solid fa-angle-left"></i></a>
                     <h2 class="h4 fw-normal px-2 mb-0">{{ trans('dash.month.num' . (int)$month) . ' ' . $year }}</h2>
-                    <a onclick="nextMonth();" class="circleArrow"><i class="fa-solid fa-angle-right"></i></a>
+                    <a data-action="Appointments.nextMonth" data-action-event="click" class="circleArrow"><i class="fa-solid fa-angle-right"></i></a>
                 </div>
                 <div class="col-md-3 col-xl-2 mt-3 mt-md-0">
-                    <select name="useridselect" id="useridselect" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" onchange="getUser();">
+                    <select name="useridselect" id="useridselect" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" data-action="Appointments.getUser" data-action-event="change">
                         @foreach ($vets as $vet)
                             <option value="{{ $vet->id }}" @if($vet->id == $userid) selected='selected' @endif>{{ ($vet->id == $user->id) ? $vet->name . ' ('. trans('dash.its.me') . ')' : $vet->name }}</option>    
                         @endforeach
@@ -66,20 +66,20 @@
                                         <td class="px-2 px-lg-3 py-1 py-lg-4" data-label="{{ trans('dash.label.owner') }}:"><span class="user-select-none" data-bs-toggle="tooltip" data-bs-html="true" data-bs-offset="0,12" data-bs-title="{{ (isset($appointment['getClient']['phone'])) ? $appointment['getClient']['phone'] : '' }} <br> {{ (isset($appointment['getClient']['email'])) ? $appointment['getClient']['email'] : '' }}">{{ (isset($appointment['getClient']['name'])) ? $appointment['getClient']['name'] : '' }}<span class="d-none d-md-inline-block"></span><i class="fa-solid fa-circle-info opacity-75 ms-2"></i></span></td>
                                         <td class="px-2 px-lg-3 py-1 py-lg-4 text-end" data-label="{{ trans('dash.label.options') }}:">
                                             <div class="d-inline-block align-top">
-                                                <button onclick="setIdAppointmentToNote('{{ $appointment->id }}');" class="apIcon d-md-inline-block m-0 p-0" data-bs-toggle="modal" data-bs-target="#noteModal">
+                                                <button data-action="Appointments.setIdAppointmentToNote" data-action-event="click" data-action-args="{{ $appointment->id }}" class="apIcon d-md-inline-block m-0 p-0" data-bs-toggle="modal" data-bs-target="#noteModal">
                                                     <i class="fa-regular fa-file-lines"></i>
                                                     <span class="d-none d-lg-inline-block">{{ trans('dash.label.notes') }}</span>
                                                 </button>
-                                                <button onclick="setIdAppointmentToAttach('{{ $appointment->id }}')" class="apIcon d-md-inline-block m-0 p-0" data-bs-toggle="modal" data-bs-target="#attachModal">
+                                                <button data-action="Appointments.setIdAppointmentToAttach" data-action-event="click" data-action-args="{{ $appointment->id }}" class="apIcon d-md-inline-block m-0 p-0" data-bs-toggle="modal" data-bs-target="#attachModal">
                                                     <i class="fa-solid fa-paperclip"></i>
                                                     <span class="d-none d-lg-inline-block">{{ trans('dash.label.attachments') }}</span>
                                                 </button>
-                                                <button onclick="setIdAppointmentToMedicine('{{ $appointment->id }}');" class="apIcon d-md-inline-block m-0 p-0" data-bs-toggle="modal" data-bs-target="#recipeModal">
+                                                <button data-action="Appointments.setIdAppointmentToMedicine" data-action-event="click" data-action-args="{{ $appointment->id }}" class="apIcon d-md-inline-block m-0 p-0" data-bs-toggle="modal" data-bs-target="#recipeModal">
                                                     <i class="fa-regular fa-pen-to-square"></i>
                                                     <span class="d-none d-lg-inline-block">{{ trans('dash.label.recipes') }}</span>
                                                 </button>
                                                 @if(in_array($appointment->status, [0,1]))
-                                                <button class="apIcon d-md-inline-block m-0 p-0" onclick="startAppointment('{{ route('appointment.start', App\Models\User::encryptor('encrypt', $appointment->id)) }}');">
+                                                <button class="apIcon d-md-inline-block m-0 p-0" data-action="Appointments.startAppointment" data-action-event="click" data-action-args="{{ route('appointment.start', App\Models\User::encryptor('encrypt', $appointment->id)) }}">
                                                     <i class="fa-regular fa-circle-play"></i>
                                                     <span class="d-none d-lg-inline-block">{{ trans('dash.label.start') }}</span>
                                                 </button>
@@ -95,9 +95,9 @@
                                                 <li><a class="dropdown-item small" href="{{ route('appointment.view', App\Models\User::encryptor('encrypt', $appointment->id)) }}">{{ trans('dash.label.btn.see') }}</a></li>
                                                 @if(in_array($appointment->status, [0,1]))
                                                 <li><a class="dropdown-item small" href="{{ route('appointment.edit', App\Models\User::encryptor('encrypt', $appointment->id)) }}">{{ trans('dash.label.btn.edit') }}</a></li>
-                                                <li><a class="dropdown-item small" href="javascript:void(0);" onclick="setIdAppointmentToOnlyCancel('{{ $appointment->id }}', '{{ $appointment->id_user }}')">{{ trans('dash.label.btn.cancel') }}</a></li>
-                                                <li><a class="dropdown-item small" href="javascript:void(0);" onclick="setIdAppointmentToOnlyReschedule('{{ $appointment->id }}', '{{ $appointment->id_user }}')" data-bs-toggle="modal" data-bs-target="#onlyRescheduleModal">{{ trans('dash.label.btn.reschedule') }}</a></li>
-                                                <li><a class="dropdown-item small" onclick="setIdAppointmentToReminder('{{ $appointment->id }}');" data-bs-toggle="modal" data-bs-target="#reminderModal">{{ trans('dash.label.btn.reminder') }}</a></li>
+                                                <li><a class="dropdown-item small" href="javascript:void(0);" data-action="Appointments.setIdAppointmentToOnlyCancel" data-action-event="click" data-action-args="{{ $appointment->id }}|{{ $appointment->id_user }}">{{ trans('dash.label.btn.cancel') }}</a></li>
+                                                <li><a class="dropdown-item small" href="javascript:void(0);" data-action="Appointments.setIdAppointmentToOnlyReschedule" data-action-event="click" data-action-args="{{ $appointment->id }}|{{ $appointment->id_user }}" data-bs-toggle="modal" data-bs-target="#onlyRescheduleModal">{{ trans('dash.label.btn.reschedule') }}</a></li>
+                                                <li><a class="dropdown-item small" data-action="Appointments.setIdAppointmentToReminder" data-action-event="click" data-action-args="{{ $appointment->id }}" data-bs-toggle="modal" data-bs-target="#reminderModal">{{ trans('dash.label.btn.reminder') }}</a></li>
                                                 @endif
                                                 </ul>
                                             </div>
@@ -132,95 +132,23 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-   })
-
-   $( '.select2' ).select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    } );
-
-    $('.select3').select2({
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#recipeModal')
-    });
-
-    function prevMonth() {
-        var month  = $('#monthCalendar').val();
-        var year   = $('#yearCalendar').val();
-        var userid = $('#useridselect').val();
-
-        if(month == 1) {
-            month = 12;
-            year = parseInt(year) - 1;
-        }else{
-            month = parseInt(month) - 1;
+    window.APPOINTMENTS_INDEX_CONFIG = {
+        routes: {
+            index: @json(route('appointment.index'))
+        },
+        texts: {
+            startTitle: @json(trans('dash.msg.start.appoinment')),
+            startConfirm: @json(trans('dash.msg.confir.start.appoinment')),
+            startYes: @json(trans('dash.label.yes.start')),
+            startNo: @json(trans('dash.label.not'))
+        },
+        selectors: {
+            monthInput: '#monthCalendar',
+            yearInput: '#yearCalendar',
+            userSelect: '#useridselect',
+            recipeModal: '#recipeModal'
         }
-
-        setCharge();
-
-        location.href = '{{ route('appointment.index') }}/' + btoa(month) + '/' + btoa(year) + '/' + btoa(userid);
-    }
-
-    function nextMonth() {
-        var month  = $('#monthCalendar').val();
-        var year   = $('#yearCalendar').val();
-        var userid = $('#useridselect').val();
-
-        if(month == 12) {
-            month = 1;
-            year = parseInt(year) + 1;
-        }else{
-            month = parseInt(month) + 1;
-        }
-
-        setCharge();
-
-        location.href = '{{ route('appointment.index') }}/' + btoa(month) + '/' + btoa(year) + '/' + btoa(userid);
-    }
-
-    function getUser() {
-        var month  = $('#monthCalendar').val();
-        var year   = $('#yearCalendar').val();
-        var userid = $('#useridselect').val();
-
-        setCharge();
-
-        location.href = '{{ route('appointment.index') }}/' + btoa(month) + '/' + btoa(year) + '/' + btoa(userid);
-    }
-
-    function startAppointment(url) {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.msg.start.appoinment') }}',
-            text: '{{ trans('dash.msg.confir.start.appoinment') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.label.yes.start') }}',
-            cancelButtonText: '{{ trans('dash.label.not') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                location.href = url;
-            }
-        });
-    }
+    };
 </script>
+<script src="{{ asset('js/appointments/index.js') }}"></script>
 @endpush

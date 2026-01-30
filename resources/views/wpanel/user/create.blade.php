@@ -19,7 +19,7 @@
     <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
     
-    <form name="frm" id="frm" role="form" method="post" enctype="multipart/form-data" action="{{ route('wp.users.store') }}" onsubmit="return validate(1);">
+    <form name="frm" id="frm" role="form" method="post" enctype="multipart/form-data" action="{{ route('wp.users.store') }}" data-action="wpanel.validate" data-action-event="submit" data-action-args="password|$el">
         @csrf
         <div class="row">
             <div class="col-md-6">
@@ -78,7 +78,7 @@
             <div class="col-md-12">
                 <br />
                 <input type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-primary" value="ACEPTAR">
-                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" onclick="window.open('{{ route('wp.users.index') }}','_self');">
+                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" data-action="navigate" data-url="{{ route('wp.users.index') }}">
             </div>
         </div>
     </form>

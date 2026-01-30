@@ -37,7 +37,7 @@
 
 <div class="container-fluid px-xl-5 pb-0 pb-lg-4">
     <div class="row px-2 px-lg-3 mt-lg-4">
-        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmProfile" name="frmProfile" method="post" action="{{ route('register.complete-save') }}" onsubmit="return validSend();">
+        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmProfile" name="frmProfile" method="post" action="{{ route('register.complete-save') }}" data-action="Setup.validSend" data-action-event="submit">
             <h1 class="text-center text-md-start text-uppercase h4 fw-normal mb-3">{{ trans('auth.register.complete.cmp') }} <span class="text-info fw-bold">{{ trans('auth.register.complete.profile') }}</span></h1>
 
             @csrf
@@ -51,7 +51,7 @@
                             </div>
                             <div class="mb-4">
                                 <label for="country" class="form-label small">{{ trans('auth.register.complete.country') }}</label>
-                                <select class="form-select fc requerido select2" name="country" id="country" onchange="changeCountry(this);">
+                                <select class="form-select fc requerido select2" name="country" id="country" data-action="Setup.changeCountry" data-action-event="change" data-action-args="$el">
                                     @foreach ($countries as $country)
                                         <option value="{{ $country->id }}" data-phonecode="{{ $country->phonecode }}" @if($country->default == 1) selected="selected" @endif>{{ $country->title }}</option>
                                     @endforeach
@@ -59,7 +59,7 @@
                             </div>
                             <div class="mb-4">
                                 <label for="phone" class="form-label small">{{ trans('auth.register.complete.phone.only') }}</label>
-                                <input type="text" class="form-control fc requerido" id="phone" name="phone" onkeydown="enterOnlyNumbers(event);" maxlength="255">
+                                <input type="text" class="form-control fc requerido" id="phone" name="phone" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event" maxlength="255">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -75,7 +75,7 @@
                             </div>
                             <div class="mb-4">
                                 <label for="idnumber" class="form-label small">{{ trans('auth.register.complete.dni') }}</label>
-                                <input type="text" class="form-control fc requerido" id="idnumber" name="idnumber" onkeydown="enterOnlyNumbers(event);" maxlength="20">
+                                <input type="text" class="form-control fc requerido" id="idnumber" name="idnumber" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event" maxlength="20">
                             </div>
                             <div class="mb-4">
                                 <label for="vEmail" class="form-label small">{{ trans('auth.login.email') }}</label>
@@ -85,7 +85,7 @@
                         <div class="col-md-4">
                             <div class="mb-4">
                                 <label for="province" class="form-label small">{{ trans('auth.register.complete.province.only') }}</label>
-                                <select class="form-select fc select2" name="province" id="province" onchange="getLocation(1, this.value);">
+                                <select class="form-select fc select2" name="province" id="province" data-action="Setup.getLocation" data-action-event="change" data-action-args="1|$value">
                                     <option value="">{{ trans('auth.register.complete.select') }}</option>
                                     @foreach ($provinces as $province)
                                         <option value="{{ $province->id }}">{{ $province->title }}</option>
@@ -95,7 +95,7 @@
                             </div>
                             <div class="mb-4">
                                 <label for="canton" class="form-label small">{{ trans('auth.register.complete.canton.only') }}</label>
-                                <select class="form-select fc select2" name="canton" id="canton"  onchange="getLocation(2, this.value);">
+                                <select class="form-select fc select2" name="canton" id="canton" data-action="Setup.getLocation" data-action-event="change" data-action-args="2|$value">
                                     <option value="">{{ trans('auth.register.complete.select') }}</option>
                                 </select>
                                 <input type="text" class="form-control fc" id="canton_alternate" name="canton_alternate" style="display: none;" maxlength="255">
@@ -110,7 +110,7 @@
                         </div>
                     </div>
                     <div class="d-grid d-sm-flex gap-2">
-                        <button type="button" class="btn btn-primary px-5" onclick="validateNext();">{{ trans('auth.register.complete.next') }}</button>
+                        <button type="button" class="btn btn-primary px-5" data-action="Setup.validateNext" data-action-event="click">{{ trans('auth.register.complete.next') }}</button>
                     </div>
                 </div>
                 <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
@@ -151,7 +151,7 @@
                                 </div>
                                 <div class="w-100">
                                     <label for="animaltype" class="form-label small">{{ trans('auth.register.complete.type') }}</label>
-                                    <select name="animaltype[]" id="animaltype1" class="form-select fc select2 requerido2" data-code="1" onchange="getBreed(this);">
+                                    <select name="animaltype[]" id="animaltype1" class="form-select fc select2 requerido2" data-code="1" data-action="Setup.getBreed" data-action-event="change" data-action-args="$el">
                                         <?php echo $optionTypes; ?>
                                     </select>
                                 </div>
@@ -169,13 +169,13 @@
                     </div>
 
                     <div class="d-block d-md-table">
-                        <a onclick="addAnimal();" class="btn btn-outline-secondary btn-sm mb-2 w-100">
+                        <a data-action="Setup.addAnimal" data-action-event="click" class="btn btn-outline-secondary btn-sm mb-2 w-100">
                             <i class="fa-solid fa-plus text-primary me-1"></i>
                             {{ trans('auth.register.complete.addOther') }}
                         </a>
                     </div>
                     <div class="d-grid d-sm-flex gap-2 mt-4">
-                        <button type="button" class="btn btn-secondary px-5" onclick="changeTab('step1')">{{ trans('auth.register.complete.previous') }}</button>
+                        <button type="button" class="btn btn-secondary px-5" data-action="Setup.changeTab" data-action-event="click" data-action-args="step1">{{ trans('auth.register.complete.previous') }}</button>
                         <button type="submit" class="btn btn-primary px-5">{{ trans('auth.register.complete.save') }}</button>
                     </div>
                 </div>
@@ -192,262 +192,21 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-    $('.select2').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    });
-
-    function changeTab(tabId) {
-      const tabContent = document.getElementById('formSteps');
-      const tabPane = tabContent.querySelector(`#${tabId}`);
-      
-      // Oculta todas las pestañas
-      const allTabs = tabContent.querySelectorAll('.tab-pane');
-      allTabs.forEach(tab => tab.classList.remove('show', 'active'));
-
-      // Muestra la pestaña seleccionada
-      tabPane.classList.add('show', 'active');
-    }
-
-    function changeCountry(obj) {
-        var country = $(obj).val();
-        var phonecode = $('#country option:selected').attr("data-phonecode");
-
-        if(country == 53) {
-            $('#province').show();
-            $('#canton').show();
-            $('#district').show();
-
-            $('#province_alternate').hide();
-            $('#canton_alternate').hide();
-            $('#district_alternate').hide();
-        }else{
-            $('#province').hide();
-            $('#canton').hide();
-            $('#district').hide();
-
-            $('#province_alternate').show();
-            $('#canton_alternate').show();
-            $('#district_alternate').show();
-        }
-
-        $('#phone').val('+' + phonecode);
-    }
-    changeCountry($('#country'));
-
-    function getLocation(type, value) {
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('get.location') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                type: type,
-                value: value
-            },
-            beforeSend: function(){},
-            success: function(data){
-                var html = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-                $.each(data.rows, function(i, item) {
-                    html = html + '<option value="'+item.id+'">'+item.title+'</option>';
-                });
-
-                if(type == 1) {
-                    $('#canton').html(html);
-                    $('#district').html('<option value="">{{ trans('auth.register.complete.select') }}</option>');
-                }
-                if(type == 2) {
-                    $('#district').html(html);
-                }
-            }
-        });
-    }
-
-    function validateNext () {
-        var validate = true;
-
-        $('.requerido').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                validate = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        var country = $('#country').val();
-        var phonecode = $('#country option:selected').attr("data-phonecode");
-
-        if(country == 53) {
-            if($('#province').val() == ''){
-                $('#province').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#province').removeClass('is-invalid');
-            }
-
-            if($('#canton').val() == ''){
-                $('#canton').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#canton').removeClass('is-invalid');
-            }
-
-            if($('#district').val() == ''){
-                $('#district').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#district').removeClass('is-invalid');
-            }
-        }else{
-            if($('#province_alternate').val() == ''){
-                $('#province_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#province_alternate').removeClass('is-invalid');
-            }
-
-            if($('#canton_alternate').val() == ''){
-                $('#canton_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#canton_alternate').removeClass('is-invalid');
-            }
-
-            if($('#district_alternate').val() == ''){
-                $('#district_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#district_alternate').removeClass('is-invalid');
-            }
-        }
-
-        if(($('#phone').val() == '+' + phonecode)) {
-            $('#phone').addClass('is-invalid');
-            validate = false;
-        }
-
-        if(validate == true) {
-            changeTab('step2');
-        }
-    }
-
-    let types = '<?php echo $optionTypes; ?>';
-    function addAnimal() {
-        let breeds = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-
-        var random = getRamdom();
-        var html = '<div class="d-grid d-md-flex gap-2 gap-md-4 justify-content-md-between align-items-center py-3">'+
-                        '<div class="w-100">'+
-                            '<label for="petname" class="form-label small">{{ trans('auth.register.complete.namepet') }}</label>'+
-                            '<input type="text" class="form-control fc requerido2" id="petname'+random+'" name="petname[]" maxlength="255">'+
-                        '</div>'+
-                        '<div class="w-100">'+
-                            '<label for="animaltype" class="form-label small">{{ trans('auth.register.complete.type') }}</label>'+
-                            '<select name="animaltype[]" id="animaltype'+random+'" class="form-select fc select2 requerido2" data-code="'+random+'" onchange="getBreed(this);">'+
-                                types +
-                            '</select>'+
-                        '</div>'+
-                        '<div class="w-100">'+
-                            '<label for="breed" class="form-label small">{{ trans('auth.register.complete.breed') }}</label>'+
-                            '<select name="breed[]" id="breed'+random+'" class="form-select fc select2 requerido2">'+
-                                breeds +
-                            '</select>'+
-                        '</div>'+
-                        '<div class="text-center">'+
-                            '<a onclick="removeAnimal(this);" class="btn btn-outline-danger btn-sm mt-1 mt-md-0"><i class="fa-solid fa-xmark"></i></a>'+
-                        '</div>'+
-                    '</div>';
-
-        
-
-        $('#printAnimals').append(html);
-
-        $('#animaltype'+random).select2( {
-            theme: "bootstrap-5",
-            width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-            placeholder: $( this ).data( 'placeholder' ),
-        });
-
-        $('#breed'+random).select2( {
-            theme: "bootstrap-5",
-            width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-            placeholder: $( this ).data( 'placeholder' ),
-        });
-    }
-
-    function removeAnimal(obj) {
-        $(obj).parent('div').parent('div').remove();
-    }
-
-    function getRamdom() {
-        var random = Math.random();
-        random = random + "";
-        random = random.replace(".", "");
-
-        return random;
-    }
-
-    function validSend() {
-        var validate = true;
-
-        $('.requerido2').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                validate = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if(validate == true) {
-            setCharge();
-        }
-
-        return validate;
-    }
-
-    function getBreed(obj) {
-        var code = $(obj).attr('data-code');
-
-        var type = $('#animaltype' + code).val();
-
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('get.breed') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                type: type
-            },
-            beforeSend: function(){},
-            success: function(data){
-                var html = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-                $.each(data.rows, function(i, item) {
-                    html = html + '<option value="'+item.id+'">'+item.title+'</option>';
-                });
-
-                $('#breed' + code).html(html);
-            }
-        });
-    }
-
-    function enterOnlyNumbers(event){
-        if ( event.keyCode == 8 || event.keyCode == 9 || (event.keyCode >= 37 && event.keyCode <= 40) || event.keyCode == 188 || event.keyCode == 190 ) {
-        } else {
-            if ((event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
-                event.preventDefault();
-            }
-        }
-    }
+    window.REGISTER_COMPLETE_OWNER_CONFIG = {
+        routes: {
+            getLocation: @json(route('get.location')),
+            getBreed: @json(route('get.breed'))
+        },
+        texts: {
+            select: @json(trans('auth.register.complete.select'))
+        },
+        labels: {
+            namepet: @json(trans('auth.register.complete.namepet')),
+            type: @json(trans('auth.register.complete.type')),
+            breed: @json(trans('auth.register.complete.breed'))
+        },
+        optionTypes: @json($optionTypes)
+    };
 </script>
+<script src="{{ asset('js/register/complete-owner.js') }}"></script>
 @endpush

@@ -48,7 +48,7 @@
                             <div class="p-4 p-md-5 planlist2">
                                 <h2 class="h1"><sup class="fw-light me-1">$</sup>{{ $setting->price_pro }}<span class="fw-light small2">/{{ trans('dash.label.payment.month') }}</span></h2>
                                 @if($vet->pro == 0)
-                                <button type="button" onclick="callPlan();" class="w-100 btn btn-primary text-uppercase py-2 mt-1">{{ trans('dash.label.payment.solicitation') }}</button>
+                                <button type="button" data-action="Home.callPlan" data-action-event="click" class="w-100 btn btn-primary text-uppercase py-2 mt-1">{{ trans('dash.label.payment.solicitation') }}</button>
                                 @endif
                                 <ul class="mt-3 px-0 mb-0">
                                     @foreach ($pros as $pro)
@@ -97,7 +97,7 @@
                 </div>
             </div>
             <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-                <button type="button" onclick="cancelPlan();" class="btn btn-primary btn-sm px-4">{{ trans('dash.label.btn.continue') }}</button>
+                <button type="button" data-action="Home.cancelPlan" data-action-event="click" class="btn btn-primary btn-sm px-4">{{ trans('dash.label.btn.continue') }}</button>
             </div>
         </div>
     </div>
@@ -147,56 +147,18 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    function callPlan() {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.msg.start.plan') }}',
-            text: '{{ trans('dash.msg.confir.start.plan') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.label.yes.contact') }}',
-            cancelButtonText: '{{ trans('dash.label.not') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                location.href = '{{ route('home.payment') }}';
-            }
-        });
-    }
-
-    function cancelPlan() {
-        $('#planWhy').removeClass('is-invalid');
-
-        var reason = $('#planWhy').val();
-
-        if(reason != '') {
-            setCharge();
-
-            $.ajax({
-                type: 'POST',
-                url: '{{ route('home.cancelPro') }}',
-                dataType: "json",
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-                },
-                data: {
-                    reason: reason
-                },
-                beforeSend: function(){},
-                success: function(data){
-                    location.reload();
-                }
-            });
-        }else{
-            $('#planWhy').addClass('is-invalid');
+    window.HOME_PLAN_CONFIG = {
+        routes: {
+            payment: @json(route('home.payment')),
+            cancel: @json(route('home.cancelPro'))
+        },
+        texts: {
+            title: @json(trans('dash.msg.start.plan')),
+            text: @json(trans('dash.msg.confir.start.plan')),
+            confirm: @json(trans('dash.label.yes.contact')),
+            cancel: @json(trans('dash.label.not'))
         }
-    }
+    };
 </script>
+<script src="{{ asset('js/home/plan.js') }}"></script>
 @endpush

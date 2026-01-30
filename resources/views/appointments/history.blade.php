@@ -16,9 +16,9 @@
         <div class="col-12">
             <div class="row justify-content-end align-items-center mb-3 mt-3 mt-lg-0">
                 <div class="col-md-6 col-xl-8 d-flex gap-2 justify-content-center">
-                    <a onclick="prevMonth();" class="circleArrow me-1"><i class="fa-solid fa-angle-left"></i></a>
+                    <a data-action="Appointments.prevMonth" data-action-event="click" class="circleArrow me-1"><i class="fa-solid fa-angle-left"></i></a>
                     <div>
-                        <select name="monthselect" id="monthselect" class="form-select fs-5 fc" aria-label="{{ trans('dash.label.select.month') }}" onchange="getAppoinments();">
+                        <select name="monthselect" id="monthselect" class="form-select fs-5 fc" aria-label="{{ trans('dash.label.select.month') }}" data-action="Appointments.getAppoinments" data-action-event="change">
                             <option value="1" @if((int)$month == 1) selected="selected" @endif>{{ trans('dash.month.num1') }}</option>
                             <option value="2" @if((int)$month == 2) selected="selected" @endif>{{ trans('dash.month.num2') }}</option>
                             <option value="3" @if((int)$month == 3) selected="selected" @endif>{{ trans('dash.month.num3') }}</option>
@@ -34,16 +34,16 @@
                         </select>
                     </div>
                     <div>
-                        <select name="yearselect" id="yearselect" class="form-select fs-5 fc" aria-label="{{ trans('dash.label.select.year') }}" onchange="getAppoinments();">
+                        <select name="yearselect" id="yearselect" class="form-select fs-5 fc" aria-label="{{ trans('dash.label.select.year') }}" data-action="Appointments.getAppoinments" data-action-event="change">
                             @for ($i = date('Y') + 1; $i >= date('Y') - 2; $i--)
                                 <option value="{{ $i }}" @if($i == $year) selected="selected" @endif>{{ $i }}</option>
                             @endfor
                         </select>
                     </div>
-                    <a onclick="nextMonth();" class="circleArrow ms-1"><i class="fa-solid fa-angle-right"></i></a>
+                    <a data-action="Appointments.nextMonth" data-action-event="click" class="circleArrow ms-1"><i class="fa-solid fa-angle-right"></i></a>
                 </div>
                 <div class="col-md-3 col-xl-2 mt-3 mt-md-0">
-                    <select name="useridselect" id="useridselect" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" onchange="getAppoinments();">
+                    <select name="useridselect" id="useridselect" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" data-action="Appointments.getAppoinments" data-action-event="change">
                         @foreach ($vets as $vet)
                             <option value="{{ $vet->id }}" @if($vet->id == $userid) selected='selected' @endif>{{ ($vet->id == $user->id) ? $vet->name . ' ('. trans('dash.its.me') . ')' : $vet->name }}</option>    
                         @endforeach
@@ -110,58 +110,16 @@
 @push('scriptBottom')
 <script src="{{ asset('js/front/datedropper.js') }}"></script>
 <script>
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-    })
-
-    function prevMonth() {
-        var month  = $('#monthselect').val();
-        var year   = $('#yearselect').val();
-        var userid = $('#useridselect').val();
-
-        if(month == 1) {
-            month = 12;
-            year = parseInt(year) - 1;
-        }else{
-            month = parseInt(month) - 1;
+    window.APPOINTMENTS_HISTORY_CONFIG = {
+        routes: {
+            history: @json(route('appointment.history'))
+        },
+        selectors: {
+            monthSelect: '#monthselect',
+            yearSelect: '#yearselect',
+            userSelect: '#useridselect'
         }
-
-        setCharge();
-
-        location.href = '{{ route('appointment.history') }}/' + btoa(month) + '/' + btoa(year) + '/' + btoa(userid);
-    }
-
-    function nextMonth() {
-        var month  = $('#monthselect').val();
-        var year   = $('#yearselect').val();
-        var userid = $('#useridselect').val();
-
-        if(month == 12) {
-            month = 1;
-            year = parseInt(year) + 1;
-        }else{
-            month = parseInt(month) + 1;
-        }
-
-        setCharge();
-
-        location.href = '{{ route('appointment.history') }}/' + btoa(month) + '/' + btoa(year) + '/' + btoa(userid);
-    }
-
-    function getAppoinments() {
-        var month  = $('#monthselect').val();
-        var year   = $('#yearselect').val();
-        var userid = $('#useridselect').val();
-
-        setCharge();
-
-        location.href = '{{ route('appointment.history') }}/' + btoa(month) + '/' + btoa(year) + '/' + btoa(userid);
-    }
+    };
 </script>
+<script src="{{ asset('js/appointments/history.js') }}"></script>
 @endpush

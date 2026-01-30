@@ -27,7 +27,7 @@
             <input type="text" name="searchClientInputPhone" id="searchClientInputPhone" class="form-control fc" autocomplete="off">
           </div>
           
-          <button onclick="searchClient(this);" id="btn-SearchClient" type="button" class="btn btn-outline-primary btn-sm mb-2 d-table mx-auto px-3">
+          <button id="btn-SearchClient" type="button" class="btn btn-outline-primary btn-sm mb-2 d-table mx-auto px-3" data-appoint-action="search-client">
             <i class="fa-solid fa-magnifying-glass me-2"></i>{{ trans('dash.label.search') }}
           </button>
   
@@ -39,81 +39,31 @@
 
 @push('scriptBottom')
 <script>
-    function searchClient() {
-      var email = $('#searchClientInput').val();
-      var codePhone = $('#searchClientInputCode').val();
-      var phone = $('#searchClientInputPhone').val();
-  
-      $.ajaxSetup({
-          headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-          }
-      });
-      
-      if((email != "") || (phone != "")) {
-        setLoad('btn-SearchClient', '{{ trans('dash.label.search') }}');
-        $.post('{{ route('appoinment.getClient') }}', {email: email, codePhone: codePhone, phone: phone},
-            function (data) {
-                var html = '';
-                $.each(data.rows, function(i, item) {
-                    html = html + '<option value="'+item.id+':'+item.id_user+'" data-iduser="' + item.get_user.id + '" data-name="' + item.get_user.name + '" data-email="' + item.get_user.email + '">' + item.name + ' ('+item.get_user.name+')</option>';
-                });
-
-                var createPet = '<div class="col col-md-6"><button type="button" onclick="chargeCreatePet();" class="btn btn-secondary btn-sm w-100"><i class="fa-solid fa-paw me-2"></i>{{ trans('dash.label.create.pet') }}</button></div>';
-                if(html == '') {
-                  createPet = '';
-                  html = html + '<option value="" data-iduser="" data-name="" data-email="">{{ trans('dash.label.not.result') }}</option>';
-                }
-  
-                var txt = '<div class="d-flex flex-column flex-sm-row gap-3">'+
-                      '<div class="flex-grow-1">'+
-                        '<label for="userSearchInput" class="form-label small">{{ trans('dash.label.user.selected') }}</label>'+
-                        '<select id="userSearchInput" name="userSearchInput" class="form-select fc">' + html + '</select>'+
-                      '</div>'+
-                      '<button onclick="searchClientSelected();" id="btn-SearchClientSelected" type="button" class="btn btn-primary btn-sm align-self-sm-end"><i class="fa-solid fa-arrow-right me-2"></i>{{ trans('dash.label.selected') }}</button>'+
-                    '</div>'+
-                    
-                    '<div class="row mt-4">'+
-                      createPet +
-                      '<div class="col col-md-6"><button type="button" class="btn btn-secondary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#createNewUser"><i class="fa-solid fa-user me-2"></i>{{ trans('dash.label.element.create.user') }}</button></div>'+
-                    '</div>';
-  
-                $('#printerCreateUser').html(txt);
-  
-                stopLoad('btn-SearchClient', '{{ trans('dash.label.search') }}');
-            }
-        );
+    window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+    window.APPOINT_MODAL_CONFIG.searchUser = {
+      ids: {
+        modal: 'createUserModal',
+        emailInput: 'searchClientInput',
+        codeSelect: 'searchClientInputCode',
+        phoneInput: 'searchClientInputPhone',
+        resultsContainer: 'printerCreateUser',
+        userSelect: 'userSearchInput',
+        mainUserSelect: 'user',
+        searchButton: 'btn-SearchClient',
+        searchSelectedButton: 'btn-SearchClientSelected'
+      },
+      routes: {
+        getClient: '{{ route('appoinment.getClient') }}',
+        setClient: '{{ route('appoinment.setClient') }}'
+      },
+      labels: {
+        search: '{{ trans('dash.label.search') }}',
+        notResult: '{{ trans('dash.label.not.result') }}',
+        userSelected: '{{ trans('dash.label.user.selected') }}',
+        selected: '{{ trans('dash.label.selected') }}',
+        createPet: '{{ trans('dash.label.create.pet') }}',
+        createUser: '{{ trans('dash.label.element.create.user') }}'
       }
-    }
-  
-    function searchClientSelected() {
-      var data = $('#userSearchInput').val();
-      var user = $('#user').val();
-  
-      if(data != '') {
-        $.ajaxSetup({
-          headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-          }
-        });
-
-        setLoad('btn-SearchClientSelected', '{{ trans('dash.label.selected') }}');
-        $.post('{{ route('appoinment.setClient') }}', {data:data, user:user},
-            function (response) {
-                var html = '';
-                $.each(response.rows, function(i, item) {
-                    html = html + '<option value="'+item.id+':'+item.id_user+'">'+ item.name + ' ('+item.get_user.name+')' +'</option>';
-                });
-
-                $('#pet').html(html);
-                $("#pet option[value='"+ data +"']").attr("selected", true);
-
-                $('#createUserModal').modal('hide');
-
-                stopLoad('btn-SearchClientSelected', '{{ trans('dash.label.selected') }}');
-            }
-        );
-      }
-    }
-  </script>
-  @endpush
+    };
+</script>
+@endpush

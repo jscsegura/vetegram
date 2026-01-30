@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-3 p-md-4">
-                <form id="frmVaccineModaladdDesp" name="frmVaccineModaladdDesp" action="" enctype="multipart/form-data" method="post" onsubmit="return false;">
+                <form id="frmVaccineModaladdDesp" name="frmVaccineModaladdDesp" action="" enctype="multipart/form-data" method="post" data-action="prevent" data-action-event="submit">
                     @csrf
                     <input type="hidden" id="sectionVaccineAdd" name="sectionVaccineAdd" value="1">
                     <input type="hidden" id="vaccineIdPetDesp" name="vaccineIdPet" value="0">
@@ -24,7 +24,7 @@
                     <div class="mb-3">
                         <label for="vaccineName" class="form-label small">{{ trans('dash.label.element.drug') }}</label>
                         {{-- <input type="text" id="vaccineName" name="vaccineName" class="form-control fc " maxlength="255"> --}}
-                        <select id="vaccineNameDesp" name="vaccineName" class="form-select fc select6 requeridoAddVaccineDesp" data-placeholder="Seleccionar" onchange="setIntervalDesp(this);">
+                        <select id="vaccineNameDesp" name="vaccineName" class="form-select fc select6 requeridoAddVaccineDesp" data-placeholder="Seleccionar" data-appoint-action="desparat-interval">
                             <option></option>
                             @foreach ($desparacitanteItems as $item)
                             <option value="{{ $item['title_' . $weblang] }}" data-interval="{{ $item->interval }}">{{ $item['title_' . $weblang] }}</option>    
@@ -63,7 +63,7 @@
                 </form>
             </div>
             <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-                <button type="button" onclick="saveToCreateVaccineDesp();" class="btn btn-primary btn-sm px-4">{{ trans('dash.text.btn.save') }}</button>
+                <button type="button" class="btn btn-primary btn-sm px-4" data-appoint-action="desparat-save">{{ trans('dash.text.btn.save') }}</button>
             </div>
         </div>
     </div>
@@ -71,59 +71,22 @@
 
 @push('scriptBottom')
     <script>
-        function setIdAppointmentToDesparat(id_pet = 0, id_owner = 0) {
-            $('#vaccineIdPetDesp').val(id_pet);
-            $('#vaccineIdOwnerDesp').val(id_owner);
-        }
-
-        function setIntervalDesp(obj) {
-            var selectedOption = $('#vaccineNameDesp').find(':selected');
-            var interval = selectedOption.attr('data-interval');
-
-            $('#intervalDesp').val(interval);
-        }
-
-        function saveToCreateVaccineDesp() {
-            var validate = true;
-
-            $('.requeridoAddVaccineDesp').each(function(i, elem){
-                var value = $(elem).val();
-                var value = value.trim();
-                if(value == ''){
-                    $(elem).addClass('is-invalid');
-                    validate = false;
-                }else{
-                    $(elem).removeClass('is-invalid');
-                }
-            });
-            
-            if(validate == true) {
-                setCharge();
-
-                $.ajax({
-                    url: '{{ route('appoinment.createVaccine') }}',
-                    type: 'POST',
-                    data: new FormData(document.getElementById('frmVaccineModaladdDesp')),
-                    contentType: false,
-                    cache: false,
-                    processData: false,
-                    success: function(data, status, xhr) {  
-                        location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        $.toast({
-                            text: '{{ trans('dash.msg.error.create.vaccine') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'error'
-                        });
-
-                        hideCharge();
-                    }
-                });
+        window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+        window.APPOINT_MODAL_CONFIG.addDesparat = {
+            ids: {
+                modal: 'addDesparation',
+                form: 'frmVaccineModaladdDesp',
+                petField: 'vaccineIdPetDesp',
+                ownerField: 'vaccineIdOwnerDesp',
+                nameSelect: 'vaccineNameDesp',
+                intervalInput: 'intervalDesp'
+            },
+            routes: {
+                createVaccine: '{{ route('appoinment.createVaccine') }}'
+            },
+            labels: {
+                errorCreate: '{{ trans('dash.msg.error.create.vaccine') }}'
             }
-        }
+        };
     </script>
 @endpush

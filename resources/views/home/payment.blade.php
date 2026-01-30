@@ -28,7 +28,7 @@
                             </div>
                             <div class="mb-4" id="selectToken" style="display: none;">
                                 <label for="tlpy_saved_cards" class="form-label small">{{ trans('dash.label.payment.select.card') }}</label>
-                                <select class="form-select fc" name="tlpy_saved_cards" id="tlpy_saved_cards" onchange="selectCard(this.value);">
+                                <select class="form-select fc" name="tlpy_saved_cards" id="tlpy_saved_cards" data-action="Home.selectCard" data-action-event="change" data-action-args="$value">
                                     <option value="">{{ trans('dash.label.payment.new.card') }}</option>
                                 </select>
                             </div>
@@ -78,7 +78,7 @@
                                 <i class="fa-solid fa-triangle-exclamation opacity-50 me-2"></i>{{ trans('dash.label.payment.apply.months') }}
                             </div>
                             <div class="mt-3">
-                                <button type="button" class="btn btn-primary px-4" id="Paybtn" onclick="pay();">{{ trans('dash.label.payment.pay.subscription') }}</button>
+                                <button type="button" class="btn btn-primary px-4" id="Paybtn" data-action="Home.pay" data-action-event="click">{{ trans('dash.label.payment.pay.subscription') }}</button>
                             </div>
                         </div>
                     </div>
@@ -124,120 +124,43 @@
     $orderNumber = rand(111,999) . date('YmdHis');
 @endphp
 
-<script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", async function () {
-        var initialize = await Tilopay.Init({
-            token: "{{ $token }}",
-            currency: "USD",
-            language: "{{ $weblang }}",
-            amount: "{{ $setting->price_pro }}",
-            billToFirstName: "{{ $firstName }}",
-            billToLastName: "{{ $lastName }}",
-            billToAddress: "{{ $province }}",
-            billToAddress2: "{{ 'line 2 ' . $province }}",
-            billToCity: "{{ $district }}",
-            billToState: "{{ $canton }}",
-            billToZipPostCode: "10101",
-            billToCountry: "{{ $country }}",
-            billToTelephone: "{{ $user->phone }}",
-            billToEmail: "{{ $user->email }}",
-            orderNumber: "{{ $orderNumber }}",
-            capture: "1",
-            redirect: "{{ env('APP_URL') . '/response-tilopay' }}",
-            subscription: "1",
-            hashVersion: "V2",
-            returnData: "{{ $user->id }}",
-            shipToAddress: "{{ $province }}",
-            shipToAddress2: "{{ 'line 2 ' . $province }}",
-            shipToCity: "{{ $district }}",
-            shipToCountry: "{{ $country }}",
-            shipToFirstName: "{{ $firstName }}",
-            shipToLastName: "{{ $lastName }}",
-            shipToState: "{{ $canton }}",
-            shipToTelephone: "{{ $user->phone }}",
-            shipToZipPostCode: "10101"
-        });
-
-        if(initialize.message == 'Success') {
-            $('#msgError').hide();
-
-            await setTestMode(initialize.environment);
-            await chargeMethods(initialize.methods);
-            await chargeCards(initialize.cards);
-        }else{
-            $('#msgError').html('<i class="fa-solid fa-triangle-exclamation opacity-50 me-2"></i>' + initialize.message);
-            $('#msgError').show();
+<script>
+    window.HOME_PAYMENT_CONFIG = {
+        tilopay: {
+            token: @json($token),
+            currency: @json('USD'),
+            language: @json($weblang),
+            amount: @json($setting->price_pro),
+            billToFirstName: @json($firstName),
+            billToLastName: @json($lastName),
+            billToAddress: @json($province),
+            billToAddress2: @json('line 2 ' . $province),
+            billToCity: @json($district),
+            billToState: @json($canton),
+            billToZipPostCode: @json('10101'),
+            billToCountry: @json($country),
+            billToTelephone: @json($user->phone),
+            billToEmail: @json($user->email),
+            orderNumber: @json($orderNumber),
+            capture: @json('1'),
+            redirect: @json(env('APP_URL') . '/response-tilopay'),
+            subscription: @json('1'),
+            hashVersion: @json('V2'),
+            returnData: @json($user->id),
+            shipToAddress: @json($province),
+            shipToAddress2: @json('line 2 ' . $province),
+            shipToCity: @json($district),
+            shipToCountry: @json($country),
+            shipToFirstName: @json($firstName),
+            shipToLastName: @json($lastName),
+            shipToState: @json($canton),
+            shipToTelephone: @json($user->phone),
+            shipToZipPostCode: @json('10101')
+        },
+        texts: {
+            termAccept: @json(trans('dash.label.payment.pay.term.accept'))
         }
-        
-    });
-
-    async function setTestMode(test) {
-        if(test == 'PROD') {
-            $('#msgTest').hide();
-        }else{
-            $('#msgTest').show();
-        }
-    }
-
-    async function chargeMethods(methods) {
-        methods.forEach(function (method) {
-            if(method.type == 'card') {
-                var option = document.createElement("option");
-                option.value = method.id;
-                option.text = method.name;
-                document.getElementById("tlpy_payment_method").appendChild(option);
-            }
-        });
-    }
-
-    async function chargeCards(cards) {
-        var totalCards = 0;
-
-        cards.forEach(function (card) {
-            var option = document.createElement("option");
-            option.value = card.id;
-            option.text = card.name;
-            document.getElementById("tlpy_saved_cards").appendChild(option);
-
-            totalCards++;
-        });
-
-        if(totalCards > 0) {
-            $('#selectToken').show();
-        }
-    }
-
-    function selectCard(card) {
-        if(card == '') {
-            $('.withToken').show();
-        }else{
-            $('.withToken').hide();
-        }
-    }
-
-    async function pay() {
-        var validate = true;
-
-        if (!$('#terms').is(':checked')) {
-            validate = false;
-            $('#msgError').html('<i class="fa-solid fa-triangle-exclamation opacity-50 me-2"></i>{{ trans('dash.label.payment.pay.term.accept') }}');
-            $('#msgError').show();
-        }
-
-        if(validate) {
-            setCharge();
-
-            var payment = await Tilopay.startPayment();
-            
-            if(payment.message != '') {
-                $('#msgError').html('<i class="fa-solid fa-triangle-exclamation opacity-50 me-2"></i>' + payment.message);
-                $('#msgError').show();
-
-                hideCharge();
-            }else{
-                $('#msgError').hide();
-            }
-        }
-    }
+    };
 </script>
+<script src="{{ asset('js/home/payment.js') }}"></script>
 @endpush

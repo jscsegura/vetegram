@@ -22,7 +22,7 @@
                     </div>
                     @endif
                     
-                    <form method="post" action="{{ route('login.submit') }}" onsubmit="return validLogin();">
+                    <form method="post" action="{{ route('login.submit') }}" data-action="Home.validLogin" data-action-event="submit">
                         @csrf
                         
                         <div class="mb-3">
@@ -85,49 +85,9 @@
 
 @push('scriptBottom')
 <script>
-    const passwordInput = document.getElementById('passwordInput');
-    const passwordToggleBtn = document.querySelector('.btn-toggle-password');
-    
-    passwordToggleBtn.addEventListener('click', function() {
-      if (passwordInput.type === 'password') {
-         passwordInput.type = 'text';
-         passwordToggleBtn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
-      } else {
-         passwordInput.type = 'password';
-         passwordToggleBtn.innerHTML = '<i class="fa-regular fa-eye"></i>';
-      }
-    });
-
-    function validLogin() {
-        var validate = true;
-
-        $('#emailInput').removeClass('is-invalid');
-        $('#passwordInput').removeClass('is-invalid');
-
-        if(!validaEmail($('#emailInput').val())){
-            $('#emailInput').addClass('is-invalid');
-            validate = false;
-        }
-
-        if($('#passwordInput').val() == ''){
-            $('#passwordInput').addClass('is-invalid');
-            validate = false;
-        }
-
-        if(validate == true) {
-            setLoad('btnLogin', '{{ trans('auth.text.btn.process') }}');
-        }
-
-        return validate;
-    }
-
-    function validaEmail(email) {
-        var reg=/^[0-9a-z_\-\+.]+@[0-9a-z\-\.]+\.[a-z]{2,8}$/i;
-        if(reg.test(email)){
-            return true;
-        }else{
-            return false;
-        }
-    }
- </script>
+    window.HOME_INDEX_CONFIG = {
+        processLabel: @json(trans('auth.text.btn.process'))
+    };
+</script>
+<script src="{{ asset('js/home/index.js') }}"></script>
 @endpush

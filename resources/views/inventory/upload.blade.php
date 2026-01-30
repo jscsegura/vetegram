@@ -8,7 +8,7 @@
 <section class="container-fluid pb-0 pb-lg-4">
     <div class="row px-2 px-lg-3 mt-2 mt-lg-4">
 
-        <form class="col-xl-7 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmMedicine" name="frmMedicine" method="post" action="{{ route('inventory.previewXml') }}" enctype="multipart/form-data" onsubmit="return validSend();">
+        <form class="col-xl-7 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmMedicine" name="frmMedicine" method="post" action="{{ route('inventory.previewXml') }}" enctype="multipart/form-data" data-action="Inventory.validSend" data-action-event="submit">
             @csrf
 
             <h1 class="text-center text-md-start text-uppercase h4 fw-normal mb-3">
@@ -34,26 +34,5 @@
 @endsection
 
 @push('scriptBottom')
-<script>
-    function validSend() {
-        var validate = true;
-
-        $('.requerido').each(function(i, elem) {
-            var value = $(elem).val();
-            var value = value.trim();
-            if (value == '') {
-                $(elem).addClass('is-invalid');
-                validate = false;
-            } else {
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if (validate == true) {
-            setCharge();
-        }
-
-        return validate;
-    }
-</script>
+<script src="{{ asset('js/inventory/upload.js') }}"></script>
 @endpush

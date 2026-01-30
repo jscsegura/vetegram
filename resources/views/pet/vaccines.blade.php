@@ -38,7 +38,7 @@
                     </p>
                     
                     @if((Auth::guard('web')->user()->rol_id != 8)&&($pet->dead_flag == 0))
-                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm px-4 text-uppercase" onclick="setIdAppointmentToDesparat('{{ $pet->id }}', '{{ $owner->id }}');" data-bs-toggle="modal" data-bs-target="#addDesparation"><i class="fa-solid fa-syringe me-2"></i>{{ trans('dash.label.add.desparation') }}</a>
+                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm px-4 text-uppercase" data-action="Appointments.setIdAppointmentToDesparat" data-action-event="click" data-action-args="{{ $pet->id }}|{{ $owner->id }}" data-bs-toggle="modal" data-bs-target="#addDesparation"><i class="fa-solid fa-syringe me-2"></i>{{ trans('dash.label.add.desparation') }}</a>
                     @endif
                 @else
                     <p class="small text-center text-md-end lh-sm">
@@ -47,12 +47,12 @@
                     </p>
                     
                     @if((Auth::guard('web')->user()->rol_id != 8)&&($pet->dead_flag == 0))
-                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm px-4 text-uppercase" onclick="setIdAppointmentToVaccine('{{ $pet->id }}', '{{ $owner->id }}');" data-bs-toggle="modal" data-bs-target="#addVaccine"><i class="fa-solid fa-syringe me-2"></i>{{ trans('dash.label.add.vaccine') }}</a>
+                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm px-4 text-uppercase" data-action="Appointments.setIdAppointmentToVaccine" data-action-event="click" data-action-args="{{ $pet->id }}|{{ $owner->id }}" data-bs-toggle="modal" data-bs-target="#addVaccine"><i class="fa-solid fa-syringe me-2"></i>{{ trans('dash.label.add.vaccine') }}</a>
                     @endif
                 @endif
 
                 @if(Auth::guard('web')->user()->rol_id == 8)
-                    <a href="javascript:void(0);" class="btn btn-secondary btn-sm px-4 text-uppercase" onclick="setIdExternalToEntryVaccine('{{ $pet->id }}');" data-bs-toggle="modal" data-bs-target="#addEntryVaccine"><i class="fa-solid fa-syringe me-2"></i>{{ trans('dash.label.add.vaccine.external') }}</a>
+                    <a href="javascript:void(0);" class="btn btn-secondary btn-sm px-4 text-uppercase" data-action="Appointments.setIdExternalToEntryVaccine" data-action-event="click" data-action-args="{{ $pet->id }}" data-bs-toggle="modal" data-bs-target="#addEntryVaccine"><i class="fa-solid fa-syringe me-2"></i>{{ trans('dash.label.add.vaccine.external') }}</a>
                 @endif
             </div>
             
@@ -128,35 +128,12 @@
 <script src="{{ asset('js/front/datedropper.js') }}"></script>
 
 <script>
-    const miDiv = document.getElementById('wrapPtabs');
-    miDiv.scrollLeft = miDiv.scrollWidth - miDiv.clientWidth;
-
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true
-    })
-
-    $('.select4').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#petEditModal')
-    });
-
-    $('.select5').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#addVaccine')
-    });
-
-    $('.select6').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#addDesparation')
-    });
+    window.PET_COMMON_CONFIG = {
+        selectors: {
+            petEditModal: '#petEditModal'
+        }
+    };
 </script>
+<script src="{{ asset('js/pet/common.js') }}"></script>
+<script src="{{ asset('js/pet/vaccines.js') }}"></script>
 @endpush

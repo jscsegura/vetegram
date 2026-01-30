@@ -12,7 +12,7 @@
           </div>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button onclick="sendEntryVaccineModal();" type="button" class="btn btn-primary btn-sm px-4">{{ trans('dash.btn.label.send') }}</button>
+          <button type="button" class="btn btn-primary btn-sm px-4" data-appoint-action="external-vaccine-send">{{ trans('dash.btn.label.send') }}</button>
         </div>
       </div>
     </div>
@@ -20,65 +20,21 @@
 
 @push('scriptBottom')
 <script>
-  function setIdExternalToEntryVaccine(id) {
-    $('#setIdPetToVaccine').val(id);
-  }
-
-  function sendEntryVaccineModal() {
-    var id    = $('#setIdPetToVaccine').val();
-    var email = $('#emailToSendVaccine').val();
-
-    var emailPattern = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-
-    email = email.trim();
-
-    if((email != '') && (emailPattern.test(email))) {
-      $.ajaxSetup({
-          headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-          }
-      });
-
-      setCharge();
-
-      $.post('{{ route('appoinment.sendEntryVaccine') }}', {id:id, email:email},
-            function (data) {
-              
-              if(data.send == '1') {
-                $('#emailToSendVaccine').val('');
-
-                $.toast({
-                    text: '{{ trans('dash.label.vaccine.sender') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'success'
-                });
-              }else{
-                $.toast({
-                  text: '{{ trans('dash.label.vaccine.send.error') }}',
-                  position: 'bottom-right',
-                  textAlign: 'center',
-                  loader: false,
-                  hideAfter: 4000,
-                  icon: 'error'
-                });
-              }           
-
-              hideCharge();
-            }
-        );
-      }else{
-        $.toast({
-          text: '{{ trans('dash.label.recipe.send.email') }}',
-          position: 'bottom-right',
-          textAlign: 'center',
-          loader: false,
-          hideAfter: 4000,
-          icon: 'error'
-        });
-      }
-  }
+  window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+  window.APPOINT_MODAL_CONFIG.addExternalVaccine = {
+    ids: {
+      modal: 'addEntryVaccine',
+      idField: 'setIdPetToVaccine',
+      emailField: 'emailToSendVaccine'
+    },
+    routes: {
+      sendEntryVaccine: '{{ route('appoinment.sendEntryVaccine') }}'
+    },
+    labels: {
+      sendSuccess: '{{ trans('dash.label.vaccine.sender') }}',
+      sendError: '{{ trans('dash.label.vaccine.send.error') }}',
+      emailInvalid: '{{ trans('dash.label.recipe.send.email') }}'
+    }
+  };
 </script>
 @endpush

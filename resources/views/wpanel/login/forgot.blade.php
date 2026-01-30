@@ -10,7 +10,7 @@
     <body class="error-body no-top lazy" data-original="{{ asset('img/wpanel/login_background.jpg') }}" style="background-image: url('{{ asset('img/wpanel/login_background.jpg') }}')">
         <div class="container">
             <div class="row login-container animated fadeInUp">
-                <form id="frm_login" class="animated fadeIn" method="POST" action="{{ route('wp.forgot.submit') }}" onsubmit="return validateNoMsj();">
+                <form id="frm_login" class="animated fadeIn" method="POST" action="{{ route('wp.forgot.submit') }}" data-action="wpanel.validate" data-action-event="submit" data-action-args="nomsg|$el">
                     @csrf
                     <div class="col-md-7 col-md-offset-2 tiles white no-padding">
                         <div class="p-t-30 p-l-40">
@@ -63,5 +63,7 @@
     </body>
 
     <script src="{{ asset('js/wpanel/library/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ asset('js/common/action-router.js') }}"></script>
+    <script src="{{ asset('js/wpanel/common.js') }}"></script>
     <script src="{{ asset('js/wpanel/validate.js') }}"></script>
 @stop

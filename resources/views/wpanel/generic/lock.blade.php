@@ -1,5 +1,5 @@
 @if($enabled == 0)
-    <a data="{{ $id }}" onclick="activeRow(this);">
+    <a data="{{ $id }}" data-action="toggle-active">
         <img width="25px" src="{{ asset('img/wpanel/deactivated.png') }}">
     </a>
 @else

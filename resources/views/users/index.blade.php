@@ -14,10 +14,10 @@
             </h1>
             <div class="d-flex gap-2 align-items-center">
                 <input class="form-control fc" type="text" name="searchUser" id="searchUser" placeholder="{{ trans('dashadmin.label.inventory.searh') }}" aria-label="default input example" value="{{ $search }}">
-                <button type="button" onclick="searchRows();" class="btn btn-light btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <button type="button" data-action="Users.searchRows" data-action-event="click" class="btn btn-light btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
             @if($limiteExcede == true)
-            <a href="javascript:void(0);" onclick="excedeLimite();" class="btn btn-primary btn-sm d-block text-uppercase px-4">{{ trans('dashadmin.label.add.user') }}</a>
+            <a href="javascript:void(0);" data-action="Users.excedeLimite" data-action-event="click" class="btn btn-primary btn-sm d-block text-uppercase px-4">{{ trans('dashadmin.label.add.user') }}</a>
             @else
             <a href="{{ route('adminuser.add') }}" class="btn btn-primary btn-sm d-block text-uppercase px-4">{{ trans('dashadmin.label.add.user') }}</a>
             @endif
@@ -62,7 +62,7 @@
                                     <td class="px-2 px-lg-3 py-2 py-lg-3" data-label="{{ trans('dashadmin.label.column.phone') }}:">{{ $row->phone }}</td>
                                     <td class="px-2 px-lg-3 py-2 py-lg-3 text-center" data-label="{{ trans('dashadmin.label.column.enabled') }}:">
                                         <div class="form-check fs-6 form-switch d-inline-block align-middle">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="enabledRow{{ $rowid }}" name="enabledRow" onclick="changeStatus('{{ $rowid }}', this);" @if($row->lock == 0) checked @endif @if($row->rol_id == 3) disabled @endif>
+                                            <input class="form-check-input" type="checkbox" role="switch" id="enabledRow{{ $rowid }}" name="enabledRow" data-action="Users.changeStatus" data-action-event="click" data-action-args="{{ $rowid }}|$el" @if($row->lock == 0) checked @endif @if($row->rol_id == 3) disabled @endif>
                                         </div>
                                     </td>
                                     <td class="px-2 px-lg-3 py-2 py-lg-3" data-label="{{ trans('dashadmin.label.inventory.options') }}:">
@@ -72,7 +72,7 @@
                                                 <span class="d-none d-lg-inline-block">{{ trans('dashadmin.label.inventory.see') }}</span>
                                             </a>
                                             @if($row->rol_id != 3)
-                                            <a class="apIcon d-md-flex gap-1 align-items-center" href="javascript:void(0);" onclick="removeUser('{{ $rowid }}', this);">
+                                            <a class="apIcon d-md-flex gap-1 align-items-center" href="javascript:void(0);" data-action="Users.removeUser" data-action-event="click" data-action-args="{{ $rowid }}|$el">
                                                 <i class="fa-regular fa-trash-can"></i>
                                                 <span class="d-none d-lg-inline-block">{{ trans('dashadmin.label.inventory.delete') }}</span>
                                             </a>
@@ -104,101 +104,24 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    function searchRows() {
-        var search = $('#searchUser').val();
-
-        location.href = '{{ url('adminuser/list') }}/' + btoa(search);
-    }
-
-    function removeUser(id, obj) {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dashadmin.msg.delete.user') }}',
-            text: '{{ trans('dashadmin.msg.confir.delete.user') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dashadmin.label.yes.delete') }}',
-            cancelButtonText: '{{ trans('dashadmin.label.not.delete') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('adminuser.delete') }}', {id:id},
-                    function (data){
-                        if(data.process == '1') {
-                            $('#row' + id).remove();
-                        }else{
-                            $.toast({
-                                text: '{{ trans('dashadmin.msg.error.delete.user') }}',
-                                position: 'bottom-right',
-                                textAlign: 'center',
-                                loader: false,
-                                hideAfter: 4000,
-                                icon: 'error'
-                            });
-                        }
-
-                        hideCharge();
-                    }
-                );
-            }
-        });
-    }
-
-    function changeStatus(id, obj) {
-        var status = 1;
-
-        if($(obj).is(':checked')) {
-            var status = 0;
+    window.USERS_INDEX_CONFIG = {
+        routes: {
+            searchBase: @json(url('adminuser/list')),
+            deleteUser: @json(route('adminuser.delete')),
+            changeStatus: @json(route('adminuser.changeLock'))
+        },
+        texts: {
+            deleteTitle: @json(trans('dashadmin.msg.delete.user')),
+            deleteConfirm: @json(trans('dashadmin.msg.confir.delete.user')),
+            deleteYes: @json(trans('dashadmin.label.yes.delete')),
+            deleteNo: @json(trans('dashadmin.label.not.delete')),
+            deleteError: @json(trans('dashadmin.msg.error.delete.user')),
+            statusSuccess: @json(trans('dashadmin.msg.success.enabled.medicine')),
+            statusError: @json(trans('dashadmin.msg.error.enabled.medicine')),
+            limitTitle: @json(trans('dash.swal.msg.limite.users')),
+            limitMessage: @json(trans('dash.swal.msg.limite.users.text', ['maxUsers' => $maxUsers]) . " <a href='" . route('plan') . "'>" . trans('auth.label.text.here') . "</a>")
         }
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-            }
-        });
-        
-        $.post('{{ route('adminuser.changeLock') }}', {id:id, status: status},
-            function (data){
-                if(data.process == '1') {
-                    $.toast({
-                        text: '{{ trans('dashadmin.msg.success.enabled.medicine') }}',
-                        position: 'bottom-right',
-                        textAlign: 'center',
-                        loader: false,
-                        hideAfter: 4000,
-                        icon: 'success'
-                    });
-                }else{
-                    $.toast({
-                        text: '{{ trans('dashadmin.msg.error.enabled.medicine') }}',
-                        position: 'bottom-right',
-                        textAlign: 'center',
-                        loader: false,
-                        hideAfter: 4000,
-                        icon: 'error'
-                    });
-                }
-            }
-        );
-    }
-
-    function excedeLimite() {
-        swal.fire("{{ trans('dash.swal.msg.limite.users') }}", "{{ trans('dash.swal.msg.limite.users.text', ['maxUsers' => $maxUsers]) }} <a href='{{ route('plan') }}'>{{ trans('auth.label.text.here') }}</a>", "error");
-    }
+    };
 </script>
+<script src="{{ asset('js/users/index.js') }}"></script>
 @endpush

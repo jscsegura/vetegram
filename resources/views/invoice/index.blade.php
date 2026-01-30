@@ -18,9 +18,9 @@
             <div class="row align-items-center justify-content-end mb-3 mt-3 mt-lg-0 mx-0 px-0">
                 <div class="col-md-6 col-xl-8 d-flex gap-2 justify-content-center">
                     <div class="d-flex gap-2 justify-content-center">
-                        <a onclick="prevMonth();" class="circleArrow me-1"><i class="fa-solid fa-angle-left"></i></a>
+                        <a class="circleArrow me-1" data-invoice-action="prev-month"><i class="fa-solid fa-angle-left"></i></a>
                         <div>
-                            <select name="monthselect" id="monthselect" class="form-select fs-5 fc" aria-label="{{ trans('dash.label.select.month') }}" onchange="getInvoices();">
+                            <select name="monthselect" id="monthselect" class="form-select fs-5 fc" aria-label="{{ trans('dash.label.select.month') }}" data-invoice-action="filter-change">
                                 <option value="1" @if((int)$month == 1) selected="selected" @endif>{{ trans('dash.month.num1') }}</option>
                                 <option value="2" @if((int)$month == 2) selected="selected" @endif>{{ trans('dash.month.num2') }}</option>
                                 <option value="3" @if((int)$month == 3) selected="selected" @endif>{{ trans('dash.month.num3') }}</option>
@@ -36,17 +36,17 @@
                             </select>
                         </div>
                         <div>
-                            <select name="yearselect" id="yearselect" class="form-select fs-5 fc" aria-label="{{ trans('dash.label.select.year') }}" onchange="getInvoices();">
+                            <select name="yearselect" id="yearselect" class="form-select fs-5 fc" aria-label="{{ trans('dash.label.select.year') }}" data-invoice-action="filter-change">
                                 @for ($i = date('Y') + 1; $i >= date('Y') - 2; $i--)
                                     <option value="{{ $i }}" @if($i == $year) selected="selected" @endif>{{ $i }}</option>
                                 @endfor
                             </select>
                         </div>
-                        <a onclick="nextMonth();" class="circleArrow ms-1"><i class="fa-solid fa-angle-right"></i></a>
+                        <a class="circleArrow ms-1" data-invoice-action="next-month"><i class="fa-solid fa-angle-right"></i></a>
                     </div>
                 </div>
                 <div class="col-md-3 col-xl-2 mt-3 mt-md-0">
-                    <select name="billingFilter" id="billingFilter" class="form-select form-select-sm" aria-label="Filtro" onchange="getInvoices();">
+                    <select name="billingFilter" id="billingFilter" class="form-select form-select-sm" aria-label="Filtro" data-invoice-action="filter-change">
                         <option value="0" @if($billtype == 0) selected="selected" @endif>{{ trans('dash.menu.bills') }}</option>
                         <option value="1" @if($billtype == 1) selected="selected" @endif>{{ trans('dash.menu.tickets') }}</option>
                         <option value="2" @if($billtype == 2) selected="selected" @endif>{{ trans('dash.menu.credits') }}</option>
@@ -102,93 +102,18 @@
     <link rel="stylesheet" href="{{ asset('css/wpanel/library/jquery.toast.css') }}">
     <script src="{{ asset('js/wpanel/library/jquery.toast.js') }}"></script>
     <script>
-        //select2
-        $('.select2').select2({
-            theme: "bootstrap-5",
-            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-            placeholder: $(this).data('placeholder'),
-        });
-
-        function prevMonth() {
-            var month  = $('#monthselect').val();
-            var year   = $('#yearselect').val();
-            var type   = $('#billingFilter').val();
-
-            if(month == 1) {
-                month = 12;
-                year = parseInt(year) - 1;
-            }else{
-                month = parseInt(month) - 1;
+        window.INVOICE_INDEX_CONFIG = {
+            routes: {
+                index: "{{ route('invoice.index') }}",
+                resend: "{{ route('invoice.resend') }}"
+            },
+            labels: {
+                resendTitle: "{{ trans('dash.invoice.index.msg.resend') }}",
+                resendText: "{{ trans('dash.invoice.index.msg.resend.text') }}",
+                resendYes: "{{ trans('dash.invoice.index.yes') }}",
+                resendNo: "{{ trans('dash.invoice.index.no') }}"
             }
-
-            setCharge();
-
-            location.href = '{{ route('invoice.index') }}/' + btoa(month) + '/' + btoa(year) + '/' + type;
-        }
-
-        function nextMonth() {
-            var month  = $('#monthselect').val();
-            var year   = $('#yearselect').val();
-            var type   = $('#billingFilter').val();
-
-            if(month == 12) {
-                month = 1;
-                year = parseInt(year) + 1;
-            }else{
-                month = parseInt(month) + 1;
-            }
-
-            setCharge();
-
-            location.href = '{{ route('invoice.index') }}/' + btoa(month) + '/' + btoa(year) + '/' + type;
-        }
-
-        function getInvoices() {
-            var month  = $('#monthselect').val();
-            var year   = $('#yearselect').val();
-            var type   = $('#billingFilter').val();
-
-            setCharge();
-
-            location.href = '{{ route('invoice.index') }}/' + btoa(month) + '/' + btoa(year) + '/' + type;
-        }
-
-        function resendDocument(type, clave) {
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                    cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-                },
-                buttonsStyling: false
-            });
-
-            swalWithBootstrapButtons.fire({
-                title: '{{ trans('dash.invoice.index.msg.resend') }}',
-                text: '{{ trans('dash.invoice.index.msg.resend.text') }}',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '{{ trans('dash.invoice.index.yes') }}',
-                cancelButtonText: '{{ trans('dash.invoice.index.no') }}',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                        }
-                    });
-
-                    setCharge();
-                    
-                    $.post('{{ route('invoice.resend') }}', {type:type, clave:clave},
-                        function (data){
-                            location.reload();
-
-                            hideCharge();
-                        }
-                    );
-                }
-            });
-        }
+        };
     </script>
+    <script src="{{ asset('js/invoice/index.js') }}"></script>
 @endpush

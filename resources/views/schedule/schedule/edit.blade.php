@@ -10,7 +10,7 @@
     <div class="row px-2 px-lg-3 mt-2 mt-lg-4">
         <h1 class="h4 text-uppercase text-center text-md-start fw-normal mb-3"> <a href="{{ route('schedule.menu') }}" class="btn btn-sm smIcon"><i class="fa-solid fa-arrow-left-long"></i></a>
            {{ trans('dash.schedule.schedule.title1') }} <span class="text-info fw-bold">{{ trans('dash.schedule.schedule.title2') }}</span></h1>
-        <form name="frmAddAppointment" id="frmAddAppointment" action="{{ route('schedule.updateSchedule') }}" method="post" onsubmit="return validateSchedule();" enctype="multipart/form-data" class="col-lg-10 col-xl-8 col-xxl-6 mx-auto mt-4 mt-lg-0 mb-lg-5">
+        <form name="frmAddAppointment" id="frmAddAppointment" action="{{ route('schedule.updateSchedule') }}" method="post" data-action="Schedule.validateSchedule" data-action-event="submit" enctype="multipart/form-data" class="col-lg-10 col-xl-8 col-xxl-6 mx-auto mt-4 mt-lg-0 mb-lg-5">
             @csrf
 
             <div class="container mt-4 mx-auto" style="max-width: 600px;">

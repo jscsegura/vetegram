@@ -36,7 +36,7 @@
                             <input type="text" id="daySearch" name="daySearch" class="form-control text-primary fc dDropper" value="{{ date('d/m/Y', strtotime($date)) }}" data-dd-opt-default-date="{{ date('Y/m/d', strtotime($date)) }}">
                         </div>
                         <div>
-                            <a onclick="getDate();" class="btn btn-secondary btn-sm text-uppercase px-3"><i class="fa-solid fa-magnifying-glass me-2"></i>{{ trans('dash.menu.search') }}</a>
+                            <a data-action="Settings.getDate" data-action-event="click" class="btn btn-secondary btn-sm text-uppercase px-3"><i class="fa-solid fa-magnifying-glass me-2"></i>{{ trans('dash.menu.search') }}</a>
                         </div>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                         </div>
                         <div class="card-body">
                             <div class="text-center" id="container-template" @if(count($hours) > 0) style="display: none;" @endif>
-                                <a data-date="{{ $date }}" data-day="{{ $day }}" onclick="chargeTemplate(this);" class="btn btn-outline-primary btn-sm text-uppercase px-4" id="btn-template"><i class="fa-solid fa-calendar-days me-2"></i>{{ trans('dash.label.calendar.template') }}</a>
+                                <a data-date="{{ $date }}" data-day="{{ $day }}" data-action="Settings.chargeTemplate" data-action-event="click" data-action-args="$el" class="btn btn-outline-primary btn-sm text-uppercase px-4" id="btn-template"><i class="fa-solid fa-calendar-days me-2"></i>{{ trans('dash.label.calendar.template') }}</a>
                             </div>
                             <div class="settingsDays d-flex flex-row flex-wrap align-items-start justify-content-center gap-2">
                                 @php $now = date('Y-m-d H:i:s'); @endphp
@@ -73,7 +73,7 @@
                                     }
                                 }
                                 @endphp
-                                <p data-hour="{{ date("Hi", strtotime($hour->hour)) }}" class="datelist d-flex align-items-center m-0 {{ $status }}">{{ date("h:i A", strtotime($hour->hour)) }} <span class="deleteH" data-id="{{ $hour->id }}" @if($status != '') onclick="deleteNotAvailable();" @else onclick="deleteHour(this);" @endif><i class="fa-solid fa-xmark"></i></span></p>    
+                                <p data-hour="{{ date("Hi", strtotime($hour->hour)) }}" class="datelist d-flex align-items-center m-0 {{ $status }}">{{ date("h:i A", strtotime($hour->hour)) }} <span class="deleteH" data-id="{{ $hour->id }}" @if($status != '') data-action="Settings.deleteNotAvailable" data-action-event="click" @else data-action="Settings.deleteHour" data-action-event="click" data-action-args="$el" @endif><i class="fa-solid fa-xmark"></i></span></p>    
                                 @endforeach
                             </div>
                         </div>
@@ -101,14 +101,14 @@
                                 </select>
                             </div>
                             <div>
-                                <a data-date="{{ $date }}" onclick="addHours(this);" class="btn btn-primary btn-sm text-uppercase px-3" id="btn-addhour"><i class="fa-solid fa-plus me-2"></i>{{ trans('dash.label.calendar.add.cup') }}</a>
+                                <a data-date="{{ $date }}" data-action="Settings.addHours" data-action-event="click" data-action-args="$el" class="btn btn-primary btn-sm text-uppercase px-3" id="btn-addhour"><i class="fa-solid fa-plus me-2"></i>{{ trans('dash.label.calendar.add.cup') }}</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="d-flex flex-column flex-md-row gap-2 gap-md-3 justify-content-center mt-4">
-                    <button onclick="deleteAllHour();" type="button" class="btn btn-outline-danger px-5">{{ trans('dash.label.calendar.clear') }}</button>
+                    <button data-action="Settings.deleteAllHour" data-action-event="click" type="button" class="btn btn-outline-danger px-5">{{ trans('dash.label.calendar.clear') }}</button>
                 </div>
 
             </form>
@@ -127,219 +127,27 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-    });
-
-    function getDate () {
-        var date = $('#daySearch').val();
-
-        if(date != '') {
-            location.href = '{{ route('sett.edit') }}/' + btoa(date);
-        }
-    }
-
-    function chargeTemplate(obj) {
-        var date = $(obj).attr('data-date');
-        var day = $(obj).attr('data-day');
-        
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-            }
-        });
-        
-        setLoad('btn-template', 'Cargando plantilla');
-        $.post('{{ route('sett.setTemplate') }}', {date:date, day:day},
-            function (data){
-                location.reload();
-            }
-        );
-    }
-
-    function addHours(obj) {
-        var valid = true;
-
-        $('.requeridoadd').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                valid = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if(valid == true) {
-            var date = $(obj).attr('data-date');
-            var hour = $('#templateHour').val();
-            var minute = $('#templateMinute').val();
-        
-            setLoad('btn-addhour', '{{ trans('dash.text.btn.save.process') }}');
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                }
-            });
-            
-            $.post('{{ route('sett.addAvailableHour') }}', {date:date, hour:hour, minute:minute},
-                function (data){
-                    if(data.type == '200') {
-                        var html = '<p data-hour="'+data.text+'" class="datelist d-flex align-items-center m-0">'+data.hour+' <span class="deleteH" data-id="'+data.id+'" onclick="deleteHour(this);"><i class="fa-solid fa-xmark"></i></span></p>';
-
-                        var count = document.getElementsByClassName('datelist').length;
-                        if(count == 0) {
-                            $('.settingsDays').append(html);
-                            $('#container-template').hide();
-                        }else{
-                            var lastElement = $('.card-body');
-                            var insert = false;
-                            $('.datelist').each(function(){
-                                var aux = $(this).attr('data-hour');
-
-                                if(parseInt(aux) > parseInt(data.text)) {
-                                    $(this).before(html);
-                                    insert = true;
-                                    return false;
-                                }else{
-                                    lastElement = $(this);
-                                }
-                            });
-
-                            if(insert == false) {
-                                $(lastElement).after(html);
-                            }
-                        }
-                    }
-
-                    if(data.type == '401') {
-                        Swal.fire({
-                            title: 'Ya existe el horario que intenta ingresar',
-                            showClass: {
-                                popup: 'animate__animated animate__fadeInDown'
-                            },
-                            hideClass: {
-                                popup: 'animate__animated animate__fadeOutUp'
-                            }
-                        });
-                    }
-                        
-                    stopLoad('btn-addhour', '<i class="fa-solid fa-plus me-2"></i>Agregar');
-                }
-            );
-        }
-    }
-
-    function deleteNotAvailable() {
-        Swal.fire(
-            'No se puede eliminar',
-            'Para poder eliminar este horario debe eliminar o reagendar la cita que esta ocupando su lugar',
-            'error'
-        );
-    }
-
-    function deleteHour(obj) {
-        var id = $(obj).attr('data-id');
-
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '¿Eliminar horario?',
-            text: "Seguro que desea eliminar este horario de su agenda",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Si, eliminar!',
-            cancelButtonText: 'No, cancelar!',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-                
-                setCharge();
-
-                $.post('{{ route('sett.delAvailableHour') }}', {id:id},
-                    function (data){
-                        if(data.isdelete == '1') {
-                            var p = $(obj).parent('p');
-                            var element = $(obj).parent('p').parent('div');
-
-                            $(p).remove();
-
-                            var quantity = $(element).find('p').toArray().length; 
-
-                            if(quantity == 0) {
-                                $('#container-template').show();
-                            }
-                        }else{
-                            Swal.fire({
-                                title: 'Ocurrio un error al eliminar el horario',
-                                showClass: {
-                                    popup: 'animate__animated animate__fadeInDown'
-                                },
-                                hideClass: {
-                                    popup: 'animate__animated animate__fadeOutUp'
-                                }
-                            });
-                        }
-
-                        hideCharge();
-                    }
-                );
-            }
-        });
-    }
-
-    function deleteAllHour() {
-        var date = '{{ $date }}';
-
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '¿Eliminar todos los horarios?',
-            text: "Seguro que desea eliminar todos los horarios del dia seleccionado, no será posible eliminar los que esten reservados o confirmados.",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Si, eliminar!',
-            cancelButtonText: 'No, cancelar!',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('sett.delAllHour') }}', {date:date},
-                    function (data){
-                        location.reload();
-                    }
-                );
-            }
-        });
-    }
+    window.SETTING_EDIT_CONFIG = {
+        editBaseUrl: "{{ route('sett.edit') }}",
+        setTemplateUrl: "{{ route('sett.setTemplate') }}",
+        addAvailableHourUrl: "{{ route('sett.addAvailableHour') }}",
+        deleteAvailableHourUrl: "{{ route('sett.delAvailableHour') }}",
+        deleteAllUrl: "{{ route('sett.delAllHour') }}",
+        date: "{{ $date }}",
+        saveProcessLabel: "{{ trans('dash.text.btn.save.process') }}",
+        addHourStopLabel: "<i class=\"fa-solid fa-plus me-2\"></i>Agregar",
+        hourExistsTitle: "Ya existe el horario que intenta ingresar",
+        deleteHourTitle: "¿Eliminar horario?",
+        deleteHourText: "Seguro que desea eliminar este horario de su agenda",
+        deleteYesLabel: "Si, eliminar!",
+        deleteNoLabel: "No, cancelar!",
+        deleteAllTitle: "¿Eliminar todos los horarios?",
+        deleteAllText: "Seguro que desea eliminar todos los horarios del dia seleccionado, no será posible eliminar los que esten reservados o confirmados.",
+        deleteHourErrorTitle: "Ocurrio un error al eliminar el horario",
+        notAvailableTitle: "No se puede eliminar",
+        notAvailableText: "Para poder eliminar este horario debe eliminar o reagendar la cita que esta ocupando su lugar",
+        loadingTemplateLabel: "Cargando plantilla"
+    };
 </script>
+<script src="{{ asset('js/setting/edit.js') }}"></script>
 @endpush

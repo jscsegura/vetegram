@@ -15,7 +15,7 @@
 </div>
 
 <div id="container">
-    <form name="frm" id="frm" role="form" method="post" enctype="multipart/form-data" action="{{ route('wp.settings.update', $setting->id) }}" onsubmit="return validate();">
+    <form name="frm" id="frm" role="form" method="post" enctype="multipart/form-data" action="{{ route('wp.settings.update', $setting->id) }}" data-action="wpanel.validate" data-action-event="submit" data-action-args="default|$el">
         @csrf
 
         <div class="row">
@@ -191,15 +191,15 @@
         <div class="row">
             <div class="col-md-4">
                 <label>Precio plan PRO:</label>
-                <input type="text" name="price_pro" id="price_pro" class="form-control" maxlength="255" value="{{ $setting->price_pro }}" onkeydown="enterOnlyNumbers(event);">
+                <input type="text" name="price_pro" id="price_pro" class="form-control" maxlength="255" value="{{ $setting->price_pro }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event">
             </div>
             <div class="col-md-4">
                 <label>Máximo consultas plan Gratis:</label>
-                <input type="text" name="max_appointment_free" id="max_appointment_free" class="form-control" maxlength="11" value="{{ $setting->max_appointment_free }}" onkeydown="enterOnlyNumbers(event);">
+                <input type="text" name="max_appointment_free" id="max_appointment_free" class="form-control" maxlength="11" value="{{ $setting->max_appointment_free }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event">
             </div>
             <div class="col-md-4">
                 <label>Máximo usuarios plan Gratis:</label>
-                <input type="text" name="max_user_free" id="max_user_free" class="form-control" maxlength="11" value="{{ $setting->max_user_free }}" onkeydown="enterOnlyNumbers(event);">
+                <input type="text" name="max_user_free" id="max_user_free" class="form-control" maxlength="11" value="{{ $setting->max_user_free }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event">
             </div>
         </div>
 
@@ -210,15 +210,15 @@
         <div class="row">
             <div class="col-md-4">
                 <label>Máximo almacenamiento plan Gratis (en MB):</label>
-                <input type="text" name="max_storage_free" id="max_storage_free" class="form-control" maxlength="11" value="{{ $setting->max_storage_free }}" onkeydown="enterOnlyNumbers(event);">
+                <input type="text" name="max_storage_free" id="max_storage_free" class="form-control" maxlength="11" value="{{ $setting->max_storage_free }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event">
             </div>
             <div class="col-md-4">
                 <label>Máximo consultas plan Pro (0 para ilimitado):</label>
-                <input type="text" name="max_appointment_pro" id="max_appointment_pro" class="form-control" maxlength="11" value="{{ $setting->max_appointment_pro }}" onkeydown="enterOnlyNumbers(event);">
+                <input type="text" name="max_appointment_pro" id="max_appointment_pro" class="form-control" maxlength="11" value="{{ $setting->max_appointment_pro }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event">
             </div>
             <div class="col-md-4">
                 <label>Máximo usuarios plan Pro (0 para ilimitado):</label>
-                <input type="text" name="max_user_pro" id="max_user_pro" class="form-control" maxlength="11" value="{{ $setting->max_user_pro }}" onkeydown="enterOnlyNumbers(event);">
+                <input type="text" name="max_user_pro" id="max_user_pro" class="form-control" maxlength="11" value="{{ $setting->max_user_pro }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event">
             </div>
         </div>
 
@@ -229,7 +229,7 @@
         <div class="row">
             <div class="col-md-4">
                 <label>Máximo almacenamiento plan Pro (en MB):</label>
-                <input type="text" name="max_storage_pro" id="max_storage_pro" class="form-control" maxlength="11" value="{{ $setting->max_storage_pro }}" onkeydown="enterOnlyNumbers(event);">
+                <input type="text" name="max_storage_pro" id="max_storage_pro" class="form-control" maxlength="11" value="{{ $setting->max_storage_pro }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event">
             </div>
         </div>
 
@@ -266,7 +266,7 @@
             <div class="col-md-12">
                 <br />
                 <input type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-primary" value="ACEPTAR">
-                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" onclick="window.open('{{ route('wp.home') }}','_self');">
+                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" data-action="navigate" data-url="{{ route('wp.home') }}">
             </div>
         </div>
 
@@ -279,14 +279,4 @@
 @stop
 
 @section('js')
-    <script>
-        function enterOnlyNumbers(event){
-            if ( event.keyCode == 8 || event.keyCode == 9 || (event.keyCode >= 37 && event.keyCode <= 40) || event.keyCode == 188 || event.keyCode == 190 ) {
-            } else {
-                if ((event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
-                    event.preventDefault();
-                }
-            }
-        }
-    </script>
 @stop

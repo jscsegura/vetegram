@@ -43,7 +43,7 @@
                         <td>{{ ($pro->pro == 1) ? 'PRO' : 'GRATIS' }}</td>
                         <td>
                             <span id="enabledRow{{ $pro->id }}">
-                                <a data="{{ $pro->id }}" onclick="enabledRow(this);">
+                                <a data="{{ $pro->id }}" data-action="toggle-enabled">
                                     @if($pro->enabled == 1)
                                         <img src="{{ asset('img/wpanel/enabled.png') }}">
                                     @else
@@ -56,7 +56,7 @@
                             <a href="{{ url('wpanel/setting-pro') }}/{{ $pro->id }}/edit"><img src="{{ asset('img/wpanel/edit.png') }}"></a>
                         </td>
                         <td>
-                            <a data="{{ $pro->id }}" onclick="deleteRow(this);"><img src="{{ asset('img/wpanel/delete.png') }}"></a>
+                            <a data="{{ $pro->id }}" data-action="delete-row"><img src="{{ asset('img/wpanel/delete.png') }}"></a>
                         </td>
                     </tr>
                 @endforeach
@@ -71,14 +71,10 @@
 
 @section('js')
     <script>
-        function enabledRow(obj) {
-            var id = $(obj).attr('data');
-            enabledRegister('{{ route('wp.setting.proenabled') }}', 'id=' + id, 'enabledRow' + id);
-        }
-        function deleteRow(obj) {
-            var id = $(obj).attr('data');
-            var row = $(obj).parent().parent('tr');
-            eliminateRegister('{{ route('wp.setting.prodelete') }}', 'id=' + id, row);
-        }
+        window.WPANEL_SETTING_PRO_CONFIG = {
+            enabledUrl: "{{ route('wp.setting.proenabled') }}",
+            deleteUrl: "{{ route('wp.setting.prodelete') }}"
+        };
     </script>
+    <script src="{{ asset('js/wpanel/setting/pro.js') }}"></script>
 @stop

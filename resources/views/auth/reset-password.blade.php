@@ -23,7 +23,7 @@
                     <h1 class="h4 text-uppercase mt-4 mt-lg-0 mb-1">{{ trans('auth.reset.title') }}</h1>
                     <p class="mb-4">{{ trans('auth.reset.instruction') }}</p>
                     
-                    <form method="post" action="{{ route('password.update') }}" onsubmit="return validReset();">
+                    <form method="post" action="{{ route('password.update') }}">
                         @csrf
 
                         <input type="hidden" name="token" value="{{ $token }}">
@@ -31,7 +31,7 @@
                         <div class="mb-3">
                             <label for="emailInput" class="form-label small">{{ trans('auth.login.email') }}</label>
                             <div class="input-group">
-                                <input type="email" class="form-control" id="email" name="email" value="{{ $email }}" onfocus="blur()">
+                                <input type="email" class="form-control" id="email" name="email" value="{{ $email }}" readonly>
                                 <span class="input-group-text">
                                     <i class="fa-regular fa-envelope"></i>
                                 </span>
@@ -77,65 +77,11 @@
 
 @push('scriptBottom')
 <script>
-    const passwordInput = document.getElementById('password');
-    const passwordConfirm = document.getElementById('password_confirmation');
-    const passwordToggleBtn = document.querySelector('.btn-toggle-password');
-    const passwordToggleBtn2 = document.querySelector('.btn-toggle-password2');
-    
-    passwordToggleBtn.addEventListener('click', function() {
-      if (passwordInput.type === 'password') {
-         passwordInput.type = 'text';
-         passwordToggleBtn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
-      } else {
-         passwordInput.type = 'password';
-         passwordToggleBtn.innerHTML = '<i class="fa-regular fa-eye"></i>';
-      }
-    });
-    passwordToggleBtn2.addEventListener('click', function() {
-      if (passwordConfirm.type === 'password') {
-        passwordConfirm.type = 'text';
-        passwordToggleBtn2.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
-      } else {
-        passwordConfirm.type = 'password';
-        passwordToggleBtn2.innerHTML = '<i class="fa-regular fa-eye"></i>';
-      }
-    });
-
-    function validReset() {
-        var validate = true;
-
-        $('#password').removeClass('is-invalid');
-        $('#password_confirmation').removeClass('is-invalid');
-
-        if($('#password').val() == ''){
-            $('#password').addClass('is-invalid');
-            validate = false;
+    window.AUTH_RESET_CONFIG = {
+        labels: {
+            processing: "{{ trans('auth.text.btn.process') }}"
         }
-
-        if($('#password_confirmation').val() == ''){
-            $('#password_confirmation').addClass('is-invalid');
-            validate = false;
-        }
-
-        if($('#password').val() != $('#password_confirmation').val()){
-            $('#password_confirmation').addClass('is-invalid');
-            validate = false;
-        }
-
-        if(validate == true) {
-            setLoad('btnReset', '{{ trans('auth.text.btn.process') }}');
-        }
-
-        return validate;
-    }
-
-    function validaEmail(email) {
-        var reg=/^[0-9a-z_\-\+.]+@[0-9a-z\-\.]+\.[a-z]{2,8}$/i;
-        if(reg.test(email)){
-            return true;
-        }else{
-            return false;
-        }
-    }
- </script>
+    };
+</script>
+<script src="{{ asset('js/auth/reset.js') }}"></script>
 @endpush

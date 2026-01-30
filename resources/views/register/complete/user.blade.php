@@ -37,7 +37,7 @@
 
 <div class="container-fluid px-xl-5 pb-0 pb-lg-4">
     <div class="row px-2 px-lg-3 mt-lg-4">
-        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmProfile" name="frmProfile" method="post" action="{{ route('register.complete-save') }}" onsubmit="return validSend();">
+        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmProfile" name="frmProfile" method="post" action="{{ route('register.complete-save') }}" data-action="Setup.validSend" data-action-event="submit">
             <h1 class="text-center text-md-start text-uppercase h4 fw-normal mb-3">{{ trans('auth.register.complete.cmp') }} <span class="text-info fw-bold">{{ trans('auth.register.complete.profile') }}</span></h1>
 
             @csrf
@@ -49,7 +49,7 @@
                     </div>
                     <div class="mb-4">
                         <label for="country" class="form-label small">{{ trans('auth.register.complete.country') }}</label>
-                        <select class="form-select fc requerido select2" name="country" id="country" onchange="changeCountry(this);">
+                        <select class="form-select fc requerido select2" name="country" id="country" data-action="Setup.changeCountry" data-action-event="change" data-action-args="$el">
                             @foreach ($countries as $country)
                                 <option value="{{ $country->id }}" data-phonecode="{{ $country->phonecode }}" @if($country->id == $user->country) selected="selected" @endif>{{ $country->title }}</option>
                             @endforeach
@@ -57,12 +57,12 @@
                     </div>
                     <div class="mb-4">
                         <label for="phone" class="form-label small">{{ trans('auth.register.complete.phone.only') }}</label>
-                        <input type="text" class="form-control fc requerido" id="phone" name="phone" value="{{ $user->phone }}" onkeydown="enterOnlyNumbers(event);" maxlength="255">
+                        <input type="text" class="form-control fc requerido" id="phone" name="phone" value="{{ $user->phone }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event" maxlength="255">
                     </div>
                     @if(in_array($user->rol_id, [3,4,5,6]))
                     <div class="mb-4">
                         <label for="vcode" class="form-label small">{{ trans('auth.register.complete.code') }} <span id="resultCode"></span></label>
-                        <input type="text" class="form-control fc requerido" id="vcode" name="vcode" onchange="checkCode(this.value);" value="{{ $user->code }}" onkeydown="enterOnlyNumbers(event);" maxlength="50">
+                        <input type="text" class="form-control fc requerido" id="vcode" name="vcode" value="{{ $user->code }}" maxlength="50">
                     </div>
                     @endif
                 </div>
@@ -79,7 +79,7 @@
                     </div>
                     <div class="mb-4">
                         <label for="idnumber" class="form-label small">{{ trans('auth.register.complete.dni') }}</label>
-                        <input type="text" class="form-control fc requerido" id="idnumber" name="idnumber" value="{{ $user->dni }}" onkeydown="enterOnlyNumbers(event);" maxlength="20">
+                        <input type="text" class="form-control fc requerido" id="idnumber" name="idnumber" value="{{ $user->dni }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event" maxlength="20">
                     </div>
                     <div class="mb-4">
                         <label for="vEmail" class="form-label small">{{ trans('auth.login.email') }}</label>
@@ -90,7 +90,7 @@
                     <div class="mb-4">
                         <label for="province" class="form-label small">{{ trans('auth.register.complete.province.only') }}</label>
                         <div id="provinceDiv" @if($user->country != 53) style="display: none;" @endif>
-                            <select class="form-select fc select2" name="province" id="province" onchange="getLocation(1, this.value);">
+                            <select class="form-select fc select2" name="province" id="province" data-action="Setup.getLocation" data-action-event="change" data-action-args="1|$value">
                                 <option value="">{{ trans('auth.register.complete.select') }}</option>
                                 @foreach ($provinces as $province)
                                     <option value="{{ $province->id }}" @if($province->id == $user->province) selected="selected" @endif>{{ $province->title }}</option>
@@ -102,7 +102,7 @@
                     <div class="mb-4">
                         <label for="canton" class="form-label small">{{ trans('auth.register.complete.canton.only') }}</label>
                         <div id="cantonDiv" @if($user->country != 53) style="display: none;" @endif>
-                            <select class="form-select fc select2" name="canton" id="canton"  onchange="getLocation(2, this.value);">
+                            <select class="form-select fc select2" name="canton" id="canton" data-action="Setup.getLocation" data-action-event="change" data-action-args="2|$value">
                                 <option value="">{{ trans('auth.register.complete.select') }}</option>
                                 @foreach ($cantons as $canton)
                                     <option value="{{ $canton->id }}" @if($canton->id == $user->canton) selected="selected" @endif>{{ $canton->title }}</option>
@@ -141,175 +141,18 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-    $('.select2').select2({
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    });
-
-    function changeCountry(obj, first = 0) {
-        var country = $(obj).val();
-        var phonecode = $('#country option:selected').attr("data-phonecode");
-
-        if(country == 53) {
-            $('#provinceDiv').show();
-            $('#cantonDiv').show();
-            $('#districtDiv').show();
-
-            $('#province_alternate').hide();
-            $('#canton_alternate').hide();
-            $('#district_alternate').hide();
-        }else{
-            $('#provinceDiv').hide();
-            $('#cantonDiv').hide();
-            $('#districtDiv').hide();
-
-            $('#province_alternate').show();
-            $('#canton_alternate').show();
-            $('#district_alternate').show();
+    window.REGISTER_COMPLETE_USER_CONFIG = {
+        routes: {
+            getLocation: @json(route('get.location')),
+            checkVetCode: @json(route('check.vetcode'))
+        },
+        texts: {
+            select: @json(trans('auth.register.complete.select'))
+        },
+        initial: {
+            phone: @json($user->phone)
         }
-
-        if(first == 1) {
-            phonecode = '{{ $user->phone }}';
-            $('#phone').val(phonecode);
-        }else{
-            $('#phone').val('+' + phonecode);
-        }        
-    }
-    changeCountry($('#country'), 1);
-
-    function getLocation(type, value) {
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('get.location') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                type: type,
-                value: value
-            },
-            beforeSend: function(){},
-            success: function(data){
-                var html = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-                $.each(data.rows, function(i, item) {
-                    html = html + '<option value="'+item.id+'">'+item.title+'</option>';
-                });
-
-                if(type == 1) {
-                    $('#canton').html(html);
-                    $('#district').html('<option value="">{{ trans('auth.register.complete.select') }}</option>');
-                }
-                if(type == 2) {
-                    $('#district').html(html);
-                }
-            }
-        });
-    }
-
-    function checkCode(code) {
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('check.vetcode') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                code: code
-            },
-            beforeSend: function(){},
-            success: function(data){
-                if(data.id == 0) {
-                    $('#resultCode').html('<i class="fa fa-times" style="color: red;" aria-hidden="true"></i>');
-                }else{
-                    $('#resultCode').html('<i class="fa fa-check"  style="color: green;" aria-hidden="true"></i>');
-                }
-            }
-        });
-    }
-
-    function validSend() {
-        var validate = true;
-
-        $('.requerido').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                validate = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        var country = $('#country').val();
-        var phonecode = $('#country option:selected').attr("data-phonecode");
-
-        if(country == 53) {
-            if($('#province').val() == ''){
-                $('#province').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#province').removeClass('is-invalid');
-            }
-
-            if($('#canton').val() == ''){
-                $('#canton').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#canton').removeClass('is-invalid');
-            }
-
-            if($('#district').val() == ''){
-                $('#district').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#district').removeClass('is-invalid');
-            }
-        }else{
-            if($('#province_alternate').val() == ''){
-                $('#province_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#province_alternate').removeClass('is-invalid');
-            }
-
-            if($('#canton_alternate').val() == ''){
-                $('#canton_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#canton_alternate').removeClass('is-invalid');
-            }
-
-            if($('#district_alternate').val() == ''){
-                $('#district_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#district_alternate').removeClass('is-invalid');
-            }
-        }
-
-        if(($('#phone').val() == '+' + phonecode)) {
-            $('#phone').addClass('is-invalid');
-            validate = false;
-        }
-
-        if(validate == true) {
-            setCharge();
-        }
-
-        return validate;
-    }
-
-    function enterOnlyNumbers(event){
-        if ( event.keyCode == 8 || event.keyCode == 9 || (event.keyCode >= 37 && event.keyCode <= 40) || event.keyCode == 188 || event.keyCode == 190 ) {
-        } else {
-            if ((event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
-                event.preventDefault();
-            }
-        }
-    }
+    };
 </script>
+<script src="{{ asset('js/register/complete-user.js') }}"></script>
 @endpush

@@ -50,8 +50,8 @@
                                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
                                             <li><a class="dropdown-item small" href="{{ route('appointment.view', App\Models\User::encryptor('encrypt', $appointment->id)) }}">{{ trans('dash.label.btn.see') }}</a></li>
                                             @if(in_array($appointment->status, [0,1]))
-                                            <li><a class="dropdown-item small" href="javascript:void(0);" onclick="setIdAppointmentToOnlyCancel('{{ $appointment->id }}', '{{ $appointment->id_user }}')">{{ trans('dash.label.btn.cancel') }}</a></li>
-                                            <li><a class="dropdown-item small" href="javascript:void(0);" onclick="setIdAppointmentToOnlyReschedule('{{ $appointment->id }}', '{{ $appointment->id_user }}')" data-bs-toggle="modal" data-bs-target="#onlyRescheduleModal">{{ trans('dash.label.btn.reschedule') }}</a></li>
+                                            <li><a class="dropdown-item small" href="javascript:void(0);" data-action="Appointments.setIdAppointmentToOnlyCancel" data-action-event="click" data-action-args="{{ $appointment->id }}|{{ $appointment->id_user }}">{{ trans('dash.label.btn.cancel') }}</a></li>
+                                            <li><a class="dropdown-item small" href="javascript:void(0);" data-action="Appointments.setIdAppointmentToOnlyReschedule" data-action-event="click" data-action-args="{{ $appointment->id }}|{{ $appointment->id_user }}" data-bs-toggle="modal" data-bs-target="#onlyRescheduleModal">{{ trans('dash.label.btn.reschedule') }}</a></li>
                                             @endif
                                         </ul>
                                     </div>

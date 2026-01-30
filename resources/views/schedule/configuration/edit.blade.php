@@ -8,7 +8,7 @@
 <section class="container-fluid pb-0 pb-lg-4">
     <div class="row px-2 px-lg-3 mt-2 mt-lg-4">
         <h1 class="h4 text-uppercase text-center text-md-start fw-normal mb-3"><a href="{{ route('schedule.menu') }}" class="btn btn-sm smIcon"><i class="fa-solid fa-arrow-left-long"></i></a>{{ trans('dashadmin.label.title.add') }} <span class="text-info fw-bold">{{ trans('dash.schedule.configuration.title') }}</span></h1>
-        <form class="col-xl-7 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmMedicine" name="frmMedicine" method="post" action="{{ route('schedule.configuration.update') }}" onsubmit="return validSend();">
+        <form class="col-xl-7 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmMedicine" name="frmMedicine" method="post" action="{{ route('schedule.configuration.update') }}" data-action="validSend" data-action-event="submit">
             @csrf
 
         
@@ -204,12 +204,6 @@
 @endsection
 
 @push('scriptBottom')
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltips.forEach(el => new bootstrap.Tooltip(el));
-    });
-</script>
+<script src="{{ asset('js/schedule/configuration.js') }}"></script>
 
 @endpush

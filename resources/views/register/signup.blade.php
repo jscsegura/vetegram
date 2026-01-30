@@ -15,7 +15,7 @@
 				<div>
 					<h1 class="h4 text-uppercase text-center text-md-start mt-4 mt-xl-0 mb-1">{{ trans('auth.login.signup') }}</h1>
 					<p class="mb-4">{{ trans('auth.login.signup.description') }}</p>
-					<form class="row" name="frmSignup" id="frmSignup" method="post" action="{{ route('register') }}" onsubmit="return validateSignup();">
+					<form class="row" name="frmSignup" id="frmSignup" method="post" action="{{ route('register') }}">
                         @csrf
                         <input type="hidden" name="rol" id="rol" value="{{ $type }}">
                         <div class="col-lg-6 mb-3">
@@ -133,128 +133,14 @@
 
 @push('scriptBottom')
 <script>
-    
-    function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-
-    const passwordInput = document.getElementById('password');
-    const passwordToggleBtn = document.querySelector('.btn-toggle-password');
-    const idInput = document.querySelector('#idInput');
-    const nameInput = document.querySelector('#name');
-    const loadingModal = $("#loadingModal");
-    
-    idInput.addEventListener('change', function() {
-        nameInput.value = '';
-        loadingModal.modal('toggle');
-        value = this.value;
-        if(value == '') {
-            loadingModal.modal('toggle');
-            nameInput.focus();
-        } else if(value.length < 9) {
-            console.log("too short");
-            loadingModal.modal('toggle');
-        } else {
-            fetchInfo(this.value);
+    window.AUTH_SIGNUP_CONFIG = {
+        urls: {
+            haciendaInfo: "{{ url('/staging2/getHaciendaInfo') }}"
+        },
+        labels: {
+            processing: "{{ trans('auth.text.btn.process') }}"
         }
-        nameInput.focus();
-    });
-
-    passwordToggleBtn.addEventListener('click', function() {
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            passwordToggleBtn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
-        } else {
-            passwordInput.type = 'password';
-            passwordToggleBtn.innerHTML = '<i class="fa-regular fa-eye"></i>';
-        }
-    });
-
-    const cpasswordInput = document.getElementById('cpassword');
-    const cpasswordToggleBtn = document.querySelector('.btn-toggle-password2');
-    
-    cpasswordToggleBtn.addEventListener('click', function() {
-        if (cpasswordInput.type === 'password') {
-            cpasswordInput.type = 'text';
-            cpasswordToggleBtn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
-        } else {
-            cpasswordInput.type = 'password';
-            cpasswordToggleBtn.innerHTML = '<i class="fa-regular fa-eye"></i>';
-        }
-    });
-
-    function validateSignup() {
-        var validate = true;
-
-		$('#name').removeClass('is-invalid');
-        $('#email').removeClass('is-invalid');
-		$('#password').removeClass('is-invalid');
-        $('#cpassword').removeClass('is-invalid');
-		$('#termsCheck').removeClass('is-invalid');
-
-		if($('#name').val() == ''){
-            $('#name').addClass('is-invalid');
-            validate = false;
-        }
-
-		if(!validaEmail($('#email').val())){
-            $('#email').addClass('is-invalid');
-            validate = false;
-        }
-
-		if($('#password').val() == ''){
-            $('#password').addClass('is-invalid');
-            validate = false;
-        }
-
-        if($('#cpassword').val() == ''){
-            $('#cpassword').addClass('is-invalid');
-            validate = false;
-        }
-
-        if($('#password').val() != $('#cpassword').val()){
-            $('#cpassword').addClass('is-invalid');
-            validate = false;
-        }
-
-		if(!$("#termsCheck").prop("checked")) {
-        	$('#termsCheck').addClass('is-invalid');
-            validate = false;
-    	}
-
-		if(validate == true) {
-            setLoad('btnRegister', '{{ trans('auth.text.btn.process') }}');
-        }
-        
-        return validate;
-    }
-
-	function validaEmail(email) {
-        var reg=/^[0-9a-z_\-\+.]+@[0-9a-z\-\.]+\.[a-z]{2,8}$/i;
-        if(reg.test(email)){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    async function fetchInfo(value) {
-        res = await fetch('/staging2/getHaciendaInfo?id=' + value + '&type=1');
-        if(!res.ok) {
-           console.log(res.status);
-        } else {
-            body = await res.json();
-            console.log(body);
-
-            if(body.ERROR) {
-                console.log(body.error);
-                nameInput.focus();
-            } else {
-                name = capitalizeFirstLetter(body.NOMBRE.toLowerCase()) + ' ' +  capitalizeFirstLetter(body.APELLIDO1.toLowerCase()) + ' ' + capitalizeFirstLetter(body.APELLIDO2.toLowerCase());
-                nameInput.value = name;
-            }
-        }
-        loadingModal.modal('toggle');
-    }
- </script>
+    };
+</script>
+<script src="{{ asset('js/auth/signup.js') }}"></script>
 @endpush

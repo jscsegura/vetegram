@@ -19,7 +19,7 @@
     <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
     
-    <form method="post" name="frm" id="frm" role="form" enctype="multipart/form-data" action="{{ url('wpanel/slider/' . $slider->id) }}" onsubmit="return validate();">
+    <form method="post" name="frm" id="frm" role="form" enctype="multipart/form-data" action="{{ url('wpanel/slider/' . $slider->id) }}" data-action="wpanel.validate" data-action-event="submit" data-action-args="default|$el">
         
         {{ method_field('PUT') }}
         @csrf
@@ -56,7 +56,7 @@
                 <div id="divPhoto">
                     @if($slider->image != "")
                         <img align="middle" src="{{ asset('files/' . $slider->image) }}" style="max-width: 200px;">
-                        <img src="{{ asset('img/wpanel/deleteFile.png') }}" class="pointer" onclick="eliminateRegisterFile('{{ route('wp.slider.deletefile') }}', 'id={{ $slider->id }}', 'divPhoto');">
+                        <img src="{{ asset('img/wpanel/deleteFile.png') }}" class="pointer" data-action="delete-file" data-url="{{ route('wp.slider.deletefile') }}" data-payload="id={{ $slider->id }}" data-target="divPhoto">
                     @else
                         <input type="file" name="photo" id="photo" class="requerido" accept="image/png, image/jpeg, image/jpg">
                     @endif
@@ -67,7 +67,7 @@
                 <div id="divPhoto2">
                     @if($slider->image_movil != "")
                         <img align="middle" src="{{ asset('files/' . $slider->image_movil) }}" style="max-width: 200px;">
-                        <img src="{{ asset('img/wpanel/deleteFile.png') }}" class="pointer" onclick="eliminateRegisterFile('{{ route('wp.slider.deletefileMovil') }}', 'id={{ $slider->id }}', 'divPhoto2');">
+                        <img src="{{ asset('img/wpanel/deleteFile.png') }}" class="pointer" data-action="delete-file" data-url="{{ route('wp.slider.deletefileMovil') }}" data-payload="id={{ $slider->id }}" data-target="divPhoto2">
                     @else
                         <input type="file" name="photomovil" id="photomovil" class="requerido" accept="image/png, image/jpeg, image/jpg">
                     @endif
@@ -82,7 +82,7 @@
             <div class="col-md-12">
                 <br />
                 <input type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-primary" value="ACEPTAR">
-                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" onclick="window.open('{{ route('wp.slider.index') }}','_self');">
+                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" data-action="navigate" data-url="{{ route('wp.slider.index') }}">
             </div>
         </div>
     </form>

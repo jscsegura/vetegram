@@ -24,7 +24,7 @@
               </form>
           </div>
           <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-            <button type="button" onclick="saveAttachModal();" class="btn btn-primary btn-sm px-4">{{ trans('dash.text.btn.save') }}</button>
+            <button type="button" class="btn btn-primary btn-sm px-4" data-appoint-action="attach-save">{{ trans('dash.text.btn.save') }}</button>
           </div>
         </div>
       </div>
@@ -35,124 +35,24 @@
     $exts = explode(',', App\Models\AppointmentAttachment::getExtensions());
   @endphp
   <script>
-    function setIdAppointmentToAttach(id, pet = 0) {
-      $('#attachIdAppointment').val(id);
-      $('#attachIdPetAppointment').val(pet);
-    }
-  
-    var peticion;
-    function saveAttachModal() {
-      var extValid = <?php echo json_encode($exts); ?>;
-      
-      var names = [];
-      var isvalid = true;
-      var counter = 0;
-      for (var i = 0; i < $('#fileModalMultiple').get(0).files.length; ++i) {
-          var name = $('#fileModalMultiple').get(0).files[i].name;
-          names.push(name);
-  
-          var extension = name.substring(name.lastIndexOf("."));
-          var position = jQuery.inArray(extension, extValid);
-          if(position == -1) {
-            isvalid = false;
-              
-            $.toast({
-              text: '{{ trans('dash.msg.ext.not.valid') }}',
-              position: 'bottom-right',
-              textAlign: 'center',
-              loader: false,
-              hideAfter: 4000,
-              icon: 'warning'
-            });
-          }
-  
-          counter++;
-      }
-  
-      if((isvalid) && (counter > 0)) {
-        setCharge2();
-  
-        peticion = $.ajax({
-          xhr: function() {
-              var progress = $('#progressAttachModal'),
-              xhr = $.ajaxSettings.xhr();
-  
-              progress.show();
-  
-              xhr.upload.onprogress = function(ev) {
-                  if (ev.lengthComputable) {
-                      var percentComplete = parseInt((ev.loaded / ev.total) * 100);
-                      $('#progressAttachModal em').html(percentComplete + "%");
-                      $("#progressAttachModal span").css("width", percentComplete + "%");
-                  }
-              };
-  
-              return xhr;
-          },
-          url: '{{ route('appoinment.saveAttach') }}',
-          type: 'POST',
-          data: new FormData(document.getElementById('frmUploaderAttachModal')),
-          contentType: false,
-          cache: false,
-          processData: false,
-          success: function(data, status, xhr) {
-            $('#progressAttachModal').hide();
-  
-            $('#fileModalMultiple').val('');
-  
-            if(data.save == 1) {
-              $.toast({
-                  text: '{{ trans('dash.msg.attach.success') }}',
-                  position: 'bottom-right',
-                  textAlign: 'center',
-                  loader: false,
-                  hideAfter: 4000,
-                  icon: 'success'
-              });
-
-              if (typeof reloadToComplete !== 'undefined') {
-                location.reload();
-              }
-            }else{
-              if(data.error != '') {
-                  $.toast({
-                    text: data.error,
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 10000,
-                    icon: 'error'
-                });
-              }else{
-                $.toast({
-                  text: '{{ trans('dash.msg.error.attach') }}',
-                  position: 'bottom-right',
-                  textAlign: 'center',
-                  loader: false,
-                  hideAfter: 4000,
-                  icon: 'error'
-                });
-              }
-            }
-  
-            hideCharge2();
-          },
-          error: function(xhr, status, error) {
-            $('#progressAttachModal').hide();
-  
-            $.toast({
-                text: '{{ trans('dash.msg.error.attach') }}',
-                position: 'bottom-right',
-                textAlign: 'center',
-                loader: false,
-                hideAfter: 4000,
-                icon: 'error'
-            });
-  
-            hideCharge2();
-          }
-        });
-      }
-    }
+    window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+    window.APPOINT_MODAL_CONFIG.attach = {
+      ids: {
+        modal: 'attachModal',
+        form: 'frmUploaderAttachModal',
+        idField: 'attachIdAppointment',
+        petField: 'attachIdPetAppointment',
+        fileInput: 'fileModalMultiple'
+      },
+      routes: {
+        saveAttach: '{{ route('appoinment.saveAttach') }}'
+      },
+      labels: {
+        extNotValid: '{{ trans('dash.msg.ext.not.valid') }}',
+        attachSuccess: '{{ trans('dash.msg.attach.success') }}',
+        attachError: '{{ trans('dash.msg.error.attach') }}'
+      },
+      allowedExtensions: <?php echo json_encode($exts); ?>
+    };
   </script>
   @endpush

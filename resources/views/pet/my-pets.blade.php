@@ -56,7 +56,7 @@
           <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-3 p-md-4">
-            <form name="frmCreatePet" id="frmCreatePet" method="post" action="{{ route('pets.savePet') }}" enctype="multipart/form-data"  onsubmit="return sendFormCreate();">
+            <form name="frmCreatePet" id="frmCreatePet" method="post" action="{{ route('pets.savePet') }}" enctype="multipart/form-data" data-action="Pet.sendFormCreate" data-action-event="submit">
                 @csrf
                 <div class="mb-3">
                     <label for="pet" class="form-label small">{{ trans('dash.label.element.name.pet') }}</label>
@@ -65,7 +65,7 @@
 
                 <div class="mb-3">
                     <label for="petType" class="form-label small">{{ trans('dash.label.element.type.pet') }}</label>
-                    <select name="animaltype" id="animaltype" class="form-select fc select4 requerido" onchange="getBreed();">
+                    <select name="animaltype" id="animaltype" class="form-select fc select4 requerido" data-action="Pet.getBreed" data-action-event="change">
                         <option value="">{{ trans('auth.register.complete.select') }}</option>
                         @foreach ($animalTypes as $type)
                             <option value="{{ $type->id }}">{{ $type['title_' . $weblang] }}</option>
@@ -87,7 +87,7 @@
             </form>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button onclick="sendFormCreateValidate();" id="agendarBtn" type="button" class="btn btn-primary btn-sm fw-medium px-4">{{ trans('dash.text.btn.save') }}</button>
+          <button data-action="Pet.sendFormCreateValidate" data-action-event="click" id="agendarBtn" type="button" class="btn btn-primary btn-sm fw-medium px-4">{{ trans('dash.text.btn.save') }}</button>
         </div>
       </div>
     </div>
@@ -105,64 +105,15 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $('.select4').select2( {
-            theme: "bootstrap-5",
-            width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-            placeholder: $( this ).data( 'placeholder' ),
-            dropdownParent: $('#petModal')
-        });
-        
-        function getBreed(obj) {
-
-            var type = $('#animaltype').val();
-
-            $.ajax({
-                type: 'POST',
-                url: '{{ route('get.breed') }}',
-                dataType: "json",
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-                },
-                data: {
-                    type: type
-                },
-                beforeSend: function(){},
-                success: function(data){
-                    var html = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-                    $.each(data.rows, function(i, item) {
-                        html = html + '<option value="'+item.id+'">'+item.title+'</option>';
-                    });
-
-                    $('#breed').html(html);
-                }
-            });
-        }
-
-        function sendFormCreateValidate() {
-            $('#frmCreatePet').submit();
-        }
-
-        function sendFormCreate() {
-            var validate = true;
-
-            $('.requerido').each(function(i, elem){
-                var value = $(elem).val();
-                var value = value.trim();
-                if(value == ''){
-                    $(elem).addClass('is-invalid');
-                    validate = false;
-                }else{
-                    $(elem).removeClass('is-invalid');
-                }
-            });
-
-            if(validate == true) {
-                setCharge2();
-
-                return true;
+        window.PET_COMMON_CONFIG = {
+            routes: {
+                getBreed: @json(route('get.breed'))
+            },
+            texts: {
+                selectLabel: @json(trans('auth.register.complete.select'))
             }
-
-            return false;
-        }
+        };
     </script>
+    <script src="{{ asset('js/pet/common.js') }}"></script>
+    <script src="{{ asset('js/pet/my-pets.js') }}"></script>
 @endpush

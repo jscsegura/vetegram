@@ -12,7 +12,7 @@
           </div>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button onclick="sendAttachModal();" type="button" class="btn btn-primary btn-sm px-4">{{ trans('dash.btn.label.send') }}</button>
+          <button type="button" class="btn btn-primary btn-sm px-4" data-appoint-action="send-attach">{{ trans('dash.btn.label.send') }}</button>
         </div>
       </div>
     </div>
@@ -20,69 +20,21 @@
 
 @push('scriptBottom')
 <script>
-  function setIdAppointmentToSendAttach(id, email = '') {
-    $('#setIdAppointmentToSendAttach').val(id);
-
-    if(email != '') {
-      $('#emailToSendAttach').val(email);
+  window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+  window.APPOINT_MODAL_CONFIG.sendAttach = {
+    ids: {
+      modal: 'sendAttachModal',
+      idField: 'setIdAppointmentToSendAttach',
+      emailField: 'emailToSendAttach'
+    },
+    routes: {
+      sendAttach: '{{ route('appoinment.sendAttach') }}'
+    },
+    labels: {
+      sendSuccess: '{{ trans('dash.label.attach.sender') }}',
+      sendError: '{{ trans('dash.label.attach.send.error') }}',
+      emailInvalid: '{{ trans('dash.label.recipe.send.email') }}'
     }
-  }
-
-  function sendAttachModal() {
-    var id    = $('#setIdAppointmentToSendAttach').val();
-    var email = $('#emailToSendAttach').val();
-
-    var emailPattern = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-
-    email = email.trim();
-
-    if((email != '') && (emailPattern.test(email))) {
-      $.ajaxSetup({
-          headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-          }
-      });
-
-      setCharge();
-
-      $.post('{{ route('appoinment.sendAttach') }}', {id:id, email:email},
-            function (data) {
-              
-              if(data.send == '1') {
-                $('#emailToSendAttach').val('');
-
-                $.toast({
-                    text: '{{ trans('dash.label.attach.sender') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'success'
-                });
-              }else{
-                $.toast({
-                  text: '{{ trans('dash.label.attach.send.error') }}',
-                  position: 'bottom-right',
-                  textAlign: 'center',
-                  loader: false,
-                  hideAfter: 4000,
-                  icon: 'error'
-                });
-              }           
-
-              hideCharge();
-            }
-        );
-      }else{
-        $.toast({
-          text: '{{ trans('dash.label.recipe.send.email') }}',
-          position: 'bottom-right',
-          textAlign: 'center',
-          loader: false,
-          hideAfter: 4000,
-          icon: 'error'
-        });
-      }
-  }
+  };
 </script>
 @endpush

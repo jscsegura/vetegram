@@ -8,7 +8,7 @@
 <section class="container-fluid pb-0 pb-lg-4">
     <div class="row px-2 px-lg-3 mt-2 mt-lg-4">
         
-        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmProfile" name="frmProfile" method="post" action="{{ route('adminuser.store') }}" onsubmit="return validSend();">
+        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmProfile" name="frmProfile" method="post" action="{{ route('adminuser.store') }}" data-action="Users.validSend" data-action-event="submit">
             @csrf
 
             <h1 class="text-center text-md-start text-uppercase h4 fw-normal mb-3">
@@ -20,7 +20,7 @@
                 <div class="col-md-4">
                     <div class="mb-4">
                         <label for="idtype" class="form-label small">{{ trans('auth.register.type.user') }}</label>
-                        <select class="form-select fc requerido" name="roluser" id="roluser" onchange="setRol();">
+                        <select class="form-select fc requerido" name="roluser" id="roluser" data-action="Users.setRol" data-action-event="change">
                             <option value="4">{{ trans('dash.rol.name.4') }}</option>
                             <option value="5">{{ trans('dash.rol.name.5') }}</option>
                             <option value="6">{{ trans('dash.rol.name.6') }}</option>
@@ -29,11 +29,11 @@
                     </div>
                     <div class="mb-4">
                         <label for="phone" class="form-label small">{{ trans('auth.register.complete.phone.only') }}</label>
-                        <input type="text" class="form-control fc requerido" id="phone" name="phone" onkeydown="enterOnlyNumbers(event);" maxlength="12">
+                        <input type="text" class="form-control fc requerido" id="phone" name="phone" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event" maxlength="12">
                     </div>
                     <div class="mb-4">
                         <label for="country" class="form-label small">{{ trans('auth.register.complete.country') }}</label>
-                        <select class="form-select fc requerido select2" id="country" name="country" onchange="changeCountry(this);">
+                        <select class="form-select fc requerido select2" id="country" name="country" data-action="Users.changeCountry" data-action-event="change" data-action-args="$el">
                             @foreach ($countries as $country)
                                 <option value="{{ $country->id }}" data-phonecode="{{ $country->phonecode }}" @if($country->id == $vet->country) selected="selected" @endif>{{ $country->title }}</option>
                             @endforeach
@@ -70,7 +70,7 @@
                     <div class="mb-4">
                         <label for="province" class="form-label small">{{ trans('auth.register.complete.province') }}</label>
                         <div id="provinceDiv" @if($vet->country != 53) style="display: none;" @endif>
-                            <select class="form-select fc select2" name="province" id="province" onchange="getLocation(1, this.value);">
+                            <select class="form-select fc select2" name="province" id="province" data-action="Users.getLocation" data-action-event="change" data-action-args="1|$value">
                                 <option value="">{{ trans('auth.register.complete.select') }}</option>
                                 @foreach ($provinces as $province)
                                     <option value="{{ $province->id }}" @if($province->id == $vet->province) selected="selected" @endif>{{ $province->title }}</option>
@@ -81,7 +81,7 @@
                     </div>
                     <div class="mb-4" id="containerCode">
                         <label for="vcode" class="form-label small">{{ trans('auth.register.complete.code') }} <span id="resultCode"></span></label>
-                        <input type="text" class="form-control fc" id="vcode" name="vcode" value="" onchange="checkCode(this.value);" onkeydown="enterOnlyNumbers(event);" maxlength="50">
+                        <input type="text" class="form-control fc" id="vcode" name="vcode" value="" maxlength="50">
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -91,12 +91,12 @@
                     </div>
                     <div class="mb-4">
                         <label for="idnumber" class="form-label small">{{ trans('auth.register.complete.dni') }}</label>
-                        <input type="text" class="form-control fc requerido" id="idnumber" name="idnumber" onkeydown="enterOnlyNumbers(event);" maxlength="12">
+                        <input type="text" class="form-control fc requerido" id="idnumber" name="idnumber" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event" maxlength="12">
                     </div>
                     <div class="mb-4">
                         <label for="canton" class="form-label small">{{ trans('auth.register.complete.canton.only') }}</label>
                         <div id="cantonDiv" @if($vet->country != 53) style="display: none;" @endif>
-                            <select class="form-select fc select2" name="canton" id="canton" onchange="getLocation(2, this.value);">
+                            <select class="form-select fc select2" name="canton" id="canton" data-action="Users.getLocation" data-action-event="change" data-action-args="2|$value">
                                 <option value="">{{ trans('auth.register.complete.select') }}</option>
                                 @foreach ($cantons as $canton)
                                     <option value="{{ $canton->id }}" @if($canton->id == $vet->canton) selected="selected" @endif>{{ $canton->title }}</option>
@@ -135,215 +135,18 @@
 <script src="{{ asset('js/wpanel/library/jquery.toast.js') }}"></script>
 
 <script>
-    $('.select2').select2({
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    });
-
-    function setRol() {
-        var roluser = $('#roluser').val();
-
-        if((roluser == 4)) {
-            $('#containerCode').show();
-        }else{
-            $('#containerCode').hide();
+    window.USERS_COMMON_CONFIG = {
+        routes: {
+            getLocation: @json(route('get.location')),
+            checkVetCode: @json(route('check.vetcode'))
+        },
+        texts: {
+            selectLabel: @json(trans('auth.register.complete.select')),
+            nameMustContainLetters: @json('El nombre debe contener letras'),
+            invalidEmail: @json('El correo no es válido')
         }
-    }
-
-    function changeCountry(obj) {
-        var country = $(obj).val();
-        var phonecode = $('#country option:selected').attr("data-phonecode");
-
-        if(country == 53) {
-            $('#provinceDiv').show();
-            $('#cantonDiv').show();
-            $('#districtDiv').show();
-
-            $('#province_alternate').hide();
-            $('#canton_alternate').hide();
-            $('#district_alternate').hide();
-        }else{
-            $('#provinceDiv').hide();
-            $('#cantonDiv').hide();
-            $('#districtDiv').hide();
-
-            $('#province_alternate').show();
-            $('#canton_alternate').show();
-            $('#district_alternate').show();
-        }
-
-        $('#phone').val('+' + phonecode);
-    }
-
-    function getLocation(type, value) {
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('get.location') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                type: type,
-                value: value
-            },
-            beforeSend: function(){},
-            success: function(data){
-                var html = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-                $.each(data.rows, function(i, item) {
-                    html = html + '<option value="'+item.id+'">'+item.title+'</option>';
-                });
-
-                if(type == 1) {
-                    $('#canton').html(html);
-                    $('#district').html('<option value="">{{ trans('auth.register.complete.select') }}</option>');
-                }
-                if(type == 2) {
-                    $('#district').html(html);
-                }
-            }
-        });
-    }
-
-    function checkCode(code) {
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('check.vetcode') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                code: code
-            },
-            beforeSend: function(){},
-            success: function(data){
-                if(data.id == 0) {
-                    $('#resultCode').html('<i class="fa fa-times" style="color: red;" aria-hidden="true"></i>');
-                }else{
-                    $('#resultCode').html('<i class="fa fa-check"  style="color: green;" aria-hidden="true"></i>');
-                }
-            }
-        });
-    }
-
-    function validSend() {
-        var validate = true;
-
-        $('.requerido').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                validate = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        var letraPattern = /[a-zA-Z]/;
-
-        $('.requeridoLetra').each(function(i, elem){
-            if(!letraPattern.test($(elem).val())){
-                $(elem).addClass('is-invalid');
-                validate = false;
-
-                $.toast({
-                    text: 'El nombre debe contener letras',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'error'
-                });
-            }
-        });
-
-        var emailPattern = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-
-        $('.requeridoEmail').each(function(i, elem){
-            if(!emailPattern.test($(elem).val())){
-                $(elem).addClass('is-invalid');
-                validate = false;
-
-                $.toast({
-                    text: 'El correo no es válido',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'error'
-                });
-            }
-        });
-
-        var country = $('#country').val();
-        var phonecode = $('#country option:selected').attr("data-phonecode");
-
-        if(country == 53) {
-            if($('#province').val() == ''){
-                $('#province').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#province').removeClass('is-invalid');
-            }
-
-            if($('#canton').val() == ''){
-                $('#canton').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#canton').removeClass('is-invalid');
-            }
-
-            if($('#district').val() == ''){
-                $('#district').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#district').removeClass('is-invalid');
-            }
-        }else{
-            if($('#province_alternate').val() == ''){
-                $('#province_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#province_alternate').removeClass('is-invalid');
-            }
-
-            if($('#canton_alternate').val() == ''){
-                $('#canton_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#canton_alternate').removeClass('is-invalid');
-            }
-
-            if($('#district_alternate').val() == ''){
-                $('#district_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#district_alternate').removeClass('is-invalid');
-            }
-        }
-
-        if(($('#phone').val() == '+' + phonecode)) {
-            $('#phone').addClass('is-invalid');
-            validate = false;
-        }
-
-        if(validate == true) {
-            setCharge();
-        }
-
-        return validate;
-    }
-
-    function enterOnlyNumbers(event){
-        if ( event.keyCode == 8 || event.keyCode == 9 || (event.keyCode >= 37 && event.keyCode <= 40) || event.keyCode == 188 || event.keyCode == 190 ) {
-        } else {
-            if ((event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
-                event.preventDefault();
-            }
-        }
-    }
+    };
 </script>
+<script src="{{ asset('js/users/common.js') }}"></script>
+<script src="{{ asset('js/users/add.js') }}"></script>
 @endpush

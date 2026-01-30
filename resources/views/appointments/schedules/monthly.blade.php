@@ -17,19 +17,19 @@
 
             <div class="row justify-content-end mb-3 mt-3 mt-lg-0">
                 <div class="col-md-3 col-xl-2 order-1 order-md-0 mt-3 mt-md-0 selTimeCalendar" id="selTimeCalendarMensual">
-                    <select id="selTime" name="selTime" class="form-select form-select-sm" aria-label="Seleccionar rango" onchange="setCalendar(this.value);">
+                    <select id="selTime" name="selTime" class="form-select form-select-sm" aria-label="Seleccionar rango">
                         <option value="1" selected>{{ trans('dash.label.cal.montly') }}</option>
                         <option value="2">{{ trans('dash.label.cal.week') }}</option>
                         <option value="3">{{ trans('dash.label.cal.daily') }}</option>
                     </select>
                 </div>
                 <div class="col-md-6 col-xl-8 order-0 order-md-1 d-flex gap-2 justify-content-center">
-                    <a onclick="prevMonth();" class="circleArrow"><i class="fa-solid fa-angle-left"></i></a>
+                    <a href="#" class="circleArrow" data-schedule-nav="month" data-direction="prev"><i class="fa-solid fa-angle-left"></i></a>
                     <h2 class="h4 fw-normal px-2 mb-0">{{ trans('dash.month.num' . (int)date('m', strtotime($params['from1']))) . ' ' . date('Y', strtotime($params['from1'])) }}</h2>
-                    <a onclick="nextMonth();" class="circleArrow"><i class="fa-solid fa-angle-right"></i></a>
+                    <a href="#" class="circleArrow" data-schedule-nav="month" data-direction="next"><i class="fa-solid fa-angle-right"></i></a>
                 </div>
                 <div class="col-md-3 col-xl-2 order-2 mt-3 mt-md-0">
-                    <select name="useridselectM" id="useridselectM" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" onchange="getUserAppoinmentMonth();">
+                    <select name="useridselectM" id="useridselectM" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" data-schedule-user="month">
                         @foreach ($vets as $vet)
                             <option value="{{ $vet->id }}" @if($vet->id == $params['userid1']) selected='selected' @endif>{{ ($vet->id == $user->id) ? $vet->name . ' ('. trans('dash.its.me') . ')' : $vet->name }}</option>    
                         @endforeach
@@ -169,36 +169,7 @@ $startNextMonth = $startNextMonth->toDateString();
 $endNextMonth = $endNextMonth->toDateString();
 @endphp
 
-<script>
-    function prevMonth() {
-        var from = '{{ $startLastMonth }}';
-        var to   = '{{ $endLastMonth }}';
-        
-        $('#from1').val(from);
-        $('#to1').val(to);
-
-        getUserAppoinmentMonth();
-    }
-
-    function nextMonth() {
-        var from = '{{ $startNextMonth }}';
-        var to   = '{{ $endNextMonth }}';
-        
-        $('#from1').val(from);
-        $('#to1').val(to);
-
-        getUserAppoinmentMonth();
-    }
-
-    function getUserAppoinmentMonth() {
-        var time = $("#selTime").val();
-        var from = $("#from1").val();
-        var to   = $("#to1").val();
-
-        setCharge();
-
-        var userid = $('#useridselectM').val();
-
-        location.href = '{{ route('appointment.schedule') }}/' + btoa(userid) + '/' + btoa(from) + '/' + btoa(to) + '/1';
-    }
-</script>
+<input type="hidden" id="monthPrevFrom" value="{{ $startLastMonth }}">
+<input type="hidden" id="monthPrevTo" value="{{ $endLastMonth }}">
+<input type="hidden" id="monthNextFrom" value="{{ $startNextMonth }}">
+<input type="hidden" id="monthNextTo" value="{{ $endNextMonth }}">

@@ -27,6 +27,11 @@ use App\Models\VeterinaryCredential;
 use App\Models\Vets;
 use App\Models\Schedule;
 use App\Models\ScheduleDetails;
+use App\Http\Requests\Setup\IdentityRequest;
+use App\Http\Requests\Setup\ClinicRequest;
+use App\Http\Requests\Setup\SpecialtiesRequest;
+use App\Http\Requests\Setup\LocationRequest;
+use App\Http\Requests\Setup\ScheduleRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -426,10 +431,7 @@ class RegisterController extends Controller {
         $isDraft = $request->boolean('draft');
 
         if ($user->rol_id == 3) {
-            $vet = Vets::where('id', '=', $user->id_vet)->first();
-            if(!isset($vet->id)) {
-                $vet = new Vets();
-            }
+            $vet = $this->getOrCreateVetForUser($user);
             $vet->type_dni     = $request->idtypevet;
             $vet->dni          = $request->idnumbervet;
             $vet->country      = $request->country;
@@ -453,29 +455,7 @@ class RegisterController extends Controller {
                 $vet->lat      = $request->lat;
                 $vet->lng      = $request->lng;
             }
-            if($request->hasfile('clinicLogo')) {
-                $file = $request->file('clinicLogo');
-                $imageName = uniqid().time().'.'.$file->extension();
-
-                if(!File::isDirectory(public_path('files/vet/logo'))) {
-                    File::makeDirectory(public_path('files/vet/logo'), 0777, true, true);
-                    chmod(public_path('files/vet/logo'), 0777);
-                }
-
-                if(isset($vet->logo) && $vet->logo != '' && File::exists(public_path($vet->logo))) {
-                    File::delete(public_path($vet->logo));
-                }
-
-                if($file->move(public_path('files/vet/logo'), $imageName)) {
-                    $vet->logo = 'files/vet/logo/' . $imageName;
-                }
-            }
-            if($request->removeClinicLogo == 1) {
-                if(isset($vet->logo) && $vet->logo != '' && File::exists(public_path($vet->logo))) {
-                    File::delete(public_path($vet->logo));
-                }
-                $vet->logo = null;
-            }
+            $this->handleClinicLogo($vet, $request);
             $vet->save();
 
             $userrow = User::select('id', 'id_vet', 'type_dni', 'dni', 'code', 'complete')->where('id', '=', $user->id)->first();
@@ -493,51 +473,11 @@ class RegisterController extends Controller {
             if($request->mycode == 1) {
                 $userrow->code = $request->vcode;
             }
-            if($request->hasfile('profilePhoto')) {
-                $file = $request->file('profilePhoto');
-                $imageName = uniqid().time().'.'.$file->extension();
-
-                if(!File::isDirectory(public_path('files/user/image'))) {
-                    File::makeDirectory(public_path('files/user/image'), 0777, true, true);
-                    chmod(public_path('files/user/image'), 0777);
-                }
-
-                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
-                    File::delete(public_path($userrow->photo));
-                }
-
-                if($file->move(public_path('files/user/image'), $imageName)) {
-                    $userrow->photo = 'files/user/image/' . $imageName;
-                }
-            }
-            if($request->removeProfilePhoto == 1) {
-                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
-                    File::delete(public_path($userrow->photo));
-                }
-                $userrow->photo = null;
-            }
+            $this->handleProfilePhoto($userrow, $request);
             $userrow->update();
 
             if ($request->boolean('schedule_enabled')) {
-                $scheduleInput = $request->input('schedule', []);
-                $schedule = Schedule::firstOrCreate(
-                    ['id_user' => $user->id],
-                    ['description' => 'Horario de ' . ($user->name ?? 'usuario'), 'status' => '1']
-                );
-                $schedule->scheduleDetails()->delete();
-                foreach ($scheduleInput as $day => $times) {
-                    foreach ($times as $time) {
-                        if (empty($time['from']) || empty($time['to'])) {
-                            continue;
-                        }
-                        $schedule->scheduleDetails()->create([
-                            'day_of_week' => $day,
-                            'start_time'  => $time['from'],
-                            'end_time'    => $time['to'],
-                            'status'      => '1',
-                        ]);
-                    }
-                }
+                $this->syncSchedule($user, $request->input('schedule', []));
             }
 
             if($isDraft) {
@@ -558,29 +498,7 @@ class RegisterController extends Controller {
             $userrow->canton   = ($request->country == 53) ? $request->canton : $request->canton_alternate;
             $userrow->district = ($request->country == 53) ? $request->district : $request->district_alternate;
             $userrow->phone    = $request->phone;
-            if($request->hasfile('profilePhoto')) {
-                $file = $request->file('profilePhoto');
-                $imageName = uniqid().time().'.'.$file->extension();
-
-                if(!File::isDirectory(public_path('files/user/image'))) {
-                    File::makeDirectory(public_path('files/user/image'), 0777, true, true);
-                    chmod(public_path('files/user/image'), 0777);
-                }
-
-                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
-                    File::delete(public_path($userrow->photo));
-                }
-
-                if($file->move(public_path('files/user/image'), $imageName)) {
-                    $userrow->photo = 'files/user/image/' . $imageName;
-                }
-            }
-            if($request->removeProfilePhoto == 1) {
-                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
-                    File::delete(public_path($userrow->photo));
-                }
-                $userrow->photo = null;
-            }
+            $this->handleProfilePhoto($userrow, $request);
             $userrow->update();
 
             if(!$isDraft && isset($_POST['petname'])){
@@ -616,35 +534,204 @@ class RegisterController extends Controller {
             $userrow->canton   = ($request->country == 53) ? $request->canton : $request->canton_alternate;
             $userrow->district = ($request->country == 53) ? $request->district : $request->district_alternate;
             $userrow->phone    = $request->phone;
-            if($request->hasfile('profilePhoto')) {
-                $file = $request->file('profilePhoto');
-                $imageName = uniqid().time().'.'.$file->extension();
-
-                if(!File::isDirectory(public_path('files/user/image'))) {
-                    File::makeDirectory(public_path('files/user/image'), 0777, true, true);
-                    chmod(public_path('files/user/image'), 0777);
-                }
-
-                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
-                    File::delete(public_path($userrow->photo));
-                }
-
-                if($file->move(public_path('files/user/image'), $imageName)) {
-                    $userrow->photo = 'files/user/image/' . $imageName;
-                }
-            }
-            if($request->removeProfilePhoto == 1) {
-                if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
-                    File::delete(public_path($userrow->photo));
-                }
-                $userrow->photo = null;
-            }
+            $this->handleProfilePhoto($userrow, $request);
             $userrow->update();
 
             if($isDraft) {
                 return response()->json(['type' => 'success']);
             }
             return redirect()->route('dash');
+        }
+    }
+
+    public function saveSetupIdentity(IdentityRequest $request) {
+        $user = Auth::guard('web')->user();
+        if ($user->rol_id != 3) {
+            return response()->json(['type' => 'error'], 403);
+        }
+
+        $vet = $this->getOrCreateVetForUser($user);
+        $vet->code = $request->vcode;
+        $vet->save();
+
+        $userrow = User::select('id', 'id_vet', 'type_dni', 'dni', 'code', 'photo')->where('id', '=', $user->id)->first();
+        $userrow->id_vet = $vet->id;
+        $userrow->type_dni = $request->idtype;
+        $userrow->dni = $request->idnumber;
+        if($request->mycode == 1) {
+            $userrow->code = $request->vcode;
+        }
+        $this->handleProfilePhoto($userrow, $request);
+        $userrow->update();
+
+        return response()->json(['type' => 'success']);
+    }
+
+    public function saveSetupClinic(ClinicRequest $request) {
+        $user = Auth::guard('web')->user();
+        if ($user->rol_id != 3) {
+            return response()->json(['type' => 'error'], 403);
+        }
+
+        $vet = $this->getOrCreateVetForUser($user);
+        $vet->type_dni     = $request->idtypevet;
+        $vet->dni          = $request->idnumbervet;
+        $vet->social_name  = $request->socialName;
+        $vet->company      = $request->clinicname;
+        $vet->phone        = $request->phone;
+        $vet->languages    = json_encode($request->language);
+        $vet->email        = $request->email_clinic;
+        $vet->website      = $request->website_clinic;
+        $this->handleClinicLogo($vet, $request);
+        $vet->save();
+
+        $userrow = User::select('id', 'id_vet', 'phone')->where('id', '=', $user->id)->first();
+        $userrow->id_vet = $vet->id;
+        $userrow->phone = $request->phone;
+        $userrow->update();
+
+        return response()->json(['type' => 'success']);
+    }
+
+    public function saveSetupSpecialties(SpecialtiesRequest $request) {
+        $user = Auth::guard('web')->user();
+        if ($user->rol_id != 3) {
+            return response()->json(['type' => 'error'], 403);
+        }
+
+        $vet = $this->getOrCreateVetForUser($user);
+        $vet->specialities = json_encode($request->specialty);
+        $vet->species      = json_encode($request->species);
+        $vet->services     = json_encode($request->services);
+        $vet->save();
+
+        $userrow = User::select('id', 'id_vet')->where('id', '=', $user->id)->first();
+        $userrow->id_vet = $vet->id;
+        $userrow->update();
+
+        return response()->json(['type' => 'success']);
+    }
+
+    public function saveSetupLocation(LocationRequest $request) {
+        $user = Auth::guard('web')->user();
+        if ($user->rol_id != 3) {
+            return response()->json(['type' => 'error'], 403);
+        }
+
+        $vet = $this->getOrCreateVetForUser($user);
+        $vet->country  = $request->country;
+        $vet->address  = $request->vetaddress;
+        $vet->province = ($request->country == 53) ? $request->province : $request->province_alternate;
+        $vet->canton   = ($request->country == 53) ? $request->canton : $request->canton_alternate;
+        $vet->district = ($request->country == 53) ? $request->district : $request->district_alternate;
+        if ($request->lat !== null && $request->lat !== '' && $request->lng !== null && $request->lng !== '') {
+            $vet->lat = $request->lat;
+            $vet->lng = $request->lng;
+        }
+        $vet->save();
+
+        $userrow = User::select('id', 'id_vet', 'country', 'province', 'canton', 'district')->where('id', '=', $user->id)->first();
+        $userrow->id_vet = $vet->id;
+        $userrow->country  = $request->country;
+        $userrow->province = ($request->country == 53) ? $request->province : $request->province_alternate;
+        $userrow->canton   = ($request->country == 53) ? $request->canton : $request->canton_alternate;
+        $userrow->district = ($request->country == 53) ? $request->district : $request->district_alternate;
+        $userrow->update();
+
+        return response()->json(['type' => 'success']);
+    }
+
+    public function saveSetupSchedule(ScheduleRequest $request) {
+        $user = Auth::guard('web')->user();
+        if ($user->rol_id != 3) {
+            return response()->json(['type' => 'error'], 403);
+        }
+
+        if ($request->boolean('schedule_enabled')) {
+            $this->syncSchedule($user, $request->input('schedule', []));
+        }
+
+        return response()->json(['type' => 'success']);
+    }
+
+    private function getOrCreateVetForUser(User $user) {
+        $vet = Vets::where('id', '=', $user->id_vet)->first();
+        if(!isset($vet->id)) {
+            $vet = new Vets();
+        }
+        return $vet;
+    }
+
+    private function handleProfilePhoto(User $userrow, Request $request) {
+        if($request->hasfile('profilePhoto')) {
+            $file = $request->file('profilePhoto');
+            $imageName = uniqid().time().'.'.$file->extension();
+
+            if(!File::isDirectory(public_path('files/user/image'))) {
+                File::makeDirectory(public_path('files/user/image'), 0777, true, true);
+                chmod(public_path('files/user/image'), 0777);
+            }
+
+            if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
+                File::delete(public_path($userrow->photo));
+            }
+
+            if($file->move(public_path('files/user/image'), $imageName)) {
+                $userrow->photo = 'files/user/image/' . $imageName;
+            }
+        }
+        if($request->removeProfilePhoto == 1) {
+            if(isset($userrow->photo) && $userrow->photo != '' && File::exists(public_path($userrow->photo))) {
+                File::delete(public_path($userrow->photo));
+            }
+            $userrow->photo = null;
+        }
+    }
+
+    private function handleClinicLogo(Vets $vet, Request $request) {
+        if($request->hasfile('clinicLogo')) {
+            $file = $request->file('clinicLogo');
+            $imageName = uniqid().time().'.'.$file->extension();
+
+            if(!File::isDirectory(public_path('files/vet/logo'))) {
+                File::makeDirectory(public_path('files/vet/logo'), 0777, true, true);
+                chmod(public_path('files/vet/logo'), 0777);
+            }
+
+            if(isset($vet->logo) && $vet->logo != '' && File::exists(public_path($vet->logo))) {
+                File::delete(public_path($vet->logo));
+            }
+
+            if($file->move(public_path('files/vet/logo'), $imageName)) {
+                $vet->logo = 'files/vet/logo/' . $imageName;
+            }
+        }
+        if($request->removeClinicLogo == 1) {
+            if(isset($vet->logo) && $vet->logo != '' && File::exists(public_path($vet->logo))) {
+                File::delete(public_path($vet->logo));
+            }
+            $vet->logo = null;
+        }
+    }
+
+    private function syncSchedule(User $user, array $scheduleInput) {
+        $schedule = Schedule::firstOrCreate(
+            ['id_user' => $user->id],
+            ['description' => 'Horario de ' . ($user->name ?? 'usuario'), 'status' => '1']
+        );
+        $schedule->scheduleDetails()->delete();
+        foreach ($scheduleInput as $day => $times) {
+            foreach ($times as $time) {
+                if (empty($time['from']) || empty($time['to'])) {
+                    continue;
+                }
+                $schedule->scheduleDetails()->create([
+                    'day_of_week' => $day,
+                    'start_time'  => $time['from'],
+                    'end_time'    => $time['to'],
+                    'status'      => '1',
+                ]);
+            }
         }
     }
 

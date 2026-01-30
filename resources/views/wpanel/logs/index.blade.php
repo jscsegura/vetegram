@@ -45,11 +45,11 @@
     </div>
     <div class="col-md-2">
         <label>Id del registro</label>
-        <input type="text" name="auditid" id="auditid" value="" class="form-control" onkeydown="enterOnlyNumbers(event);" maxlength="11">
+        <input type="text" name="auditid" id="auditid" value="" class="form-control" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event" maxlength="11">
     </div>
     <div class="col-md-2">
         <label>&nbsp;</label>
-        <a onclick="filter();" class="btn btn-primary">Filtrar</a>
+        <a data-action="filter-logs" class="btn btn-primary">Filtrar</a>
     </div>
 </div>   
 
@@ -106,117 +106,14 @@
     <script src="https://cdn.datatables.net/v/bs/dt-1.13.4/datatables.min.js"></script>
 
     <script>
-        var vartype = '';
-        var varevent = '';
-        var auditid = '';
-        var dataTable = $('#tableList').DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            order: [[0, 'desc']],
-            ajax: "{{ url('wpanel/logs/list') }}/?type=" + vartype + "&event=" + varevent + "&auditid=" + auditid,
-            paging: true,
-            pageLength: 25,
-            columns: [
-                {data:'id'},
-                {data:'event'},
-                {data:'auditable_type'},
-                {data:'auditable_id'},
-                {data:'author'},
-                {data:'created_at'},
-                {data:'ip_address'},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<a data-id="' + row.id + '" data-toggle="modal" data-target="#detailModal" onclick="detail(this);"><img src="{{ asset('img/wpanel/menu.png') }}" data-toggle="tooltip" data-placement="top" title="Detalles"></a>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-            ],
-            language: {
-                sLengthMenu: '',
-                sZeroRecords: 'No se encontraron resultados',
-                sEmptyTable: 'Ningún dato disponible en esta tabla',
-                sInfo: 'Registro _START_ al _END_ de un total de _TOTAL_ registros',
-                sInfoEmpty: 'Mostrando registros del 0 al 0 de un total de 0 registros',
-                sInfoFiltered: '',
-                sSearch: 'Buscar:',
-                oPaginate: {
-                    "sFirst": 'Primero',
-                    "sLast":  'Último',
-                    "sNext": 'Siguiente',
-                    "sPrevious": 'Anterior',
-                },
+        window.WPANEL_LOGS_INDEX_CONFIG = {
+            listBaseUrl: "{{ url('wpanel/logs/list') }}",
+            detailUrl: "{{ route('wp.logs.detail') }}",
+            assets: {
+                menu: "{{ asset('img/wpanel/menu.png') }}"
             }
-        });
-
-        var verDetall = function(tbody, table){
-            table.on('draw', function () {
-                $('[data-toggle="tooltip"]').tooltip();
-            });
-        }
-        verDetall("#tableList tbody",dataTable);
-
-        function filter() {
-            vartype = $('#type').val();
-            varevent = $('#event').val();
-            auditid = $('#auditid').val();
-            dataTable.ajax.url("{{ url('wpanel/logs/list') }}/?type=" + vartype + "&event=" + varevent + "&auditid=" + auditid);
-            dataTable.draw();
-        }
-
-        function detail(obj) {
-            var id = $(obj).attr('data-id');
-
-            $('.modal-body').html('<center>Cargando...</center>');
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                }
-            });
-            
-            $.post('{{ route('wp.logs.detail') }}', {id:id},
-                function (data) {
-                    var url = '';
-                    if(data.url != '') {
-                        url = '<div class="row">'+
-                                    '<div class="col-md-12 text-center">'+
-                                        '<label>Url: ' + data.url + '</label>'+
-                                    '</div>'+
-                                '</div>'+
-                                '<div class="row">'+
-                                    '<div class="col-md-12"><p>&nbsp;</p></div>'+
-                                '</div>';
-                    }
-                    var txt = '<div class="row">'+
-                                    '<div class="col-md-12 text-center">'+
-                                        '<strong>UserId ' + data.userid + ' | ' + data.name + ' | ' + data.email + ' | Modulo: ' + data.module + '</strong>'+
-                                    '</div>'+
-                                '</div>'+
-                                '<div class="row">'+
-                                    '<div class="col-md-12"><p>&nbsp;</p></div>'+
-                                '</div>'+
-                                url +
-                                '<div class="table-responsive-lg">'+
-                                    '<table class="table">'+
-                                        '<thead>'+
-                                            '<tr>'+
-                                                '<th scope="col" style="width: 50%;">Registro viejo</th>'+
-                                                '<th scope="col" style="width: 50%;">Registro nuevo</th>'+
-                                            '</tr>'+
-                                        '</thead>'+
-                                        '<tr>'+
-                                            '<td>'+
-                                                data.oldRegister +
-                                            '</td>'+
-                                            '<td>'+
-                                                data.newRegister +
-                                            '</td>'+
-                                        '</tr>'+
-                                    '</table>'+
-                                '</div>';
-
-                    $('.modal-body').html(txt);
-                }
-            );
-        }
+        };
     </script>
+    <script src="{{ asset('js/wpanel/common.js') }}"></script>
+    <script src="{{ asset('js/wpanel/logs/index.js') }}"></script>
 @stop

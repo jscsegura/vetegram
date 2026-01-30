@@ -47,18 +47,18 @@
 
 <div class="container-fluid px-xl-5 pb-0 pb-lg-4">
     <div class="row px-2 px-lg-3 mt-lg-4">
-        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5 wizard-form" id="frmProfile" name="frmProfile" method="post" action="{{ route('register.complete-save') }}" onsubmit="return validSend();" enctype="multipart/form-data">
+        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5 wizard-form" id="frmProfile" name="frmProfile" method="post" action="{{ route('register.complete-save') }}" data-action="Setup.validSend" data-action-event="submit" enctype="multipart/form-data">
             <h1 class="text-center text-md-start text-uppercase h4 fw-normal mb-2">{{ trans('auth.register.complete.cmp') }} <span class="text-info fw-bold">{{ trans('auth.register.complete.profile') }}</span></h1>
             <p class="text-center text-md-start text-muted mb-4">{{ trans('auth.register.complete.intro') }}</p>
 
             @csrf
 
             <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
-                <button type="button" class="btn btn-primary btn-sm text-uppercase step-btn" data-step="step1" onclick="changeTab('step1')">1. {{ trans('auth.register.complete.step.identity') }}</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step2" onclick="changeTab('step2')">2. {{ trans('auth.register.complete.step.clinic') }}</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step3" onclick="changeTab('step3')">3. {{ trans('auth.register.complete.step.specialties') }}</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step4" onclick="changeTab('step4')">4. {{ trans('auth.register.complete.step.location') }}</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step5" onclick="changeTab('step5')">5. {{ trans('auth.register.complete.step.schedule') }}</button>
+                <button type="button" class="btn btn-primary btn-sm text-uppercase step-btn" data-step="step1" data-action="Setup.changeTab" data-action-event="click" data-action-args="step1">1. {{ trans('auth.register.complete.step.identity') }}</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step2" data-action="Setup.changeTab" data-action-event="click" data-action-args="step2">2. {{ trans('auth.register.complete.step.clinic') }}</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step3" data-action="Setup.changeTab" data-action-event="click" data-action-args="step3">3. {{ trans('auth.register.complete.step.specialties') }}</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step4" data-action="Setup.changeTab" data-action-event="click" data-action-args="step4">4. {{ trans('auth.register.complete.step.location') }}</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm text-uppercase step-btn" data-step="step5" data-action="Setup.changeTab" data-action-event="click" data-action-args="step5">5. {{ trans('auth.register.complete.step.schedule') }}</button>
             </div>
 
             <div class="tab-content" id="formSteps">
@@ -85,7 +85,7 @@
                             </div>
                             <div class="mb-4">
                                 <label for="idnumber" class="form-label small">{{ trans('auth.register.complete.dni') }}</label>
-                                <input type="text" class="form-control fc requerido" id="idnumber" name="idnumber" value="{{ $user->dni ?? '' }}" onkeydown="enterOnlyNumbers(event);" maxlength="50">
+                                <input type="text" class="form-control fc requerido" id="idnumber" name="idnumber" value="{{ $user->dni ?? '' }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event" maxlength="50">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -96,10 +96,10 @@
                                     <input type="hidden" id="removeProfilePhoto" name="removeProfilePhoto" value="0">
                                     <div class="small text-muted">{{ trans('auth.register.complete.photo.hint') }}</div>
                                     <div class="d-flex justify-content-center gap-2 mt-2 flex-wrap">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); document.getElementById('profilePhoto').click();">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-action="trigger-file" data-action-event="click" data-action-args="#profilePhoto">
                                             {{ trans('auth.register.complete.photo.btn') }}
                                         </button>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" id="removeProfilePhotoBtn" onclick="event.stopPropagation();" style="{{ (isset($user->photo) && $user->photo != '') ? '' : 'display:none;' }}">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" id="removeProfilePhotoBtn" data-action="stop-propagation" data-action-event="click" style="{{ (isset($user->photo) && $user->photo != '') ? '' : 'display:none;' }}">
                                             {{ trans('auth.register.complete.photo.remove') }}
                                         </button>
                                     </div>
@@ -129,7 +129,7 @@
                             </div>
                             <div class="mb-4" id="vetCodeBlock" style="{{ ($myCodeValue == 1) ? '' : 'display:none;' }}">
                                 <label for="vcode" class="form-label small">{{ trans('auth.register.complete.code') }} <span id="resultCode"></span></label>
-                                <input type="text" class="form-control fc requerido-vcode" id="vcode" name="vcode" value="{{ $vetCode }}" onchange="checkCode(this.value);" onkeydown="enterOnlyNumbers(event);" maxlength="50">
+                                <input type="text" class="form-control fc requerido-vcode" id="vcode" name="vcode" value="{{ $vetCode }}" maxlength="50">
                             </div>
                         </div>
                     </div>
@@ -164,7 +164,7 @@
                             </div>
                             <div class="mb-4">
                                 <label for="idnumbervet" class="form-label small">{{ trans('auth.register.complete.dni.clinic') }}</label>
-                                <input type="text" class="form-control fc requerido" id="idnumbervet" name="idnumbervet" value="{{ $vet->dni ?? '' }}" onkeydown="enterOnlyNumbers(event);" maxlength="50">
+                                <input type="text" class="form-control fc requerido" id="idnumbervet" name="idnumbervet" value="{{ $vet->dni ?? '' }}" data-action="vetegramHelpers.enterOnlyNumbers" data-action-event="keydown" data-action-args="$event" maxlength="50">
                             </div>
                             <div class="mb-4">
                                 <label for="email_clinic" class="form-label small">{{ trans('auth.login.email.clinic') }}</label>
@@ -187,10 +187,10 @@
                                     <input type="hidden" id="removeClinicLogo" name="removeClinicLogo" value="0">
                                     <div class="small text-muted">{{ trans('auth.register.complete.logo.hint') }}</div>
                                     <div class="d-flex justify-content-center gap-2 mt-2 flex-wrap">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="event.stopPropagation(); document.getElementById('clinicLogo').click();">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-action="trigger-file" data-action-event="click" data-action-args="#clinicLogo">
                                             {{ trans('auth.register.complete.logo.btn') }}
                                         </button>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" id="removeClinicLogoBtn" onclick="event.stopPropagation();" style="{{ (isset($vet->logo) && $vet->logo != '') ? '' : 'display:none;' }}">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" id="removeClinicLogoBtn" data-action="stop-propagation" data-action-event="click" style="{{ (isset($vet->logo) && $vet->logo != '') ? '' : 'display:none;' }}">
                                             {{ trans('auth.register.complete.logo.remove') }}
                                         </button>
                                     </div>
@@ -287,7 +287,7 @@
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label for="country" class="form-label small">{{ trans('auth.register.complete.country') }}</label>
-                                <select class="form-select fc requerido select2" name="country" id="country" onchange="changeCountry(this);">
+                                <select class="form-select fc requerido select2" name="country" id="country" data-action="Setup.changeCountry" data-action-event="change" data-action-args="$el">
                                     @foreach ($countries as $country)
                                         <option value="{{ $country->id }}" data-phonecode="{{ $country->phonecode }}" @if(($vetCountry && $country->id == $vetCountry) || (!$vetCountry && $country->default == 1)) selected="selected" @endif>{{ $country->title }}</option>
                                     @endforeach
@@ -295,7 +295,7 @@
                             </div>
                             <div class="mb-4" id="provinceGroup" style="{{ ($vetCountry && $vetCountry != 53) ? 'display: none;' : '' }}">
                                 <label for="province" class="form-label small">{{ trans('auth.register.complete.province') }}</label>
-                                <select class="form-select fc select2" name="province" id="province" onchange="getLocation(1, this.value);">
+                                <select class="form-select fc select2" name="province" id="province" data-action="Setup.getLocation" data-action-event="change" data-action-args="1|$value">
                                     <option value="">{{ trans('auth.register.complete.select') }}</option>
                                     @foreach ($provinces as $province)
                                         <option value="{{ $province->id }}" @if($vetProvince && $province->id == $vetProvince) selected @endif>{{ $province->title }}</option>
@@ -304,7 +304,7 @@
                             </div>
                             <div class="mb-4" id="cantonGroup" style="{{ ($vetCountry && $vetCountry != 53) ? 'display: none;' : '' }}">
                                 <label for="canton" class="form-label small">{{ trans('auth.register.complete.canton') }}</label>
-                                <select class="form-select fc select2" name="canton" id="canton"  onchange="getLocation(2, this.value);">
+                                <select class="form-select fc select2" name="canton" id="canton" data-action="Setup.getLocation" data-action-event="change" data-action-args="2|$value">
                                     <option value="">{{ trans('auth.register.complete.select') }}</option>
                                 </select>
                             </div>
@@ -382,1044 +382,51 @@
 
 
 @push('scriptBottom')
-<style>
-    :root {
-        --wizard-bar-height: 64px;
-        --wizard-footer-height: 44px;
-    }
-    .wizard-form {
-        padding-bottom: calc(var(--wizard-bar-height) + var(--wizard-footer-height));
-    }
-    .wizard-action-bar {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: var(--wizard-footer-height);
-        background: #fff;
-        border-top: 1px solid rgba(0, 0, 0, 0.08);
-        box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.06);
-        padding: 0;
-        z-index: 1020;
-    }
-    .wizard-action-bar-inner {
-        min-height: var(--wizard-bar-height);
-        padding: 10px 0;
-        margin-bottom: 0 !important;
-        max-width: 960px;
-    }
-    .app-footer {
-        position: fixed !important;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: var(--wizard-footer-height);
-        margin-top: 0 !important;
-        z-index: 1010;
-    }
-    .wizard-action-bar .btn-primary {
-        background-color: #4bc6f9;
-        border-color: #4bc6f9;
-        color: #fff;
-    }
-    .wizard-action-bar .btn-primary:hover,
-    .wizard-action-bar .btn-primary:focus {
-        background-color: #3fbef2;
-        border-color: #3fbef2;
-        color: #fff;
-    }
-    .map-loading {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        z-index: 1001;
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 999px;
-        padding: 6px 12px;
-        font-size: 0.85rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .map-hidden {
-        visibility: hidden;
-    }
-    .clinic-pin {
-        z-index: 1000;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/setup/complete-profile.css') }}">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.1/build/css/intlTelInput.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.1/build/js/intlTelInput.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    $('.select2').select2({
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    });
-    $('#specialty').select2({
-        theme: "bootstrap-5",
-        width: $('#specialty').data('width') ? $('#specialty').data('width') : $('#specialty').hasClass('w-100') ? '100%' : 'style',
-        placeholder: $('#specialty').data('placeholder'),
-        closeOnSelect: false
-    });
-
-    $('input[name="species[]"]').on('change', function() {
-        if ($('input[name="species[]"]:checked').length > 0) {
-            $('#speciesGroup').removeClass('border-danger');
-            $('#speciesError').hide();
-        }
-    });
-
-    function selectDefaultLanguageFromIp() {
-        const languageSelect = $('#language');
-        if (!languageSelect.length) return;
-        const current = languageSelect.val();
-        if (current && current.length) return;
-
-        const languageMap = {
-            'CR': ['Español', 'Spanish'],
-            'ES': ['Español', 'Spanish'],
-            'MX': ['Español', 'Spanish'],
-            'AR': ['Español', 'Spanish'],
-            'BO': ['Español', 'Spanish'],
-            'CL': ['Español', 'Spanish'],
-            'CO': ['Español', 'Spanish'],
-            'CU': ['Español', 'Spanish'],
-            'DO': ['Español', 'Spanish'],
-            'EC': ['Español', 'Spanish'],
-            'GT': ['Español', 'Spanish'],
-            'HN': ['Español', 'Spanish'],
-            'NI': ['Español', 'Spanish'],
-            'PA': ['Español', 'Spanish'],
-            'PE': ['Español', 'Spanish'],
-            'PR': ['Español', 'Spanish'],
-            'PY': ['Español', 'Spanish'],
-            'UY': ['Español', 'Spanish'],
-            'VE': ['Español', 'Spanish'],
-            'BR': ['Portuguese', 'Portugués'],
-            'US': ['English', 'Inglés'],
-            'GB': ['English', 'Inglés'],
-            'CA': ['English', 'Inglés'],
-            'AU': ['English', 'Inglés'],
-            'NZ': ['English', 'Inglés'],
-            'IE': ['English', 'Inglés']
-        };
-
-        function trySelectByNames(names) {
-            if (!names || !names.length) return false;
-            let selectedId = null;
-            languageSelect.find('option').each(function() {
-                const text = ($(this).text() || '').trim().toLowerCase();
-                if (!text) return;
-                for (const name of names) {
-                    if (text.includes(name.toLowerCase())) {
-                        selectedId = $(this).val();
-                        return false;
-                    }
-                }
-            });
-            if (selectedId) {
-                languageSelect.val([selectedId]).trigger('change');
-                return true;
+    window.SETUP_COMPLETE_PROFILE_CONFIG = {
+        routes: {
+            getLocation: @json(route('get.location')),
+            checkVetCode: @json(route('check.vetcode')),
+            stepSave: {
+                step1: @json(route('register.complete-save.identity')),
+                step2: @json(route('register.complete-save.clinic')),
+                step3: @json(route('register.complete-save.specialties')),
+                step4: @json(route('register.complete-save.location')),
+                step5: @json(route('register.complete-save.schedule'))
             }
-            return false;
-        }
-
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                const code = (data && data.country_code) ? data.country_code.toUpperCase() : null;
-                if (!code) return;
-                const names = languageMap[code] || [];
-                if (!trySelectByNames(names)) {
-                    if (code === 'US' || code === 'GB') {
-                        trySelectByNames(['English', 'Inglés']);
-                    }
-                }
-            })
-            .catch(() => {});
-    }
-
-    selectDefaultLanguageFromIp();
-
-    async function changeTab(tabId, options = {}) {
-        if (!options.skipDraft) {
-            await saveDraft();
-        }
-        const tabContent = document.getElementById('formSteps');
-        const tabPane = tabContent.querySelector(`#${tabId}`);
-
-        const allTabs = tabContent.querySelectorAll('.tab-pane');
-        allTabs.forEach(tab => tab.classList.remove('show', 'active'));
-
-        tabPane.classList.add('show', 'active');
-
-        const allSteps = document.querySelectorAll('.step-btn');
-        allSteps.forEach(btn => {
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-outline-secondary');
-        });
-        const activeBtn = document.querySelector(`.step-btn[data-step="${tabId}"]`);
-        if (activeBtn) {
-            activeBtn.classList.remove('btn-outline-secondary');
-            activeBtn.classList.add('btn-primary');
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        if (tabId === 'step4' && window._clinicMap) {
-            setTimeout(() => {
-                window._clinicMap.invalidateSize();
-                if (window._syncMapToStoredPin) {
-                    window._syncMapToStoredPin();
-                }
-                setTimeout(() => {
-                    window._clinicMap.invalidateSize();
-                    if (window._syncMapToStoredPin) {
-                        window._syncMapToStoredPin();
-                    }
-                }, 350);
-            }, 200);
-        }
-        if (tabId === 'step5') {
-            $('#schedule_enabled').val('1');
-        }
-        updateActionButtons();
-    }
-
-    async function nextStep(currentStep, nextStepId) {
-        if (!validateStep(currentStep)) {
-            return;
-        }
-        setNextLoading(currentStep, true);
-        await saveDraft();
-        setNextLoading(currentStep, false);
-        changeTab(nextStepId, { skipDraft: true });
-    }
-
-    async function saveDraft(options = {}) {
-        const form = document.getElementById('frmProfile');
-        if (!form) {
-            return;
-        }
-        const formData = new FormData(form);
-        if (options.omitFiles) {
-            formData.delete('profilePhoto');
-            formData.delete('clinicLogo');
-        }
-        formData.append('draft', '1');
-        try {
-            await fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-                },
-                credentials: 'same-origin',
-                body: formData
-            });
-        } catch (e) {}
-    }
-
-    function validateStep(stepId) {
-        let validate = true;
-        const step = document.getElementById(stepId);
-        if (!step) {
-            return true;
-        }
-
-        $(step).find('.requerido').each(function(i, elem){
-            const value = $(elem).val();
-            let isEmpty = false;
-            if (Array.isArray(value)) {
-                isEmpty = value.length === 0;
-            } else {
-                const text = (value === null || value === undefined) ? '' : value.toString().trim();
-                isEmpty = text === '';
-            }
-            if (isEmpty) {
-                $(elem).addClass('is-invalid');
-                validate = false;
-            } else {
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if (stepId === 'step1') {
-            const isVet = $('input[name="mycode"]:checked').val() === '1';
-            const vcodeInput = $('#vcode');
-            if (isVet) {
-                if (vcodeInput.val().trim() === '') {
-                    vcodeInput.addClass('is-invalid');
-                    validate = false;
-                } else {
-                    vcodeInput.removeClass('is-invalid');
-                }
-            } else {
-                vcodeInput.removeClass('is-invalid');
-            }
-        }
-
-        if (stepId === 'step3') {
-            const speciesSelected = $('input[name="species[]"]:checked').length > 0;
-            if (!speciesSelected) {
-                $('#speciesGroup').addClass('border-danger');
-                $('#speciesError').show();
-                validate = false;
-            } else {
-                $('#speciesGroup').removeClass('border-danger');
-                $('#speciesError').hide();
-            }
-        }
-
-        if (stepId === 'step4') {
-            var country = $('#country').val();
-            if(country == 53) {
-                if($('#province').val() == ''){
-                    $('#province').addClass('is-invalid');
-                    validate = false;
-                }else{
-                    $('#province').removeClass('is-invalid');
-                }
-
-                if($('#canton').val() == ''){
-                    $('#canton').addClass('is-invalid');
-                    validate = false;
-                }else{
-                    $('#canton').removeClass('is-invalid');
-                }
-
-                if($('#district').val() == ''){
-                    $('#district').addClass('is-invalid');
-                    validate = false;
-                }else{
-                    $('#district').removeClass('is-invalid');
-                }
-            }else{
-                if($('#province_alternate').val() == ''){
-                    $('#province_alternate').addClass('is-invalid');
-                    validate = false;
-                }else{
-                    $('#province_alternate').removeClass('is-invalid');
-                }
-
-            if($('#canton_alternate').val() == ''){
-                $('#canton_alternate').addClass('is-invalid');
-                validate = false;
-            }else{
-                $('#canton_alternate').removeClass('is-invalid');
-            }
-        }
-        }
-
-        return validate;
-    }
-
-    function toggleVetCode(isVet) {
-        if (isVet) {
-            $('#vetCodeBlock').show();
-        } else {
-            $('#vetCodeBlock').hide();
-            $('#vcode').val('').removeClass('is-invalid');
-            $('#resultCode').html('');
-        }
-    }
-
-    function getActiveStepId() {
-        const activeStep = document.querySelector('.tab-pane.show.active');
-        return activeStep ? activeStep.id : null;
-    }
-
-    function stepIsReady(stepId) {
-        const step = document.getElementById(stepId);
-        if (!step) {
-            return true;
-        }
-
-        let ok = true;
-        $(step).find('.requerido').each(function(i, elem){
-            const value = $(elem).val();
-            if (!value || value.toString().trim() === '') {
-                ok = false;
-                return false;
-            }
-        });
-
-        if (stepId === 'step1') {
-            const isVet = $('input[name="mycode"]:checked').val() === '1';
-            if (isVet && $('#vcode').val().trim() === '') {
-                ok = false;
-            }
-        }
-
-        if (stepId === 'step3') {
-            if ($('input[name="species[]"]:checked').length === 0) {
-                ok = false;
-            }
-        }
-
-        if (stepId === 'step4') {
-            const country = $('#country').val();
-            if (country == 53) {
-                if ($('#province').val() === '' || $('#canton').val() === '' || $('#district').val() === '') {
-                    ok = false;
-                }
-            } else {
-                if ($('#province_alternate').val() === '' || $('#canton_alternate').val() === '') {
-                    ok = false;
-                }
-            }
-            if ($('#lat').val() === '' || $('#lng').val() === '') {
-                ok = false;
-            }
-        }
-
-        return ok;
-    }
-
-    function updateActionButtons() {
-        const activeStep = getActiveStepId();
-        if (!activeStep) {
-            return;
-        }
-        if (window._isProfileComplete) {
-            const btn = document.querySelector(`.wizard-next-btn[data-step="${activeStep}"]`);
-            if (btn) {
-                btn.disabled = false;
-            }
-            return;
-        }
-        const ready = stepIsReady(activeStep);
-        const btn = document.querySelector(`.wizard-next-btn[data-step="${activeStep}"]`);
-        if (btn) {
-            btn.disabled = !ready;
-        }
-    }
-
-    function setNextLoading(stepId, isLoading) {
-        const btn = document.querySelector(`.wizard-next-btn[data-step="${stepId}"]`);
-        if (!btn) return;
-        const defaultLabel = btn.getAttribute('data-default-label') || btn.textContent;
-        const loadingLabel = btn.getAttribute('data-loading-label') || defaultLabel;
-        btn.disabled = isLoading;
-        btn.textContent = isLoading ? loadingLabel : defaultLabel;
-    }
-
-    function setupDropzone(dropId, inputId, previewId, removeBtnId, removeFlagId, defaultSrc = '', hasImage = false) {
-        const drop = document.getElementById(dropId);
-        const input = document.getElementById(inputId);
-        const preview = document.getElementById(previewId);
-        const removeBtn = document.getElementById(removeBtnId);
-        const removeFlag = document.getElementById(removeFlagId);
-
-        if (!drop || !input) {
-            return;
-        }
-
-        drop.addEventListener('click', () => input.click());
-
-        drop.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            drop.classList.add('border-primary');
-        });
-
-        drop.addEventListener('dragleave', () => {
-            drop.classList.remove('border-primary');
-        });
-
-        drop.addEventListener('drop', (e) => {
-            e.preventDefault();
-            drop.classList.remove('border-primary');
-            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                input.files = e.dataTransfer.files;
-                updatePreview(input, preview);
-                if (removeFlag) removeFlag.value = '0';
-            }
-        });
-
-        input.addEventListener('change', () => {
-            updatePreview(input, preview, removeBtn);
-            if (removeFlag) removeFlag.value = '0';
-        });
-
-        if (removeBtn) {
-            removeBtn.addEventListener('click', () => {
-                input.value = '';
-                if (preview) {
-                    preview.src = defaultSrc || '';
-                    if (!defaultSrc) {
-                        preview.style.display = 'none';
-                    }
-                }
-                removeBtn.style.display = 'none';
-                if (removeFlag) removeFlag.value = '1';
-            });
-            if (!hasImage) {
-                removeBtn.style.display = 'none';
-            }
-        }
-    }
-
-    function updatePreview(input, preview, removeBtn) {
-        if (!preview || !input.files || !input.files[0]) {
-            return;
-        }
-        const file = input.files[0];
-        if (!file.type.startsWith('image/')) {
-            return;
-        }
-        preview.src = URL.createObjectURL(file);
-        preview.style.display = 'block';
-        if (removeBtn) {
-            removeBtn.style.display = 'inline-block';
-        }
-    }
-
-    function changeCountry(obj) {
-        var country = $(obj).val();
-        var phonecode = $('#country option:selected').attr("data-phonecode");
-
-        if(country == 53) {
-            $('#provinceGroup').show();
-            $('#cantonGroup').show();
-            $('#districtGroup').show();
-
-            $('#provinceAltGroup').hide();
-            $('#cantonAltGroup').hide();
-
-            $('#canton').prop('disabled', ($('#province').val() == ''));
-            $('#district').prop('disabled', ($('#canton').val() == ''));
-        }else{
-            $('#provinceGroup').hide();
-            $('#cantonGroup').hide();
-            $('#districtGroup').hide();
-
-            $('#provinceAltGroup').show();
-            $('#cantonAltGroup').show();
-        }
-
-        if (!window._itiPhone && ($('#phone').val() === '' || $('#phone').val() === '+' + phonecode)) {
-            $('#phone').val('+' + phonecode);
-        }
-        if (window._updateMapFromAddress) {
-            setTimeout(window._updateMapFromAddress, 200);
-        }
-    }
-    changeCountry($('#country'));
-
-    $('#province').on('change', function() {
-        if ($('#country').val() == 53) {
-            const hasProvince = $(this).val() !== '';
-            $('#canton').prop('disabled', !hasProvince);
-            if (!hasProvince) {
-                $('#canton').val('').trigger('change');
-                $('#district').prop('disabled', true).val('');
-            }
-        }
-    });
-
-    $('#canton').on('change', function() {
-        if ($('#country').val() == 53) {
-            const hasCanton = $(this).val() !== '';
-            $('#district').prop('disabled', !hasCanton);
-            if (!hasCanton) {
-                $('#district').val('');
-            }
-        }
-    });
-
-    function getLocation(type, value, selectedCanton = null, selectedDistrict = null) {
-        if(type == 1) {
-            $('#canton').prop('disabled', true);
-            $('#district').prop('disabled', true);
-        }
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('get.location') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                type: type,
-                value: value
-            },
-            beforeSend: function(){},
-            success: function(data){
-                var html = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-                $.each(data.rows, function(i, item) {
-                    html = html + '<option value="'+item.id+'">'+item.title+'</option>';
-                });
-
-                if(type == 1) {
-                    $('#canton').html(html);
-                    $('#district').html('<option value="">{{ trans('auth.register.complete.select') }}</option>');
-                    $('#canton').prop('disabled', false);
-                    $('#district').prop('disabled', true);
-                    if (selectedCanton) {
-                        $('#canton').val(selectedCanton).trigger('change');
-                        if (selectedDistrict) {
-                            getLocation(2, selectedCanton, null, selectedDistrict);
-                        }
-                    }
-                }
-                if(type == 2) {
-                    $('#district').html(html);
-                    $('#district').prop('disabled', false);
-                    if (selectedDistrict) {
-                        $('#district').val(selectedDistrict).trigger('change');
-                    }
-                }
-                if (window._updateMapFromAddress) {
-                    setTimeout(window._updateMapFromAddress, 200);
-                }
-            }
-        });
-    }
-
-    const initialCountry = @json($vetCountry);
-    const initialProvince = @json($vetProvince);
-    const initialCanton = @json($vetCanton);
-    const initialDistrict = @json($vetDistrict);
-
-    if (initialCountry) {
-        $('#country').val(initialCountry).trigger('change');
-        changeCountry($('#country').get(0));
-        if (initialCountry == 53 && initialProvince) {
-            $('#province').val(initialProvince).trigger('change');
-            getLocation(1, initialProvince, initialCanton, initialDistrict);
-        }
-    }
-
-    function checkCode(code) {
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('check.vetcode') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                code: code
-            },
-            beforeSend: function(){},
-            success: function(data){
-                if(data.id == 0) {
-                    $('#resultCode').html('<i class="fa fa-times" style="color: red;" aria-hidden="true"></i>');
-                }else{
-                    $('#resultCode').html('<i class="fa fa-check"  style="color: green;" aria-hidden="true"></i>');
-                }
-            }
-        });
-    }
-
-    function validSend() {
-        var validate = true;
-        let firstInvalid = null;
-        const markInvalid = (elem) => {
-            if (!elem) return;
-            if (!firstInvalid) {
-                firstInvalid = elem;
-            }
-        };
-
-        $('.requerido').each(function(i, elem){
-            var value = $(elem).val();
-            var valueText = '';
-            if (Array.isArray(value)) {
-                valueText = value.join(',').trim();
-            } else {
-                valueText = (value === null || value === undefined) ? '' : value.toString().trim();
-            }
-            if(valueText == ''){
-                $(elem).addClass('is-invalid');
-                validate = false;
-                markInvalid(elem);
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if($('input[name="mycode"]:checked').val() === '1') {
-            if($('#vcode').val().trim() == ''){
-                $('#vcode').addClass('is-invalid');
-                validate = false;
-                markInvalid($('#vcode').get(0));
-            }else{
-                $('#vcode').removeClass('is-invalid');
-            }
-        }
-
-        const speciesSelected = $('input[name="species[]"]:checked').length > 0;
-        if (!speciesSelected) {
-            $('#speciesGroup').addClass('border-danger');
-            $('#speciesError').show();
-            validate = false;
-            markInvalid($('#speciesGroup').get(0));
-        } else {
-            $('#speciesGroup').removeClass('border-danger');
-            $('#speciesError').hide();
-        }
-
-        var country = $('#country').val();
-        var phonecode = $('#country option:selected').attr("data-phonecode");
-
-        if(country == 53) {
-            if($('#province').val() == ''){
-                $('#province').addClass('is-invalid');
-                validate = false;
-                markInvalid($('#province').get(0));
-            }else{
-                $('#province').removeClass('is-invalid');
-            }
-
-            if($('#canton').val() == ''){
-                $('#canton').addClass('is-invalid');
-                validate = false;
-                markInvalid($('#canton').get(0));
-            }else{
-                $('#canton').removeClass('is-invalid');
-            }
-
-            if($('#district').val() == ''){
-                $('#district').addClass('is-invalid');
-                validate = false;
-                markInvalid($('#district').get(0));
-            }else{
-                $('#district').removeClass('is-invalid');
-            }
-        }else{
-            if($('#province_alternate').val() == ''){
-                $('#province_alternate').addClass('is-invalid');
-                validate = false;
-                markInvalid($('#province_alternate').get(0));
-            }else{
-                $('#province_alternate').removeClass('is-invalid');
-            }
-
-            if($('#canton_alternate').val() == ''){
-                $('#canton_alternate').addClass('is-invalid');
-                validate = false;
-                markInvalid($('#canton_alternate').get(0));
-            }else{
-                $('#canton_alternate').removeClass('is-invalid');
-            }
-        }
-
-        if (window._itiPhone) {
-            if (!window._itiPhone.isValidNumber()) {
-                $('#phone').addClass('is-invalid');
-                validate = false;
-                markInvalid($('#phone').get(0));
-            } else {
-                $('#phone').removeClass('is-invalid');
-            }
-            try { $('#phone').val(window._itiPhone.getNumber()); } catch (e) {}
-        } else if($('#phone').val().trim() === '' || $('#phone').val() == '+' + phonecode) {
-            $('#phone').addClass('is-invalid');
-            validate = false;
-            markInvalid($('#phone').get(0));
-        }
-
-        if($('#lat').val() == '' || $('#lng').val() == '') {
-            $('#clinicMap').addClass('border-danger');
-            validate = false;
-            markInvalid($('#clinicMap').get(0));
-        } else {
-            $('#clinicMap').removeClass('border-danger');
-        }
-
-        if ($('#schedule_enabled').val() === '1' && window.validateSchedule) {
-            if (!window.validateSchedule()) {
-                validate = false;
-            }
-        }
-
-        if(validate == true) {
-            setCharge();
-            return true;
-        }
-
-        if (firstInvalid) {
-            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        if (window.Swal) {
-            Swal.fire({
-                title: '{{ trans("auth.register.complete.error.title") }}',
-                text: '{{ trans("auth.register.complete.error.required") }}',
-                icon: 'error',
-                confirmButtonText: '{{ trans("auth.register.complete.ok") }}',
-                confirmButtonColor: '#4bc6f9',
-                buttonsStyling: true
-            });
-        } else {
-            alert('{{ trans("auth.register.complete.error.required") }}');
-        }
-
-        return false;
-
-    }
-
-    setupDropzone('profilePhotoDrop', 'profilePhoto', 'profilePhotoPreview', 'removeProfilePhotoBtn', 'removeProfilePhoto', @json($profilePhoto), @json(isset($user->photo) && $user->photo != ''));
-    setupDropzone('clinicLogoDrop', 'clinicLogo', 'clinicLogoPreview', 'removeClinicLogoBtn', 'removeClinicLogo', @json($clinicLogo), @json(isset($vet->logo) && $vet->logo != ''));
-
-    $('input[name="mycode"]').on('change', function() {
-        toggleVetCode(this.value === '1');
-    });
-    toggleVetCode($('input[name="mycode"]:checked').val() === '1');
-
-    $('#frmProfile').on('input change', 'input, select, textarea', function() {
-        updateActionButtons();
-    });
-    updateActionButtons();
-
-    $('#step5').on('change', 'select[name^="schedule["]', function() {
-        $('#schedule_enabled').val('1');
-    });
-
-
-    window._isProfileComplete = @json($isProfileComplete);
-
-    let step4SaveTimer = null;
-    $('#step4').on('input change', 'input, select, textarea', function() {
-        if (step4SaveTimer) {
-            clearTimeout(step4SaveTimer);
-        }
-        step4SaveTimer = setTimeout(() => {
-            saveDraft({ omitFiles: true });
-        }, 800);
-    });
-
-    const phoneInput = document.getElementById('phone');
-    if (phoneInput && window.intlTelInput) {
-        const iti = window.intlTelInput(phoneInput, {
-            initialCountry: "auto",
-            separateDialCode: true,
-            nationalMode: false,
-            geoIpLookup: function(callback) {
-                fetch('https://ipapi.co/json/')
-                    .then(res => res.json())
-                    .then(data => callback((data && data.country_code) ? data.country_code.toLowerCase() : 'us'))
-                    .catch(() => callback('us'));
-            },
-            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.1.1/build/js/utils.js",
-        });
-
-        window._itiPhone = iti;
-        if (phoneInput.value) {
-            try { iti.setNumber(phoneInput.value); } catch (e) {}
-        }
-    }
-
-    const mapEl = document.getElementById('clinicMap');
-    let map = null;
-    let marker = null;
-    const initialLat = parseFloat($('#lat').val() || '0');
-    const initialLng = parseFloat($('#lng').val() || '0');
-    const defaultCenter = (initialLat && initialLng) ? [initialLat, initialLng] : [9.933, -84.083];
-
-        if (mapEl && typeof L !== 'undefined') {
-            map = L.map('clinicMap').setView(defaultCenter, (initialLat && initialLng) ? 16 : 12);
-            window._clinicMap = map;
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-
-        const markerIcon = L.divIcon({
-            className: 'clinic-pin',
-            html: '<div style="width:16px;height:16px;background:#4bc6f9;border:3px solid #152630;border-radius:50%;box-shadow:0 0 0 4px rgba(75,198,249,.25);"></div>',
-            iconSize: [16, 16],
-            iconAnchor: [8, 8]
-        });
-
-        function setMarker(lat, lng) {
-            if (!marker) {
-                marker = L.marker([lat, lng], { icon: markerIcon, draggable: true }).addTo(map);
-                marker.on('dragend', function(e) {
-                    const pos = e.target.getLatLng();
-                    $('#lat').val(pos.lat.toFixed(6));
-                    $('#lng').val(pos.lng.toFixed(6));
-                    $('#lat, #lng').trigger('change');
-                });
-            } else {
-                marker.setLatLng([lat, lng]);
-                marker.setIcon(markerIcon);
-            }
-            $('#lat').val(lat.toFixed(6));
-            $('#lng').val(lng.toFixed(6));
-            $('#lat, #lng').trigger('change');
-        }
-        window._setClinicMarker = setMarker;
-
-        if (initialLat && initialLng) {
-            setMarker(initialLat, initialLng);
-        }
-
-        map.on('click', function(e) {
-            setMarker(e.latlng.lat, e.latlng.lng);
-        });
-
-        let geocodeController = null;
-        function setMapLoading(isLoading) {
-            const loader = document.getElementById('mapLoading');
-            const mapEl = document.getElementById('clinicMap');
-            if (!loader) return;
-            loader.classList.toggle('d-none', !isLoading);
-            if (mapEl) {
-                mapEl.classList.toggle('map-hidden', isLoading);
-            }
-        }
-        async function geocode(query, signal = null) {
-            if (!query) return null;
-            const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
-            let res = null;
-            try {
-                res = await fetch(url, { headers: { 'Accept-Language': 'es,en' }, signal });
-            } catch (e) {
-                return null;
-            }
-            if (!res.ok) return null;
-            const data = await res.json();
-            if (!data.length) return null;
-            const bbox = data[0].boundingbox
-                ? [
-                    [parseFloat(data[0].boundingbox[0]), parseFloat(data[0].boundingbox[2])],
-                    [parseFloat(data[0].boundingbox[1]), parseFloat(data[0].boundingbox[3])]
-                  ]
-                : null;
-            return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), bbox };
-        }
-
-        function syncMapToStoredPin() {
-            const latRaw = $('#lat').val();
-            const lngRaw = $('#lng').val();
-            if (!latRaw || !lngRaw) {
-                return false;
-            }
-            const lat = parseFloat(latRaw);
-            const lng = parseFloat(lngRaw);
-            if (isNaN(lat) || isNaN(lng)) {
-                return false;
-            }
-            if (map) {
-                map.invalidateSize();
-            }
-            setMarker(lat, lng);
-            map.setView([lat, lng], 16);
-            if (marker) {
-                marker.setZIndexOffset(1000);
-            }
-            if (map) {
-                if (!window._pinDot) {
-                    window._pinDot = L.circleMarker([lat, lng], {
-                        radius: 6,
-                        color: '#152630',
-                        weight: 2,
-                        fillColor: '#4bc6f9',
-                        fillOpacity: 0.95
-                    }).addTo(map);
-                } else {
-                    window._pinDot.setLatLng([lat, lng]);
-                }
-            }
-            if (map) {
-                setTimeout(() => {
-                    map.invalidateSize();
-                    map.setView([lat, lng], 16);
-                }, 250);
-            }
-            return true;
-        }
-        window._syncMapToStoredPin = syncMapToStoredPin;
-
-        async function updateMapFromAddress() {
-            const countryText = $('#country option:selected').text();
-            const provinceText = $('#province option:selected').text();
-            const cantonText = $('#canton option:selected').text();
-            const districtText = $('#district option:selected').text();
-            const altProvince = $('#province_alternate').val();
-            const altCanton = $('#canton_alternate').val();
-            const address = $('#vetaddress').val();
-            const hasSavedPin = $('#lat').val() !== '' && $('#lng').val() !== '';
-            if (hasSavedPin) {
-                syncMapToStoredPin();
-                return;
-            }
-
-            const parts = [];
-            if (countryText) parts.push(countryText);
-            if (countryText && countryText.toLowerCase().includes('costa') && provinceText) parts.push(provinceText);
-            if (countryText && countryText.toLowerCase().includes('costa') && cantonText) parts.push(cantonText);
-            if (countryText && countryText.toLowerCase().includes('costa') && districtText) parts.push(districtText);
-            if (altProvince) parts.push(altProvince);
-            if (altCanton) parts.push(altCanton);
-            if (!hasSavedPin && address) parts.push(address);
-
-            const query = parts.filter(Boolean).join(', ');
-            if (!query) {
-                return;
-            }
-            if (geocodeController) {
-                geocodeController.abort();
-            }
-            geocodeController = new AbortController();
-            setMapLoading(true);
-            const result = await geocode(query, geocodeController.signal);
-            setMapLoading(false);
-            if (result) {
-                const onlyCountry =
-                    !!countryText &&
-                    !address &&
-                    !provinceText &&
-                    !cantonText &&
-                    !districtText &&
-                    !altProvince &&
-                    !altCanton;
-                if (onlyCountry && result.bbox) {
-                    map.fitBounds(result.bbox, { padding: [20, 20] });
-                } else {
-                    map.setView([result.lat, result.lng], 14);
-                }
-                setMarker(result.lat, result.lng);
-            }
-        }
-
-        $('#country, #province, #canton, #district').on('change', function() {
-            updateMapFromAddress();
-        });
-        $('#province_alternate, #canton_alternate').on('input', function() {
-            updateMapFromAddress();
-        });
-
-        window._updateMapFromAddress = updateMapFromAddress;
-
-        const mapEl = document.getElementById('clinicMap');
-        if (mapEl) {
-            const hadPin = syncMapToStoredPin();
-            if (!hadPin) {
-                setMapLoading(true);
-                updateMapFromAddress().finally(() => {
-                    setMapLoading(false);
-                });
-            }
-            if (map && map.whenReady) {
-                map.whenReady(() => {
-                    syncMapToStoredPin();
-                });
-            }
-        }
-    }
-
-    function enterOnlyNumbers(event){
-        if ( event.keyCode == 8 || event.keyCode == 9 || (event.keyCode >= 37 && event.keyCode <= 40) || event.keyCode == 188 || event.keyCode == 190 ) {
-        } else {
-            if ((event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
-                event.preventDefault();
-            }
-        }
-    }
+        },
+        texts: {
+            select: @json(trans('auth.register.complete.select')),
+            errorTitle: @json(trans('auth.register.complete.error.title')),
+            errorRequired: @json(trans('auth.register.complete.error.required')),
+            ok: @json(trans('auth.register.complete.ok'))
+        },
+        initial: {
+            country: @json($vetCountry),
+            province: @json($vetProvince),
+            canton: @json($vetCanton),
+            district: @json($vetDistrict)
+        },
+        images: {
+            profilePhoto: @json($profilePhoto),
+            profilePhotoHasImage: @json(isset($user->photo) && $user->photo != ''),
+            clinicLogo: @json($clinicLogo),
+            clinicLogoHasImage: @json(isset($vet->logo) && $vet->logo != '')
+        },
+        isProfileComplete: @json($isProfileComplete)
+    };
 </script>
+<script src="{{ asset('js/setup/profile-validation.js') }}"></script>
+<script src="{{ asset('js/setup/profile-draft.js') }}"></script>
+<script src="{{ asset('js/setup/profile-map.js') }}"></script>
+<script src="{{ asset('js/setup/profile-tabs.js') }}"></script>
+<script src="{{ asset('js/setup/complete-profile.js') }}"></script>
 
 @include('schedule.schedule._script')
 @endpush

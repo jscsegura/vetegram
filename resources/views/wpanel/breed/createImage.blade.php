@@ -19,7 +19,7 @@
     <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
     
-    <form name="frm" id="frm" role="form" method="post" enctype="multipart/form-data" action="{{ route('wp.animal-breed.storeImage') }}" onsubmit="return validate();">
+    <form name="frm" id="frm" role="form" method="post" enctype="multipart/form-data" action="{{ route('wp.animal-breed.storeImage') }}" data-action="wpanel.validate" data-action-event="submit" data-action-args="default|$el">
         @csrf
 
         <input type="hidden" name="breedId" id="breedId" value="{{ $id }}">
@@ -52,7 +52,7 @@
             <div class="col-md-12">
                 <br />
                 <input type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-primary" value="ACEPTAR">
-                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" onclick="window.open('{{ route('wp.animal-breed.images', $breed->id) }}','_self');">
+                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" data-action="navigate" data-url="{{ route('wp.animal-breed.images', $breed->id) }}">
             </div>
         </div>
     </form>

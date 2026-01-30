@@ -33,7 +33,7 @@
                         <span class="opacity-75">{{ trans('dash.label.only.authorized') }}</span>
                     </p>
                     @if((Auth::guard('web')->user()->rol_id != 8)&&($pet->dead_flag == 0))
-                        <a href="javascript:void(0);" onclick="setIdAppointmentToMedicine('0', '{{ $pet->id }}');" class="btn btn-secondary btn-sm px-4 text-uppercase" data-bs-toggle="modal" data-bs-target="#recipeModal"><i class="fa-regular fa-pen-to-square me-2"></i>{{ trans('dash.label.add.recipes') }}</a>
+                        <a href="javascript:void(0);" data-action="Appointments.setIdAppointmentToMedicine" data-action-event="click" data-action-args="0|{{ $pet->id }}" class="btn btn-secondary btn-sm px-4 text-uppercase" data-bs-toggle="modal" data-bs-target="#recipeModal"><i class="fa-regular fa-pen-to-square me-2"></i>{{ trans('dash.label.add.recipes') }}</a>
                     @endif
                 </div>
                   
@@ -74,7 +74,7 @@
                                                     </tbody>
                                                 </table>
                                                 <div class="d-flex gap-2 justify-content-end">
-                                                    <a href="javascript:void(0);" onclick="setIdAppointmentToSendRecipe('{{ $recipe->id }}');" class="btn btn-outline-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#sendModal"><i class="fa-regular fa-envelope me-2"></i>{{ trans('dash.btn.label.send') }}</a>
+                                                    <a href="javascript:void(0);" data-action="Appointments.setIdAppointmentToSendRecipe" data-action-event="click" data-action-args="{{ $recipe->id }}" class="btn btn-outline-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#sendModal"><i class="fa-regular fa-envelope me-2"></i>{{ trans('dash.btn.label.send') }}</a>
                                                     <a href="{{ route('appoinment.printrecipe', App\Models\User::encryptor('encrypt', $recipe->id)) }}" target="_blank" class="btn btn-outline-primary btn-sm mt-3"><i class="fa-solid fa-print me-2"></i>{{ trans('dash.btn.label.printer') }}</a>
                                                 </div>
                                             </div>
@@ -108,26 +108,12 @@
 <script src="{{ asset('js/wpanel/library/jquery.toast.js') }}"></script>
 
 <script>
-    var reloadToComplete = true;
-
-   $( '.select2' ).select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    } );
-
-    $( '.select3' ).select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#recipeModal')
-    } );
-
-    $('.select4').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#petEditModal')
-    });
+    window.PET_COMMON_CONFIG = {
+        selectors: {
+            petEditModal: '#petEditModal'
+        }
+    };
 </script>
+<script src="{{ asset('js/pet/common.js') }}"></script>
+<script src="{{ asset('js/pet/recipes.js') }}"></script>
 @endpush

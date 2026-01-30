@@ -12,7 +12,7 @@
           </div>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button onclick="sendRecipeModal();" type="button" class="btn btn-primary btn-sm px-4">{{ trans('dash.btn.label.send') }}</button>
+          <button type="button" class="btn btn-primary btn-sm px-4" data-appoint-action="send-recipe">{{ trans('dash.btn.label.send') }}</button>
         </div>
       </div>
     </div>
@@ -20,65 +20,21 @@
 
 @push('scriptBottom')
 <script>
-  function setIdAppointmentToSendRecipe(id) {
-    $('#setIdAppointmentToSendRecipe').val(id);
-  }
-
-  function sendRecipeModal() {
-    var id    = $('#setIdAppointmentToSendRecipe').val();
-    var email = $('#emailToSendRecipe').val();
-
-    var emailPattern = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-
-    email = email.trim();
-
-    if((email != '') && (emailPattern.test(email))) {
-      $.ajaxSetup({
-          headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-          }
-      });
-
-      setCharge();
-
-      $.post('{{ route('appoinment.sendRecipe') }}', {id:id, email:email},
-            function (data) {
-              
-              if(data.send == '1') {
-                $('#emailToSendRecipe').val('');
-
-                $.toast({
-                    text: '{{ trans('dash.label.recipe.sender') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'success'
-                });
-              }else{
-                $.toast({
-                  text: '{{ trans('dash.label.recipe.send.error') }}',
-                  position: 'bottom-right',
-                  textAlign: 'center',
-                  loader: false,
-                  hideAfter: 4000,
-                  icon: 'error'
-                });
-              }           
-
-              hideCharge();
-            }
-        );
-      }else{
-        $.toast({
-          text: '{{ trans('dash.label.recipe.send.email') }}',
-          position: 'bottom-right',
-          textAlign: 'center',
-          loader: false,
-          hideAfter: 4000,
-          icon: 'error'
-        });
-      }
-  }
+  window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+  window.APPOINT_MODAL_CONFIG.sendRecipe = {
+    ids: {
+      modal: 'sendModal',
+      idField: 'setIdAppointmentToSendRecipe',
+      emailField: 'emailToSendRecipe'
+    },
+    routes: {
+      sendRecipe: '{{ route('appoinment.sendRecipe') }}'
+    },
+    labels: {
+      sendSuccess: '{{ trans('dash.label.recipe.sender') }}',
+      sendError: '{{ trans('dash.label.recipe.send.error') }}',
+      emailInvalid: '{{ trans('dash.label.recipe.send.email') }}'
+    }
+  };
 </script>
 @endpush

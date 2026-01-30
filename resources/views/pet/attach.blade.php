@@ -29,7 +29,7 @@
             
             @if($pet->dead_flag == 0)
             <div class="d-flex flex-column flex-sm-row justify-content-end mb-3">
-                <a href="javascript:void(0);" onclick="setIdAppointmentToAttach('0', '{{ $pet->id }}')" class="btn btn-secondary btn-sm px-4 text-uppercase" data-bs-toggle="modal" data-bs-target="#attachModal"><i class="fa-solid fa-paperclip me-2"></i>Agregar adjunto</a>
+                <a href="javascript:void(0);" data-action="Appointments.setIdAppointmentToAttach" data-action-event="click" data-action-args="0|{{ $pet->id }}" class="btn btn-secondary btn-sm px-4 text-uppercase" data-bs-toggle="modal" data-bs-target="#attachModal"><i class="fa-solid fa-paperclip me-2"></i>Agregar adjunto</a>
             </div>
             @endif
 
@@ -57,9 +57,9 @@
                                         <p class="small lh-sm"><small>{{ date('d', strtotime($attach->created_at)) . ' de ' . strtolower(trans('dash.month.num' . (int)date('m', strtotime($attach->created_at)))) . ', ' . date('Y', strtotime($attach->created_at)) }}</small></p>
                                     </div>
                                 </a>
-                                <button type="button" class="btn btn-link p-2 opacity-75" title="Enviar" onclick="setIdAppointmentToSendAttach('{{ $attach->id }}', '{{ $owner->email }}')" data-bs-toggle="modal" data-bs-target="#sendAttachModal"><i class="fa-regular fa-envelope"></i></button>
+                                <button type="button" class="btn btn-link p-2 opacity-75" title="Enviar" data-action="Appointments.setIdAppointmentToSendAttach" data-action-event="click" data-action-args="{{ $attach->id }}|{{ $owner->email }}" data-bs-toggle="modal" data-bs-target="#sendAttachModal"><i class="fa-regular fa-envelope"></i></button>
                                 @if($attach->created_by == $thisUser)
-                                <button type="button" data-id="{{ $attach->id }}" onclick="removeFile(this);" class="btn btn-link p-2 opacity-75" title="Borrar"><i class="fa-regular fa-trash-can"></i></button>
+                                <button type="button" data-id="{{ $attach->id }}" data-action="Pet.removeFile" data-action-event="click" data-action-args="$el" class="btn btn-link p-2 opacity-75" title="Borrar"><i class="fa-regular fa-trash-can"></i></button>
                                 @endif
                             </div>
                         </div>
@@ -84,73 +84,23 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    var reloadToComplete = true;
-
-    $('.select4').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#petEditModal')
-    });
-
-    function removeFile(obj) {
-        var id = $(obj).attr('data-id');
-
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.msg.delete.attach') }}',
-            text: '{{ trans('dash.msg.confir.delete.attach') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.label.yes.delete') }}',
-            cancelButtonText: '{{ trans('dash.label.no.cancel') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('appoinment.deleteAttach') }}', {id:id},
-                    function (data){
-                      if(data.process == '1') {
-                        $(obj).parent('div').remove();
-                      }else if(data.process == '500') {
-                        $.toast({
-                            text: '{{ trans('dash.msg.error.perm.attach') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'error'
-                        });
-                      }else{
-                        $.toast({
-                            text: '{{ trans('dash.msg.error.delete.attach') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'error'
-                        });
-                      }
-
-                      hideCharge();
-                    }
-                );
-            }
-        });
-    }
+    window.PET_COMMON_CONFIG = {
+        routes: {
+            deleteAttach: @json(route('appoinment.deleteAttach'))
+        },
+        texts: {
+            deleteAttachTitle: @json(trans('dash.msg.delete.attach')),
+            deleteAttachConfirm: @json(trans('dash.msg.confir.delete.attach')),
+            deleteYes: @json(trans('dash.label.yes.delete')),
+            deleteNo: @json(trans('dash.label.no.cancel')),
+            deleteAttachPermError: @json(trans('dash.msg.error.perm.attach')),
+            deleteAttachError: @json(trans('dash.msg.error.delete.attach'))
+        },
+        selectors: {
+            petEditModal: '#petEditModal'
+        }
+    };
 </script> 
+<script src="{{ asset('js/pet/common.js') }}"></script>
+<script src="{{ asset('js/pet/attach.js') }}"></script>
 @endpush

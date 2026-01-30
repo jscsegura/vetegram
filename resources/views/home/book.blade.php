@@ -74,7 +74,7 @@
                     @if(count($hours) > 0)
                         @foreach ($hours as $hour)
                             <div class="col-6 col-sm-4 col-lg-3 p-2">
-                                <a href="javascript:void(0);" data-id="{{ $hour->id }}" onclick="selectedHour(this);" class="selectDays d-block">{{ date('h:i A', strtotime($hour->hour)) }}</a>
+                                <a href="javascript:void(0);" data-id="{{ $hour->id }}" data-action="Home.selectedHour" data-action-event="click" data-action-args="$el" class="selectDays d-block">{{ date('h:i A', strtotime($hour->hour)) }}</a>
                             </div>
                         @endforeach
                     @else
@@ -86,7 +86,7 @@
                     @endif
                     
                     <div class="col-12 p-2 text-center">
-                        <button class="btn btn-outline-primary px-5 mt-2" onclick="reserveHour();">{{ trans('dash.label.btn.continue') }}</button>
+                        <button class="btn btn-outline-primary px-5 mt-2" data-action="Home.reserveHour" data-action-event="click">{{ trans('dash.label.btn.continue') }}</button>
                     </div>
                 </div>
 
@@ -123,7 +123,7 @@
                             @endphp
                             
                             <div class="col">
-                                <a href="javascript:void(0);" data-id="{{ $pet->id }}" onclick="selectedPet(this);" class="thispets fw-medium d-flex align-items-center gap-2 position-relative w-100 text-decoration-none rounded-3 border border-2 border-secondary px-3 py-2">
+                                <a href="javascript:void(0);" data-id="{{ $pet->id }}" data-action="Home.selectedPet" data-action-event="click" data-action-args="$el" class="thispets fw-medium d-flex align-items-center gap-2 position-relative w-100 text-decoration-none rounded-3 border border-2 border-secondary px-3 py-2">
                                     <span class="petPhoto d-inline-block rounded-circle" style="background-image: url({{ $photo }})"></span>
                                     <span>{{ $pet->name }}</span>
                                 </a>
@@ -144,7 +144,7 @@
                     @if($doctor->rol_id == 6)
                     <div class="mb-3">
                         <label class="form-label">{{ trans('dash.label.element.breed') }}</label>
-                        <select class="form-select fc" id="breed" name="breed" aria-label="Select" onchange="changeBreed(this);">
+                        <select class="form-select fc" id="breed" name="breed" aria-label="Select" data-action="Home.changeBreed" data-action-event="change" data-action-args="$el">
                             <option selected>{{ trans('dash.label.selected') }}</option>
                         </select>
                     </div>
@@ -154,7 +154,7 @@
                         <div class="row row-cols-1 row-cols-sm-2 g-2 g-md-3 mb-3" id="containerGrooming">
                             
                             <div class="col">
-                                <a href="javascript:void(0);" data-id="0" onclick="selectedImage(this);" class="thisimages fw-medium d-flex align-items-center gap-2 position-relative w-100 text-decoration-none rounded-3 border border-2 border-secondary px-3 py-2">
+                                <a href="javascript:void(0);" data-id="0" data-action="Home.selectedImage" data-action-event="click" data-action-args="$el" class="thisimages fw-medium d-flex align-items-center gap-2 position-relative w-100 text-decoration-none rounded-3 border border-2 border-secondary px-3 py-2">
                                     <span class="petPhoto d-inline-block rounded-circle" style="background-image: url({{ asset('img/default.png') }})"></span>
                                     <span>{{ trans('dash.label.other') }}</span>
                                 </a>
@@ -171,7 +171,7 @@
                 </form>
             </div>
             <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-              <button id="agendarBtn" onclick="sendAppointment();" type="button" class="btn btn-primary btn-sm fw-medium px-4">{{ trans('dash.label.title.schedule') }}</button>
+              <button id="agendarBtn" data-action="Home.sendAppointment" data-action-event="click" type="button" class="btn btn-primary btn-sm fw-medium px-4">{{ trans('dash.label.title.schedule') }}</button>
             </div>
           </div>
         </div>
@@ -187,329 +187,32 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        new dateDropper({
-            selector: '.dDropper',
-            format: 'dd/mm/y',
-            expandable: true,
-            showArrowsOnHover: true,
-            onDropdownExit: changeDate
-        })
-
-        function selectedHour(obj) {
-            var id = $(obj).attr('data-id');
-
-            $('#hourSelected').val(id);
-
-            $('.deleteD').remove();
-            $('.selectDays').removeClass('active');
-            $(obj).addClass('active');
-            $(obj).append('<span class="deleteD" onclick="removeSelected(event);"><i class="fa-solid fa-minus"></i></span>');
-        }
-
-        function removeSelected(event) {
-            event.stopPropagation();
-            $('#hourSelected').val(0);
-
-            $('.deleteD').remove();
-            $('.selectDays').removeClass('active');
-        }
-
-        let userid = '{{ $vet_id }}';
-        function changeDate(option) {
-            
-            var date = $('#dateShow').val();
-            var parts = date.split('/');
-            date = parts[2] + '-' + parts[1] + '-' + parts[0];
-      
-            setCharge();
-
-            location.href = '{{ url('book/hours') }}/' + userid + '/' + btoa(date);
-        }
-
-        function reserveHour() {
-            var hourid = $('#hourSelected').val();
-
-            if(hourid > 0) {
-                setCharge();
-
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-                
-                $.post('{{ route('appoinment.reserveHour') }}', {id:hourid},
-                    function (data){
-                        if(data.reserve != '1') {
-                            $.toast({
-                                text: '{{ trans('dash.msg.error.hour.not.available') }}',
-                                position: 'bottom-right',
-                                textAlign: 'center',
-                                loader: false,
-                                hideAfter: 4000,
-                                icon: 'warning'
-                            });
-                        }
-                        if(data.reserve == '1') {
-                            $('#bookModal').modal('show');
-                        }
-                        hideCharge();
-                    }
-                );
-            }else{
-                $.toast({
-                    text: '{{ trans('dash.hour.not.choose') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'error'
-                });
+        window.HOME_BOOK_CONFIG = {
+            vetId: @json($vet_id),
+            doctorRoleId: @json((int) $doctor->rol_id),
+            doctorVetId: @json($doctor->id_vet),
+            assetsBase: @json(asset('/')),
+            routes: {
+                reserveHour: @json(route('appoinment.reserveHour')),
+                getPetData: @json(route('search.getPetData')),
+                getPetDataImages: @json(route('search.getPetDataImages')),
+                saveBook: @json(route('search.saveBook'))
+            },
+            urls: {
+                bookHoursBase: @json(url('book/hours')),
+                bookMessageBase: @json(url('book-message'))
+            },
+            texts: {
+                hourNotAvailable: @json(trans('dash.msg.error.hour.not.available')),
+                hourNotChoose: @json(trans('dash.hour.not.choose')),
+                petNotChoose: @json(trans('dash.pet.not.choose')),
+                imageNotChoose: @json(trans('dash.image.not.choose')),
+                imageNotChoosePersonalize: @json(trans('dash.image.not.choose.personalize')),
+                extNotValid: @json(trans('dash.msg.ext.not.valid')),
+                appointmentSaveError: @json(trans('dash.msg.error.appoinment.save')),
+                selectedLabel: @json(trans('dash.label.selected'))
             }
-        }
-
-        var assets = '{{ asset('/') }}';
-        function selectedPet(obj) {
-            var id = $(obj).attr('data-id');
-            var id_vet = '{{ $doctor->id_vet }}';
-
-            $('#petSelected').val(id);
-
-            $('.unselectPet').remove();
-            $('.thispets').removeClass('border-info');
-            $('.thispets').addClass('border-secondary');
-
-            $(obj).removeClass('border-secondary');
-            $(obj).addClass('border-info');
-
-            $(obj).append('<span class="unselectPet" onclick="removeSelectedPet(event);"><i class="fa-solid fa-minus"></i></span>');
-
-            @if($doctor->rol_id == 6)
-                $('.containerImg').remove();
-
-                $.post('{{ route('search.getPetData') }}', {id:id, id_vet:id_vet},
-                    function (data){
-                        var options = '<option selected>{{ trans('dash.label.selected') }}</option>';
-                        var optionSelect = '';
-
-                        $.each(data.breeds, function(i, item) {
-                            if(item.id == data.breedSelected) {
-                                optionSelect = 'selected';
-                            }else{
-                                optionSelect = '';
-                            }
-                            options = options + '<option value="'+item.id+'" '+optionSelect+'>'+item.title+'</option>';
-                        });
-
-                        var images = '';
-                        $.each(data.images, function(i, item) {
-                            images = images + '<div class="col containerImg">' +
-                                '<a href="javascript:void(0);" data-id="'+item.id+'" onclick="selectedImage(this);" class="thisimages fw-medium d-flex align-items-center gap-2 position-relative w-100 text-decoration-none rounded-3 border border-2 border-secondary px-3 py-2">' +
-                                    '<span class="petPhoto d-inline-block rounded-circle" style="background-image: url('+assets+item.image+')"></span>' +
-                                    '<span>'+item.title+'</span>' +
-                                '</a>' +
-                            '</div>';
-                        });
-                        
-                        $('#breed').html(options);
-                        $('#containerGrooming').prepend(images);
-                    }
-                );
-            @endif
-        }
-
-        function selectedImage(obj) {
-            var id = $(obj).attr('data-id');
-
-            $('#imageSelected').val(id);
-
-            $('.unselectImage').remove();
-            $('.thisimages').removeClass('border-info');
-            $('.thisimages').addClass('border-secondary');
-
-            $(obj).removeClass('border-secondary');
-            $(obj).addClass('border-info');
-
-            $(obj).append('<span class="unselectImage" onclick="removeSelectedImage(event);"><i class="fa-solid fa-minus"></i></span>');
-
-            const estilosOriginal = getComputedStyle(document.querySelector('.unselectPet'));
-            const claseDestino = document.querySelector('.unselectImage');
-
-            for (const propiedad in estilosOriginal) {
-                if (typeof estilosOriginal[propiedad] === 'string' && estilosOriginal[propiedad] !== '') {
-                    claseDestino.style[propiedad] = estilosOriginal[propiedad];
-                }
-            }
-
-            if(id == 0) {
-                $('#containerGroomingText').show();
-            }else{
-                $('#containerGroomingText').hide();
-            }
-        }
-
-        function changeBreed (obj) {
-            var id = $(obj).val();
-
-            $('.containerImg').remove();
-            $.post('{{ route('search.getPetDataImages') }}', {id:id},
-                function (data){
-                    var images = '';
-                    $.each(data.images, function(i, item) {
-                        images = images + '<div class="col containerImg">' +
-                            '<a href="javascript:void(0);" data-id="'+item.id+'" onclick="selectedImage(this);" class="thisimages fw-medium d-flex align-items-center gap-2 position-relative w-100 text-decoration-none rounded-3 border border-2 border-secondary px-3 py-2">' +
-                                '<span class="petPhoto d-inline-block rounded-circle" style="background-image: url('+assets+item.image+')"></span>' +
-                                '<span>'+item.title+'</span>' +
-                            '</a>' +
-                        '</div>';
-                    });
-                    
-                    $('#containerGrooming').prepend(images);
-                }
-            );
-        }
-
-        function removeSelectedPet() {
-            event.stopPropagation();
-            $('#petSelected').val(0);
-
-            $('.unselectPet').remove();
-            $('.thispets').removeClass('border-info');
-            $('.thispets').addClass('border-secondary');
-        }
-
-        function removeSelectedImage() {
-            event.stopPropagation();
-            $('#imageSelected').val('');
-
-            $('.unselectImage').remove();
-            $('.thisimages').removeClass('border-info');
-            $('.thisimages').addClass('border-secondary');
-        }
-
-        function sendAppointment() {
-            var hour = $('#hourSelected').val();
-            var pet  = $('#petSelected').val();
-            var reason = $('#reason').val();
-
-            var extValid = ['.jpg','.JPG','.jpeg','.JPEG','.png','.PNG','.gif','.GIF','.pdf','.PDF','.mp3','.mp4','.avi','.zip','.rar','.doc','.docx','.ppt','.pptx','.pptm','.pps','.ppsm','.ppsx','.xls','.xlsx'];
-  
-            var names = [];
-            var isvalid = true;
-            var counter = 0;
-            for (var i = 0; i < $('#bookAttach').get(0).files.length; ++i) {
-                var name = $('#bookAttach').get(0).files[i].name;
-                names.push(name);
-        
-                var extension = name.substring(name.lastIndexOf("."));
-                var position = jQuery.inArray(extension, extValid);
-                if(position == -1) {
-                    isvalid = false;
-                    
-                    $.toast({
-                        text: '{{ trans('dash.msg.ext.not.valid') }}',
-                        position: 'bottom-right',
-                        textAlign: 'center',
-                        loader: false,
-                        hideAfter: 4000,
-                        icon: 'warning'
-                    });
-                }
-        
-                counter++;
-            }
-
-            if(hour == 0) {
-                $.toast({
-                    text: '{{ trans('dash.hour.not.choose') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'error'
-                });
-                isvalid = false;
-            }
-            if(pet == 0) {
-                $.toast({
-                    text: '{{ trans('dash.pet.not.choose') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'error'
-                });
-                isvalid = false;
-            }
-
-            @if($doctor->rol_id == 6)
-            if($('#imageSelected').val() == '') {
-                $.toast({
-                    text: '{{ trans('dash.image.not.choose') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'error'
-                });
-                isvalid = false;
-            }
-            if($('#imageSelected').val() == '0') {
-                if($('#grooming_personalize').val() == '') {
-                    $.toast({
-                        text: '{{ trans('dash.image.not.choose.personalize') }}',
-                        position: 'bottom-right',
-                        textAlign: 'center',
-                        loader: false,
-                        hideAfter: 4000,
-                        icon: 'error'
-                    });
-                    isvalid = false;
-                }
-            }
-            @endif
-
-            if(isvalid) {
-                setCharge2();
-        
-                var peticion = $.ajax({
-                    url: '{{ route('search.saveBook') }}',
-                    type: 'POST',
-                    data: new FormData(document.getElementById('frmUploaderAppoinment')),
-                    contentType: false,
-                    cache: false,
-                    processData: false,
-                    success: function(data, status, xhr) {
-                        
-                        if(data.save == 1) {
-                            location.href = '{{ url('book-message') }}/' + data.id;
-                        }else{
-                            $.toast({
-                                text: data.error,
-                                position: 'bottom-right',
-                                textAlign: 'center',
-                                loader: false,
-                                hideAfter: 4000,
-                                icon: 'error'
-                            });
-                        }
-            
-                        hideCharge2();
-                    },
-                    error: function(xhr, status, error) {
-                        $.toast({
-                            text: '{{ trans('dash.msg.error.appoinment.save') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'error'
-                        });
-            
-                        hideCharge2();
-                    }
-                });
-            }
-        }
+        };
     </script>
+    <script src="{{ asset('js/home/book.js') }}"></script>
 @endpush

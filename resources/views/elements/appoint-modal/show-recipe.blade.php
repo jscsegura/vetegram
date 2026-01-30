@@ -29,34 +29,22 @@
 
 @push('scriptBottom')
     <script>
-        function setIdAppointmentToShow(id) {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                }
-            });
-
-            setCharge();
-
-            $('#tbodyShowRecipe').html('');
-            
-            $.post('{{ route('appoinment.getRecipeData') }}', {id:id, onlyDetail:true},
-                function (data) {
-                    $.each(data.recipe.detail, function(i, item) {
-                        var txt = '<tr>'+
-                                        '<td data-label="{{ trans('dash.label.name') }}:" class="fw-medium py-1 py-md-3">' + item.title + '</td>'+
-                                        '<td data-label="{{ trans('dash.label.duration') }}:" class="py-1 py-md-3">' + item.duration + '</td>'+
-                                        '<td data-label="{{ trans('dash.label.take') }}:" class="py-1 py-md-3 text-center">' + item.take + '</td>'+
-                                        '<td data-label="{{ trans('dash.label.quantity') }}:" class="py-1 py-md-3 text-center">' + item.quantity + '</td>'+
-                                        '<td data-label="{{ trans('dash.label.notes') }}:" class="py-1 py-md-3 d-flex"><span class="flex-1">' + item.instruction + '</span></td>'+
-                                    '</tr>';
-                        
-                        $('#tbodyShowRecipe').append(txt);
-                    });
-
-                    hideCharge();
-                }
-            );
-        }
+        window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+        window.APPOINT_MODAL_CONFIG.showRecipe = {
+            ids: {
+                modal: 'showRecipe',
+                container: 'tbodyShowRecipe'
+            },
+            routes: {
+                getRecipeData: '{{ route('appoinment.getRecipeData') }}'
+            },
+            labels: {
+                name: '{{ trans('dash.label.name') }}',
+                duration: '{{ trans('dash.label.duration') }}',
+                take: '{{ trans('dash.label.take') }}',
+                quantity: '{{ trans('dash.label.quantity') }}',
+                notes: '{{ trans('dash.label.notes') }}'
+            }
+        };
     </script>
 @endpush

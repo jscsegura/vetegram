@@ -19,7 +19,7 @@
     <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
     
-    <form method="post" name="frm" id="frm" role="form" enctype="multipart/form-data" action="{{ url('wpanel/about/' . $about->id) }}" onsubmit="return validate();">
+    <form method="post" name="frm" id="frm" role="form" enctype="multipart/form-data" action="{{ url('wpanel/about/' . $about->id) }}" data-action="wpanel.validate" data-action-event="submit" data-action-args="default|$el">
         
         {{ method_field('PUT') }}
         @csrf
@@ -53,7 +53,7 @@
         <div class="row">
             <div class="col-md-6">
                 <label>Icono:</label>
-                <input type="text" name="icon" id="icon" class="form-control requerido" value="{{ $about->image }}" onclick="openIcons();">
+                <input type="text" name="icon" id="icon" class="form-control requerido" value="{{ $about->image }}" data-action="open-icons">
             </div>
         </div>
         <div class="row">
@@ -64,7 +64,7 @@
             <div class="col-md-12">
                 <br />
                 <input type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-primary" value="ACEPTAR">
-                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" onclick="window.open('{{ route('wp.about.index') }}','_self');">
+                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" data-action="navigate" data-url="{{ route('wp.about.index') }}">
             </div>
         </div>
     </form>

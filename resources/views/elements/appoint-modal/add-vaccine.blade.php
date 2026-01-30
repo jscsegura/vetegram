@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-3 p-md-4">
-                <form id="frmVaccineModaladd" name="frmVaccineModaladd" action="" enctype="multipart/form-data" method="post" onsubmit="return false;">
+                <form id="frmVaccineModaladd" name="frmVaccineModaladd" action="" enctype="multipart/form-data" method="post" data-action="prevent" data-action-event="submit">
                     @csrf
                     <input type="hidden" id="sectionVaccineAdd" name="sectionVaccineAdd" value="0">
                     <input type="hidden" id="vaccineIdPet" name="vaccineIdPet" value="0">
@@ -24,7 +24,7 @@
                     <div class="mb-3">
                         <label for="vaccineName" class="form-label small">{{ trans('dash.label.element.drug') }}</label>
                         {{-- <input type="text" id="vaccineName" name="vaccineName" class="form-control fc " maxlength="255"> --}}
-                        <select id="vaccineName" name="vaccineName" class="form-select fc select5 requeridoAddVaccine" data-placeholder="Seleccionar" onchange="setInterval(this);">
+                        <select id="vaccineName" name="vaccineName" class="form-select fc select5 requeridoAddVaccine" data-placeholder="Seleccionar" data-appoint-action="vaccine-interval">
                             <option></option>
                             @foreach ($vaccineItems as $item)
                             <option value="{{ $item['title_' . $weblang] }}" data-interval="{{ $item->interval }}">{{ $item['title_' . $weblang] }}</option>    
@@ -63,7 +63,7 @@
                 </form>
             </div>
             <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-                <button type="button" onclick="saveToCreateVaccine();" class="btn btn-primary btn-sm px-4">{{ trans('dash.text.btn.save') }}</button>
+                <button type="button" class="btn btn-primary btn-sm px-4" data-appoint-action="vaccine-save">{{ trans('dash.text.btn.save') }}</button>
             </div>
         </div>
     </div>
@@ -100,105 +100,32 @@
 
 @push('scriptBottom')
     <script>
-        function setIdAppointmentToVaccine(id_pet = 0, id_owner = 0) {
-            $('#vaccineIdPet').val(id_pet);
-            $('#vaccineIdOwner').val(id_owner);
-        }
-
-        function setInterval(obj) {
-            var selectedOption = $('#vaccineName').find(':selected');
-            var interval = selectedOption.attr('data-interval');
-
-            $('#interval').val(interval);
-        }
-
-        function saveToCreateVaccine() {
-            var validate = true;
-
-            $('.requeridoAddVaccine').each(function(i, elem){
-                var value = $(elem).val();
-                var value = value.trim();
-                if(value == ''){
-                    $(elem).addClass('is-invalid');
-                    validate = false;
-                }else{
-                    $(elem).removeClass('is-invalid');
-                }
-            });
-            
-            if(validate == true) {
-                setCharge();
-
-                $.ajax({
-                    url: '{{ route('appoinment.createVaccine') }}',
-                    type: 'POST',
-                    data: new FormData(document.getElementById('frmVaccineModaladd')),
-                    contentType: false,
-                    cache: false,
-                    processData: false,
-                    success: function(data, status, xhr) {  
-                        location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        $.toast({
-                            text: '{{ trans('dash.msg.error.create.vaccine') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'error'
-                        });
-
-                        hideCharge();
-                    }
-                });
-            }
-        }
-
-        function showAppointmentVaccine(id) {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                }
-            });
-
-            setCharge();
-
-            $('#containerVaccine').html('');
-            
-            $.post('{{ route('appoinment.getVaccineData') }}', {id:id},
-                function (data) {
-                    var photo = '';
-                    if(data.result.photo != '') {
-                        var img = '{{ asset('/') }}';
-                        photo = '<img src="'+ img + data.result.photo +'" alt="Vacuna" class="vaccineImg">';
-                    }
-
-                    var signature = '';
-                    if(data.result.signature != '') {
-                        signature = '<img src="'+ data.result.signature +'" alt="Firma" class="vaccineImg">';
-                    }
-
-                    var html = '<tr>' +
-                                    '<td data-label="Aplicación:" class="fw-medium py-1 py-md-3">'+ data.result.date +'</td>' +
-                                    '<td data-label="Fármaco:" class="py-1 py-md-3">'+ data.result.name +'</td>' +
-                                    '<td data-label="Marca:" class="py-1 py-md-3 text-center">'+ data.result.brand +'</td>' +
-                                    '<td data-label="Lote:" class="py-1 py-md-3 text-center">'+ data.result.batch +'</td>' +
-                                    '<td data-label="Caducidad:" class="py-1 py-md-3 text-center">'+ data.result.expire +'</td>' +
-                                    '<td data-label="Fotografía:" class="py-1 py-md-3 text-center">' +
-                                        photo +
-                                    '</td>' +
-                                    '<td data-label="Profesional:" class="py-1 py-md-3 text-center">' +
-                                        '<p class="d-inline-block">'+ data.result.nameDoctor +'</p><br>' +
-                                        signature +
-                                    '</td>' +
-                                '</tr>';
-                    
-                    $('#containerVaccine').html(html);
-
-                    hideCharge();
-                }
-            );
-        }
+        window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+        window.APPOINT_MODAL_CONFIG.addVaccine = {
+            ids: {
+                modal: 'addVaccine',
+                form: 'frmVaccineModaladd',
+                petField: 'vaccineIdPet',
+                ownerField: 'vaccineIdOwner',
+                nameSelect: 'vaccineName',
+                intervalInput: 'interval',
+                detailContainer: 'containerVaccine'
+            },
+            routes: {
+                createVaccine: '{{ route('appoinment.createVaccine') }}',
+                getVaccineData: '{{ route('appoinment.getVaccineData') }}'
+            },
+            labels: {
+                errorCreate: '{{ trans('dash.msg.error.create.vaccine') }}',
+                applyLabel: '{{ trans('dash.label.element.apply') }}',
+                drugLabel: '{{ trans('dash.label.element.drug') }}',
+                brandLabel: '{{ trans('dash.label.element.brand') }}',
+                batchLabel: '{{ trans('dash.label.element.lot') }}',
+                expireLabel: '{{ trans('dash.label.element.expire') }}',
+                photoLabel: '{{ trans('dash.label.element.photo') }}',
+                professionalLabel: '{{ trans('dash.label.element.professional') }}'
+            },
+            assetsBase: '{{ asset('/') }}'
+        };
     </script>
 @endpush

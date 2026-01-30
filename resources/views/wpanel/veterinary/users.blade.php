@@ -18,18 +18,18 @@
         </div>
     </div>
     <div class="col-md-6 text-right">
-        <a class="btn btn-default" id="btnplus" data-plus="0" onclick="showPlus(this);"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Ver más detalles</a>
+        <a class="btn btn-default" id="btnplus" data-plus="0" data-action="show-plus"><i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Ver más detalles</a>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-6">
         <label>Veterinaria</label>
-        <input type="text" onfocus="blur()" class="form-control" value="{{ $vet->company }}">
+        <input type="text" readonly class="form-control" value="{{ $vet->company }}">
     </div>
     <div class="col-md-6">
         <label>Razón Social</label>
-        <input type="text" onfocus="blur()" class="form-control" value="{{ $vet->social_name }}">
+        <input type="text" readonly class="form-control" value="{{ $vet->social_name }}">
     </div>
 </div>
 
@@ -39,11 +39,11 @@
     <div class="row">
         <div class="col-md-6">
             <label>País</label>
-            <input type="text" onfocus="blur()" class="form-control" value="{{ (isset($country->title)) ? $country->title : '' }}">
+            <input type="text" readonly class="form-control" value="{{ (isset($country->title)) ? $country->title : '' }}">
         </div>
         <div class="col-md-6">
             <label>Provincia</label>
-            <input type="text" onfocus="blur()" class="form-control" value="{{ $province }}">
+            <input type="text" readonly class="form-control" value="{{ $province }}">
         </div>
     </div>
 
@@ -52,11 +52,11 @@
     <div class="row">
         <div class="col-md-6">
             <label>Cantón</label>
-            <input type="text" onfocus="blur()" class="form-control" value="{{ $canton }}">
+            <input type="text" readonly class="form-control" value="{{ $canton }}">
         </div>
         <div class="col-md-6">
             <label>Distrito</label>
-            <input type="text" onfocus="blur()" class="form-control" value="{{ $district }}">
+            <input type="text" readonly class="form-control" value="{{ $district }}">
         </div>
     </div>
 
@@ -65,7 +65,7 @@
     <div class="row">
         <div class="col-md-12">
             <label>Dirección</label>
-            <input type="text" onfocus="blur()" class="form-control" value="{{ $vet->address }}">
+            <input type="text" readonly class="form-control" value="{{ $vet->address }}">
         </div>
     </div>
 
@@ -74,11 +74,11 @@
     <div class="row">
         <div class="col-md-6">
             <label>Teléfono</label>
-            <input type="text" onfocus="blur()" class="form-control" value="{{ $vet->phone }}">
+            <input type="text" readonly class="form-control" value="{{ $vet->phone }}">
         </div>
         <div class="col-md-6">
             <label>Registro</label>
-            <input type="text" onfocus="blur()" class="form-control" value="{{ $vet->created_at }}">
+            <input type="text" readonly class="form-control" value="{{ $vet->created_at }}">
         </div>
     </div>
 
@@ -130,125 +130,24 @@
     <script src="https://cdn.datatables.net/v/bs/dt-1.13.4/datatables.min.js"></script>
 
     <script>
-        var dataTable = $('#tableList').DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            order: [[0, 'desc']],
-            ajax: "{{ route('wp.veterinary.listUsers') }}/?id={{ $id }}",
-            paging: true,
-            pageLength: 25,
-            columns: [
-                {data:'id'},
-                {data:'rol_id', render: function(data, type, row) {
-                    var txt = '';
-                    switch (row.rol_id) {
-                        case 3: txt = 'Administrador';
-                            break;
-                        case 4: txt = 'Veterinario';
-                            break;
-                        case 5: txt = 'Cajero';
-                            break;
-                        case 6: txt = 'Groomer';
-                            break;
-                        case 7: txt = 'Contador';
-                            break;
-                        default: txt = 'NA';
-                            break;
-                    }
-                    return txt;
-                }, 'orderable': false, 'searchable': false, 'className': "text-left"},
-                {data:'name'},
-                {data:'email'},
-                {data:'phone'},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<a href="{{ url('wpanel/veterinary/detail') }}/'+row.id+'"><img src="{{ asset('img/wpanel/menu.png') }}"></a>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '';
-                    if(row.enabled == 1) {
-                        btn += '<span id="enabledRow'+row.id+'"><a data="' + row.id + '">';
-                        btn += '<img width="25px" src="{{ asset('img/wpanel/active.png') }}">';
-                        btn += '</a></span>';
-                    } else {
-                        btn += '<span id="enabledRow'+row.id+'"><a data="' + row.id + '" onclick="activeRow(this);">';
-                        btn += '<img width="25px" src="{{ asset('img/wpanel/deactivated.png') }}">';
-                        btn += '</a></span>';
-                    }
-                    
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<span id="lockRow'+row.id+'"><a data="' + row.id + '" onclick="enabledRow(this);">';
-                    if(row.lock == 1) {
-                        btn += '<img src="{{ asset('img/wpanel/enabled.png') }}">';
-                    } else {
-                        btn += '<img src="{{ asset('img/wpanel/disabled.png') }}">';
-                    }
-                    btn += '</a></span>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-            ],
-            language: {
-                sLengthMenu: '',
-                sZeroRecords: 'No se encontraron resultados',
-                sEmptyTable: 'Ningún dato disponible en esta tabla',
-                sInfo: 'Registro _START_ al _END_ de un total de _TOTAL_ registros',
-                sInfoEmpty: 'Mostrando registros del 0 al 0 de un total de 0 registros',
-                sInfoFiltered: '',
-                sSearch: 'Buscar:',
-                oPaginate: {
-                    "sFirst": 'Primero',
-                    "sLast":  'Último',
-                    "sNext": 'Siguiente',
-                    "sPrevious": 'Anterior',
-                },
+        window.WPANEL_VETERINARY_USERS_CONFIG = {
+            listUrl: "{{ route('wp.veterinary.listUsers') }}/?id={{ $id }}",
+            lockUrl: "{{ route('wp.veterinary.lock') }}",
+            enabledUrl: "{{ route('wp.veterinary.enabled') }}",
+            detailBaseUrl: "{{ url('wpanel/veterinary/detail') }}",
+            showDetailsLabel: "<i class=\"fa fa-plus\" aria-hidden=\"true\"></i>&nbsp;Ver m\u00e1s detalles",
+            hideDetailsLabel: "<i class=\"fa fa-minus\" aria-hidden=\"true\"></i>&nbsp;Ocultar detalles",
+            confirmTitle: "Validar correo",
+            confirmMessage: "\u00bfDesea confirmar la direcci\u00f3n de correo electronica del usuario como v\u00e1lida?",
+            assets: {
+                menu: "{{ asset('img/wpanel/menu.png') }}",
+                active: "{{ asset('img/wpanel/active.png') }}",
+                deactivated: "{{ asset('img/wpanel/deactivated.png') }}",
+                enabled: "{{ asset('img/wpanel/enabled.png') }}",
+                disabled: "{{ asset('img/wpanel/disabled.png') }}"
             }
-        });
-
-        function enabledRow(obj) {
-            var id = $(obj).attr('data');
-            enabledRegister('{{ route('wp.veterinary.lock') }}', 'id=' + id, 'lockRow' + id);
-        }
-
-        function showPlus(obj) {
-            var plus = $(obj).attr('data-plus');
-
-            if(plus == '0') {
-                $(obj).attr('data-plus', '1');
-                $('#btnplus').html('<i class="fa fa-minus" aria-hidden="true"></i>&nbsp;Ocultar detalles');
-                $('#moreDetails').show(1000);
-            }else{
-                $(obj).attr('data-plus', '0');
-                $('#btnplus').html('<i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Ver más detalles');
-                $('#moreDetails').hide(1000);
-            }
-        }
-
-        function activeRow(obj) {
-            var id = $(obj).attr('data');
-            
-            bootbox.confirm({
-                title: "Validar correo",
-                message: "¿Desea confirmar la dirección de correo electronica del usuario como válida?",
-                className: 'confirm_bootbox',
-                buttons: {
-                    confirm: {
-                        label: '<i class="fa fa-times"></i> Si, Validar ',
-                        className: 'btn-success'
-                    },
-                    cancel: {
-                        label: ' No, Cancelar ',
-                        className: 'btn-danger'
-                    }
-                },
-                callback: function (result) {
-                    if(result){
-                        enabledRegister('{{ route('wp.veterinary.enabled') }}', 'id=' + id, 'enabledRow' + id);
-                    }
-                }
-            });
-        }
+        };
     </script>
+    <script src="{{ asset('js/wpanel/common.js') }}"></script>
+    <script src="{{ asset('js/wpanel/veterinary/users.js') }}"></script>
 @stop

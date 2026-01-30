@@ -61,8 +61,7 @@
                                         @endfor
                                     </select>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0"
-                                        onclick="removeSegment(this, {{ $dayNumber }})">
+                                <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0" data-action="Schedule.removeSegment" data-action-event="click" data-action-args="$el|{{ $dayNumber }}">
                                     <i class="fa-solid fa-xmark"></i>
                                 </button>
                             </div>
@@ -97,20 +96,17 @@
                                     @endfor
                                 </select>
                             </div>
-                            <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0"
-                                    onclick="removeSegment(this, {{ $dayNumber }})">
+                            <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0" data-action="Schedule.removeSegment" data-action-event="click" data-action-args="$el|{{ $dayNumber }}">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         </div>
                     @endif
                 </div>
 
-                <button type="button" class="btn btn-sm btn-outline-primary"
-                        onclick="addSegment({{ $dayNumber }})">
+                <button type="button" class="btn btn-sm btn-outline-primary" data-action="Schedule.addSegment" data-action-event="click" data-action-args="{{ $dayNumber }}">
                     <i class="fa-solid fa-plus"></i>
                 </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary"
-                        onclick="showCopyDaysPopup({{ $dayNumber }}, event)">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-action="Schedule.showCopyDaysPopup" data-action-event="click" data-action-args="{{ $dayNumber }}|$event">
                     <i class="fa-solid fa-copy"></i>
                 </button>
             </div>

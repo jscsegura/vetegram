@@ -8,7 +8,7 @@
 <section class="container-fluid pb-0 pb-lg-4 px-xl-5">
     <div class="row px-2 px-lg-3 mt-2 mt-lg-4">
 
-        <form name="frm" id="frm" method="POST" action="{{ route('sett.groomingSave') }}" onsubmit="setCharge();">
+        <form name="frm" id="frm" method="POST" action="{{ route('sett.groomingSave') }}" data-action="setCharge" data-action-event="submit">
             @csrf
             <div class="col-lg-10 col-xl-9 col-xxl-8 mx-auto mt-3">
 

@@ -11,7 +11,7 @@
             <h1 class="h4 text-uppercase justify-content-center justify-content-md-start fw-normal mb-2 mb-lg-3 flex-grow-1 d-flex gap-1 align-items-center">
                 <span>{{ trans('dash.label.newa') }} <span class="text-info fw-bold">{{ trans('dash.label.invoice') }}</span></span>
             </h1>
-            <form name="frmInv" id="frmInv" action="{{ route('invoice.store') }}" method="post" onsubmit="return validaSubmitInvoice();">
+            <form name="frmInv" id="frmInv" action="{{ route('invoice.store') }}" method="post">
                 @csrf
                 <input type="hidden" name="proformId" id="proformId" value="{{ (isset($proformId)) ? $proformId : 0 }}">
                 <input type="hidden" name="typeInvoice" id="typeInvoice" value="0">
@@ -19,7 +19,7 @@
                     <div class="row row-cols-1 row-cols-md-3 g-3 g-md-4 mb-4 mb-md-5 px-2">
                         <div>
                             <label for="clientName" class="form-label small">{{ trans('dash.label.element.client') }}</label>
-                            <select class="form-select select2 requerido" name="client" id="client" onchange="selectClient(this);">
+                            <select class="form-select select2 requerido" name="client" id="client" data-invoice-action="client-select">
                                 <option value="0" data-name="{{ trans('dash.label.client.contado') }}" data-phone="" data-email="" data-typedni="" data-dni="">{{ trans('dash.label.new.client') }}</option>
                                 @foreach ($owner as $client)
                                 <option value="{{ $client->id }}" data-name="{{ $client->name }}" data-phone="{{ $client->phone }}" data-email="{{ $client->email }}" data-typedni="{{ $client->type_dni }}" data-dni="{{ $client->dni }}" @if((isset($invoice->user_id)) && ($invoice->user_id == $client->id)) selected @endif>{{ $client->name }}</option>
@@ -97,7 +97,7 @@
                                     $total = 0;
                                 @endphp
                                 @foreach ($rows as $row)
-                                <tr id="rowInvoice{{ $row['id'] }}">
+                                <tr id="rowInvoice{{ $row['id'] }}" data-line-id="{{ $row['id'] }}">
                                     <input type="hidden" name="productCode[]" id="productCode{{ $row['id'] }}" class="productCodeList" value="{{ $row['id'] }}">
                                     <input type="hidden" name="productId[]" id="productId{{ $row['id'] }}" value="{{ $row['id'] }}">
 
@@ -105,19 +105,19 @@
                                     <input type="hidden" name="unit[]" id="unit{{ $row['id'] }}" value="{{ $row['unit'] }}">
 
                                     <td class="px-2 py-2 py-lg-4" data-label="Eliminar:">
-                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow('{{ $row['id'] }}');">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-invoice-action="line-remove" data-line-id="{{ $row['id'] }}">
                                             <i class="fa-solid fa-xmark"></i>
                                         </button>
                                     </td>
                                     <td class="px-2 py-2 py-lg-4" data-label="Cantidad:">
                                         <div class="d-table">
                                             <div class="input-group w-auto align-items-center">
-                                                <input type="text" class="form-control form-control-sm fw-semibold text-center requerido" id="quantity{{ $row['id'] }}" name="quantity[]" value="{{ $row['quantity'] }}" onchange="setQuantity('{{ $row['id'] }}');" onkeydown="enterOnlyNumbers(event);" size="1">
+                                                <input type="text" class="form-control form-control-sm fw-semibold text-center requerido invoice-numeric" id="quantity{{ $row['id'] }}" name="quantity[]" value="{{ $row['quantity'] }}" data-invoice-action="line-quantity" data-line-id="{{ $row['id'] }}" size="1">
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-2 py-2 py-lg-4" data-label="Pro/Ser:">
-                                        <select class="form-select form-select-sm select2 requerido" id="product{{ $row['id'] }}" name="product[]">
+                                        <select class="form-select form-select-sm select2 requerido" id="product{{ $row['id'] }}" name="product[]" data-invoice-action="line-product" data-line-id="{{ $row['id'] }}">
                                             <option value="{{ $row['id'] }}">{{ $row['title'] }}</option>
                                         </select>
                                     </td>
@@ -132,10 +132,10 @@
                                         </select>
                                     </td>
                                     <td class="px-2 py-2 py-lg-4" data-label="Precio:">
-                                        <input type="text" class="form-control form-control-sm requerido" name="productSubPrice[]" id="productSubPrice{{ $row['id'] }}" value="{{ $row['subprice'] }}" onkeyup="calculatePrice('{{ $row['id'] }}', 1);" onkeydown="enterOnlyNumbers(event);">
+                                        <input type="text" class="form-control form-control-sm requerido invoice-numeric" name="productSubPrice[]" id="productSubPrice{{ $row['id'] }}" value="{{ $row['subprice'] }}" data-invoice-action="line-subprice" data-line-id="{{ $row['id'] }}">
                                     </td>
                                     <td class="px-2 py-2 py-lg-4" data-label="IVA:">
-                                        <select class="form-select form-select-sm requerido" id="rate{{ $row['id'] }}" name="rate[]" onchange="calculatePrice('{{ $row['id'] }}', 2);">
+                                        <select class="form-select form-select-sm requerido" id="rate{{ $row['id'] }}" name="rate[]" data-invoice-action="line-rate" data-line-id="{{ $row['id'] }}">
                                             <option value=""></option>
                                             <option value="01" @if($row['rate'] == '01') selected @endif>0%</option>
                                             <option value="02" @if($row['rate'] == '02') selected @endif>1%</option>
@@ -149,7 +149,7 @@
                                         </select>
                                     </td>
                                     <td class="px-2 py-2 py-lg-4 text-end" data-label="Precio:">
-                                        <input type="text" class="form-control form-control-sm requerido" name="productPrice[]" id="productPrice{{ $row['id'] }}" value="{{ $row['price'] }}" onkeyup="calculatePrice('{{ $row['id'] }}', 3);" onkeydown="enterOnlyNumbers(event);">
+                                        <input type="text" class="form-control form-control-sm requerido invoice-numeric" name="productPrice[]" id="productPrice{{ $row['id'] }}" value="{{ $row['price'] }}" data-invoice-action="line-price" data-line-id="{{ $row['id'] }}">
                                     </td>
                                     <td class="px-2 py-2 py-lg-4 text-end" data-label="Tot. lin.:" id="printPriceTotalLine{{ $row['id'] }}">¢{{ number_format(($row['quantity'] * $row['price']), 2, ".", ",") }}</td>
                                     @php
@@ -160,7 +160,7 @@
                                 
                                 <tr id="btnAddline">
                                     <td class="px-2 py-0 py-md-2 py-lg-4 text-end shadow-none" colspan="9">
-                                        <button type="button" onclick="newLine();" class="btn btn-outline-primary btn-sm px-4"><i class="fa-solid fa-plus me-1"></i>{{ trans('dash.label.add.line') }}</button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm px-4" data-invoice-action="line-add"><i class="fa-solid fa-plus me-1"></i>{{ trans('dash.label.add.line') }}</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -179,8 +179,8 @@
                     </table>
                 </div>
                 <div class="d-flex gap-2 flex-column flex-sm-row">
-                    <button type="button" onclick="createInvoice(0);" class="btn btn-primary px-4">{{ trans('dash.label.create.invoice') }}</button>
-                    <button type="button" onclick="createInvoice(1);" class="btn btn-primary px-4">{{ trans('dash.label.create.proforma') }}</button>
+                    <button type="button" class="btn btn-primary px-4" data-invoice-action="create-invoice" data-invoice-type="0">{{ trans('dash.label.create.invoice') }}</button>
+                    <button type="button" class="btn btn-primary px-4" data-invoice-action="create-invoice" data-invoice-type="1">{{ trans('dash.label.create.proforma') }}</button>
                 </div>
             </form>
         </div>
@@ -201,316 +201,18 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
 
-@php echo '<script> var arrayProducts = ' . json_encode($products) . ';</script>'; @endphp
-
 <script>
-    var varBtnAddLine = '<tr id="btnAddline">' +
-                            '<td class="px-2 px-lg-3 py-0 py-md-2 py-lg-4 text-end shadow-none" colspan="9">' +
-                                '<button type="button" onclick="newLine();" class="btn btn-outline-primary btn-sm px-4"><i class="fa-solid fa-plus me-1"></i>Agregar línea</button>' +
-                            '</td>' +
-                        '</tr>';
-
-    $('.select2').select2({
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    });
-    
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-    });
-
-    function selectClient(obj) {        
-        var name = $(obj).find('option:selected').attr('data-name');
-        var phone = $(obj).find('option:selected').attr('data-phone');
-        var email = $(obj).find('option:selected').attr('data-email');
-        var typedni = $(obj).find('option:selected').attr('data-typedni');
-        var dni = $(obj).find('option:selected').attr('data-dni');
-
-        $('#invoiceName').val(name);
-        $('#invoiceDniType').val(typedni);
-        $('#invoiceDni').val(dni);
-        $('#invoicePhone').val(phone);
-        $('#invoiceEmail').val(email);
-    }
-
-    function createInvoice(type) {
-        $('#typeInvoice').val(type);
-        $('#frmInv').submit();
-    }
-
-    function validaSubmitInvoice() {
-        var valida = true;
-
-        $('.requerido').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                valida = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if(valida == true) {
-            setCharge();
+    window.INVOICE_CREATE_CONFIG = {
+        products: @json($products),
+        labels: {
+            selectLabel: "{{ trans('dash.label.selected') }}",
+            addLine: "{{ trans('dash.label.add.line') }}",
+            deleteRowTitle: "{{ trans('dash.msg.delete.row.invoice') }}",
+            deleteRowText: "{{ trans('dash.msg.confir.delete.row.invoice') }}",
+            deleteYes: "{{ trans('dash.label.yes.delete') }}",
+            deleteNo: "{{ trans('dash.label.no.cancel') }}"
         }
-
-        return valida;
-    }
-
-    function newLine() {
-        var random = getRamdom();
-
-        var listProducts = '<option value="">{{ trans('dash.label.selected') }}</option><option value="0" random="'+random+'" data-id="0" description="" subprice="0" price="0" type="gravado" cabys="3564001000000" rate="08" unit="Producto">Otro</option>';
-        $.each(arrayProducts, function(index, value) {
-            listProducts = listProducts + '<option value="'+value.id+'" random="'+random+'" data-id="'+value.id+'" description="'+value.description+'" subprice="'+value.subprice+'" price="'+value.price+'" type="'+value.type+'" cabys="'+value.cabys+'" rate="'+value.rate+'" unit="'+value.unit+'">'+value.title+'</option>';
-        });
-
-        var txt = '<tr id="rowInvoice'+random+'">' +
-                    '<input type="hidden" name="productCode[]" id="productCode'+random+'" class="productCodeList" value="'+random+'">' +
-                    '<input type="hidden" name="productId[]" id="productId'+random+'" value="0">' +
-                    '<input type="hidden" name="cabys[]" id="cabys'+random+'" value="">' +
-                    '<input type="hidden" name="unit[]" id="unit'+random+'" value="">' +
-                    '<td class="px-2 py-2 py-lg-4" data-label="Eliminar:">' +
-                        '<button type="button" class="btn btn-outline-danger btn-sm" onclick="removeRow(\''+random+'\');">' +
-                            '<i class="fa-solid fa-xmark"></i>' +
-                        '</button>' +
-                    '</td>' +
-                    '<td class="px-2 py-2 py-lg-4" data-label="Cantidad:">' +
-                        '<div class="d-table">' +
-                            '<div class="input-group w-auto align-items-center">' +
-                                '<input type="text" class="form-control form-control-sm fw-semibold text-center requerido" id="quantity'+random+'" name="quantity[]" value="1" size="1" onchange="setQuantity(\''+random+'\');" onkeydown="enterOnlyNumbers(event);">' +
-                            '</div>' +
-                        '</div>' +
-                    '</td>' +
-                    '<td class="px-2 py-2 py-lg-4" data-label="Pro/Ser:">' +
-                        '<select class="form-select form-select-sm select2 requerido" id="product'+random+'" name="product[]" onchange="selectRow(this);">' +
-                            listProducts +
-                        '</select>' +
-                    '</td>' +
-                    '<td class="px-2 py-2 py-lg-4" data-label="Detalles:">' +
-                        '<input type="text" class="form-control form-control-sm requerido" name="detail[]" id="detail'+random+'" value="">' +
-                    '</td>' +
-                    '<td class="px-2 py-2 py-lg-4" data-label="Gravado:">' +
-                        '<select class="form-select form-select-sm requerido" id="gravado'+random+'" name="gravado[]">' +
-                            '<option value=""></option>' +
-                            '<option value="gravado">Gravado</option>' +
-                            '<option value="exento">Exento</option>' +
-                        '</select>' +
-                    '</td>' +
-                    '<td class="px-2 py-2 py-lg-4" data-label="Precio:">' +
-                        '<input type="text" class="form-control form-control-sm requerido" name="productSubPrice[]" id="productSubPrice'+random+'" value="0" onkeyup="calculatePrice(\''+random+'\', 1);" onkeydown="enterOnlyNumbers(event);">' +
-                    '</td>' +
-                    '<td class="px-2 py-2 py-lg-4" data-label="IVA:">' +
-                        '<select class="form-select form-select-sm requerido" id="rate'+random+'" name="rate[]" onchange="calculatePrice(\''+random+'\', 2);">' +
-                            '<option value=""></option>' +
-                            '<option value="01">0%</option>' +
-                            '<option value="02">1%</option>' +
-                            '<option value="03">2%</option>' +
-                            '<option value="04">4%</option>' +
-                            '<option value="05">0%</option>' +
-                            '<option value="06">4%</option>' +
-                            '<option value="07">8%</option>' +
-                            '<option value="08">13%</option>' +
-                            '<option value="09">0.5%</option>' +
-                        '</select>' +
-                    '</td>' +
-                    '<td class="px-2 py-2 py-lg-4 text-end" data-label="Precio:">' +
-                        '<input type="text" class="form-control form-control-sm requerido" name="productPrice[]" id="productPrice'+random+'" value="0" onkeyup="calculatePrice(\''+random+'\', 3);" onkeydown="enterOnlyNumbers(event);">' +
-                    '</td>' +
-                    '<td class="px-2 py-2 py-lg-4 text-end" data-label="Tot. lin.:" id="printPriceTotalLine'+random+'">¢0.00</td>' +
-                '</tr>';
-
-        $('#btnAddline').remove();
-        $('#rowsInvoice').append(txt);
-        $('#rowsInvoice').append(varBtnAddLine);
-
-        $('.select2').select2({
-            theme: "bootstrap-5",
-            width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-            placeholder: $( this ).data( 'placeholder' ),
-        });
-    }
-
-    function selectRow(obj) {
-        var option = $(obj).find('option:selected');
-
-        var random = option.attr('random');
-        var id = option.attr('data-id');
-        var description = option.attr('description');
-        var subprice = option.attr('subprice');
-        var price = option.attr('price');
-        var type = option.attr('type');
-        var cabys = option.attr('cabys');
-        var rate = option.attr('rate'); 
-        var cabys = option.attr('cabys'); 
-        var unit = option.attr('unit'); 
-           
-        $('#productId' + random).val(id);
-        $('#productSubPrice' + random).val(subprice);
-        $('#productPrice' + random).val(price);
-        $('#detail' + random).val(description);
-        $('#gravado' + random).val(type);
-        $('#rate' + random).val(rate);
-        $('#cabys' + random).val(cabys);
-        $('#unit' + random).val(unit);
-
-        if(price > 0) {
-            var quantity = $('#quantity' + random).val();
-            if (isNaN(quantity)) {
-                quantity = 1;
-            }
-            $('#printPriceTotalLine' + random).html('¢' + numeral(price * quantity).format('0,0.00'));
-        }else{
-            $('#printPriceTotalLine' + random).html('¢0.00');
-        }
-
-        setTotals();
-    }
-
-    function setQuantity(id) {
-        var price = $('#productPrice' + id).val();
-        var quantity = $('#quantity' + id).val();
-
-        if(price > 0) {
-            if (isNaN(quantity)) {
-                quantity = 1;
-            }
-
-            $('#printPriceTotalLine' + id).html('¢' + numeral(price * quantity).format('0,0.00'));
-        }else{
-            $('#printPriceTotalLine' + id).html('¢0.00');
-        }
-
-        setTotals();
-    }
-
-    function calculatePrice(id, type) {
-        var subprice = $('#productSubPrice' + id).val();
-        var price = $('#productPrice' + id).val();
-        var rate = $('#rate' + id).val();
-
-        if(subprice == '') {
-            subprice = 0;
-        }
-
-        if(price == '') {
-            price = 0;
-        }
-
-        var taxes = 0;
-        switch (rate) {
-            case "01": taxes = 0; break;
-            case "02": taxes = 1; break;
-            case "03": taxes = 2; break;
-            case "04": taxes = 4; break;
-            case "05": taxes = 0; break;
-            case "06": taxes = 4; break;
-            case "07": taxes = 8; break;
-            case "08": taxes = 13; break;
-            case "09": taxes = 0.5; break;
-            default: taxes = 0; break;
-        }
-
-        if(type == 1) {
-            if((rate != '') && (taxes > 0)) {
-                var impuesto = (taxes / 100) * parseFloat(subprice);
-                var total = parseFloat(subprice) + parseFloat(impuesto);
-
-                $('#productPrice' + id).val(total.toFixed(2));
-            }else{
-                $('#productPrice' + id).val(subprice);
-            }
-        } else if(type == 2) {
-            if((rate != '') && (taxes > 0)) {
-                var impuesto = (taxes / 100) * parseFloat(subprice);
-                var total = parseFloat(subprice) + parseFloat(impuesto);
-
-                $('#productPrice' + id).val(total.toFixed(2));
-            }else{
-                $('#productPrice' + id).val(subprice);
-            }
-        } else if(type == 3) {
-            if((rate != '') && (taxes > 0)) {
-                var montoBase = parseFloat(price) / (1 + (taxes / 100));
-
-                $('#productSubPrice' + id).val(montoBase.toFixed(2));
-            }else{
-                $('#productSubPrice' + id).val(price);
-            }
-        }
-
-        setQuantity(id);
-    }
-
-    function setTotals() {
-        var total = 0;
-
-        $('.productCodeList').each(function(index, elemento) {
-            var code = $(this).val();
-
-            var price = $('#productPrice' + code).val();
-            var quantity = $('#quantity' + code).val();
-
-            if(price > 0) {
-                if (isNaN(quantity)) {
-                    quantity = 1;
-                }
-
-                total = total + (price * quantity);
-            }
-        });
-
-        $('#printerGranTotal').html('¢' + numeral(total).format('0,0.00'));
-    }
-
-    function removeRow(id) {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.msg.delete.row.invoice') }}',
-            text: '{{ trans('dash.msg.confir.delete.row.invoice') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.label.yes.delete') }}',
-            cancelButtonText: '{{ trans('dash.label.no.cancel') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $('#rowInvoice' + id).remove();
-
-                setTotals();
-            }
-        });
-    }
-
-    function getRamdom() {
-        var random = Math.random();
-        random = random + "";
-        random = random.replace(".", "");
-        random = random.replaceAll(/0/g, "1");
-
-        return random;
-    }
-
-    function enterOnlyNumbers(event){
-        if (event.keyCode == 8 || event.keyCode == 9 || (event.keyCode >= 37 && event.keyCode <= 40) || (event.keyCode == 190)) {
-        } else {
-            if ((event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
-                event.preventDefault();
-            }
-        }
-    }
+    };
 </script>
+<script src="{{ asset('js/invoice/create-appointment.js') }}"></script>
 @endpush

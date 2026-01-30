@@ -30,7 +30,7 @@
 
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button type="button" onclick="saveCreditNoteModal();" class="btn btn-primary btn-sm px-4">{{ trans('dash.label.nc.proceed') }}</button>
+          <button type="button" class="btn btn-primary btn-sm px-4" data-invoice-action="credit-note-save">{{ trans('dash.label.nc.proceed') }}</button>
         </div>
       </div>
     </div>
@@ -38,77 +38,25 @@
 
 @push('scriptBottom')
     <script>
-        function setIdInvoiceNc(clave) {
-            $('#invoiceidnc').val(clave);
-        }
-
-        function saveCreditNoteModal() {
-            var valida = true;
-
-            $('.requeridoNC').each(function(i, elem){
-                var value = $(elem).val();
-                var value = value.trim();
-                if(value == ''){
-                    $(elem).addClass('is-invalid');
-                    valida = false;
-                }else{
-                    $(elem).removeClass('is-invalid');
-                }
-            });
-
-            if(valida == true) {
-                const swalWithBootstrapButtons = Swal.mixin({
-                    customClass: {
-                        confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                        cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-                    },
-                    buttonsStyling: false
-                });
-
-                swalWithBootstrapButtons.fire({
-                    title: '{{ trans('dash.nc.swal.title') }}',
-                    text: '{{ trans('dash.nc.swal.text') }}',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: '{{ trans('dash.nc.swal.btn.confirm') }}',
-                    cancelButtonText: '{{ trans('dash.nc.swal.btn.cancel') }}',
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        var clave = $('#invoiceidnc').val();
-                        var razon = $('#reasonnc').val();
-                        var action = $('#actionnc').val();
-
-                        $.ajaxSetup({
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                            }
-                        });
-
-                        setCharge();
-                        
-                        $.post('{{ route('invoice.nc') }}', {clave:clave, razon:razon, action:action},
-                            function (data){
-                                if(data.type == '200') {
-                                    swal.close();
-                                    swal.fire("{{ trans('dash.swal.msg.success') }}", "{{ trans('dash.swal.msg.success.nc') }}" + data.clave, "success");
-                                }else{
-                                    $.toast({
-                                        text: '{{ trans('dash.msg.nc.error.create') }}',
-                                        position: 'bottom-right',
-                                        textAlign: 'center',
-                                        loader: false,
-                                        hideAfter: 4000,
-                                        icon: 'error'
-                                    });
-                                }
-
-                                hideCharge();
-                            }
-                        );
-                    }
-                });
+        window.INVOICE_CREDIT_NOTE_CONFIG = {
+            routes: {
+                save: "{{ route('invoice.nc') }}"
+            },
+            ids: {
+                invoiceId: "invoiceidnc",
+                reason: "reasonnc",
+                action: "actionnc"
+            },
+            labels: {
+                confirmTitle: "{{ trans('dash.nc.swal.title') }}",
+                confirmText: "{{ trans('dash.nc.swal.text') }}",
+                confirmYes: "{{ trans('dash.nc.swal.btn.confirm') }}",
+                confirmNo: "{{ trans('dash.nc.swal.btn.cancel') }}",
+                successTitle: "{{ trans('dash.swal.msg.success') }}",
+                successText: "{{ trans('dash.swal.msg.success.nc') }}",
+                errorText: "{{ trans('dash.msg.nc.error.create') }}"
             }
-        }
+        };
     </script>
+    <script src="{{ asset('js/invoice/credit-note.js') }}"></script>
 @endpush

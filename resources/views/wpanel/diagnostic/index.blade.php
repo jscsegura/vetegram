@@ -47,61 +47,19 @@
     <script src="https://cdn.datatables.net/v/bs/dt-1.13.4/datatables.min.js"></script>
 
     <script>
-        var dataTable = $('#tableList').DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            order: [[0, 'desc']],
-            ajax: "{{ route('wp.diagnostic.list') }}",
-            paging: true,
-            pageLength: 25,
-            columns: [
-                {data:'id'},
-                {data:'title_es'},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<span id="enabledRow'+row.id+'"><a data="' + row.id + '" onclick="enabledRow(this);">';
-                    if(row.enabled == 1) {
-                        btn += '<img src="{{ asset('img/wpanel/enabled.png') }}">';
-                    } else {
-                        btn += '<img src="{{ asset('img/wpanel/disabled.png') }}">';
-                    }
-                    btn += '</a></span>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<a href="{{ url('wpanel/diagnostic') }}/'+row.id+'/edit"><img src="{{ asset('img/wpanel/edit.png') }}"></a>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-                {data:'id', render: function(data, type, row) {
-                    var btn = '<a data="' + row.id + '" onclick="deleteRow(this);"><img src="{{ asset('img/wpanel/delete.png') }}"></a>';
-                    return btn;
-                }, 'orderable': false, 'searchable': false, 'className': "text-center"},
-            ],
-            language: {
-                sLengthMenu: '',
-                sZeroRecords: 'No se encontraron resultados',
-                sEmptyTable: 'Ningún dato disponible en esta tabla',
-                sInfo: 'Registro _START_ al _END_ de un total de _TOTAL_ registros',
-                sInfoEmpty: 'Mostrando registros del 0 al 0 de un total de 0 registros',
-                sInfoFiltered: '',
-                sSearch: 'Buscar:',
-                oPaginate: {
-                    "sFirst": 'Primero',
-                    "sLast":  'Último',
-                    "sNext": 'Siguiente',
-                    "sPrevious": 'Anterior',
-                },
+        window.WPANEL_DIAGNOSTIC_INDEX_CONFIG = {
+            listUrl: "{{ route('wp.diagnostic.list') }}",
+            enabledUrl: "{{ route('wp.diagnostic.enabled') }}",
+            deleteUrl: "{{ route('wp.diagnostic.delete') }}",
+            editBaseUrl: "{{ url('wpanel/diagnostic') }}",
+            assets: {
+                enabled: "{{ asset('img/wpanel/enabled.png') }}",
+                disabled: "{{ asset('img/wpanel/disabled.png') }}",
+                edit: "{{ asset('img/wpanel/edit.png') }}",
+                delete: "{{ asset('img/wpanel/delete.png') }}"
             }
-        });
-
-        function enabledRow(obj) {
-            var id = $(obj).attr('data');
-            enabledRegister('{{ route('wp.diagnostic.enabled') }}', 'id=' + id, 'enabledRow' + id);
-        }
-        function deleteRow(obj) {
-            var id = $(obj).attr('data');
-            var row = $(obj).parent().parent('tr');
-            eliminateRegister('{{ route('wp.diagnostic.delete') }}', 'id=' + id, row);
-        }
+        };
     </script>
+    <script src="{{ asset('js/wpanel/common.js') }}"></script>
+    <script src="{{ asset('js/wpanel/diagnostic/index.js') }}"></script>
 @stop

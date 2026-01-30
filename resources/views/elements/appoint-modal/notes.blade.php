@@ -13,7 +13,7 @@
           </div>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button type="button" onclick="saveNoteModal();" class="btn btn-primary btn-sm px-4">{{ trans('dash.text.btn.save') }}</button>
+          <button type="button" class="btn btn-primary btn-sm px-4" data-appoint-action="note-save">{{ trans('dash.text.btn.save') }}</button>
         </div>
       </div>
     </div>
@@ -21,68 +21,22 @@
 
 @push('scriptBottom')
 <script>
-  function setIdAppointmentToNote(id, to = 0) {
-    $('#noteToAppointment').val(to);
-    $('#noteIdAppointment').val(id);
-  }
-
-  function saveNoteModal() {
-    var id = $('#noteIdAppointment').val();
-    var to = $('#noteToAppointment').val();
-    var note = $('#noteMtitle').val();
-
-    note = note.trim();
-
-    if(note != '') {
-      $.ajaxSetup({
-          headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-          }
-      });
-
-      setCharge();
-
-      $.post('{{ route('appoinment.saveNote') }}', {id:id, note:note, to:to},
-            function (data) {
-              $('#noteMtitle').val('');
-
-              if(data.save == 1) {
-                $.toast({
-                    text: '{{ trans('dash.label.msj.note.success') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'success'
-                });
-
-                if (typeof reloadToComplete !== 'undefined') {
-                  location.reload();
-                }
-              }else{
-                $.toast({
-                  text: '{{ trans('dash.label.msj.note.error') }}',
-                  position: 'bottom-right',
-                  textAlign: 'center',
-                  loader: false,
-                  hideAfter: 4000,
-                  icon: 'error'
-                });
-              }           
-
-              hideCharge();
-            }
-        );
-      }else{
-        $.toast({
-          text: '{{ trans('dash.label.msj.note.require.text') }}',
-          position: 'bottom-right',
-          textAlign: 'center',
-          loader: false,
-          hideAfter: 4000,
-          icon: 'error'
-        });
-      }
-  }
+  window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+  window.APPOINT_MODAL_CONFIG.notes = {
+    ids: {
+      modal: 'noteModal',
+      idField: 'noteIdAppointment',
+      toField: 'noteToAppointment',
+      noteField: 'noteMtitle'
+    },
+    routes: {
+      saveNote: '{{ route('appoinment.saveNote') }}'
+    },
+    labels: {
+      noteSuccess: '{{ trans('dash.label.msj.note.success') }}',
+      noteError: '{{ trans('dash.label.msj.note.error') }}',
+      noteRequired: '{{ trans('dash.label.msj.note.require.text') }}'
+    }
+  };
 </script>
 @endpush

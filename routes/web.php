@@ -53,6 +53,11 @@ Route::middleware(['checkLang'])->group(function () {
     Route::middleware(['checkWeb'])->group(function () {
         Route::get('/register/complete-profile', 'Auth\RegisterController@completeProfile')->name('register.complete-profile');
         Route::post('/register/complete-save', 'Auth\RegisterController@completeProfileSave')->name('register.complete-save');
+        Route::post('/register/complete-save/identity', 'Auth\RegisterController@saveSetupIdentity')->name('register.complete-save.identity');
+        Route::post('/register/complete-save/clinic', 'Auth\RegisterController@saveSetupClinic')->name('register.complete-save.clinic');
+        Route::post('/register/complete-save/specialties', 'Auth\RegisterController@saveSetupSpecialties')->name('register.complete-save.specialties');
+        Route::post('/register/complete-save/location', 'Auth\RegisterController@saveSetupLocation')->name('register.complete-save.location');
+        Route::post('/register/complete-save/schedule', 'Auth\RegisterController@saveSetupSchedule')->name('register.complete-save.schedule');
         Route::post('/register/check-vetcode', 'Auth\RegisterController@checkVetCode')->name('check.vetcode');
         Route::post('/register/create-owner', 'Auth\RegisterController@createOwner')->name('register.create-owner');
         Route::post('/register/create-pet', 'Auth\RegisterController@createPet')->name('register.create-pet');

@@ -128,140 +128,16 @@
 
 @push('scriptBottom')
 <script>
-    function printerInitialPhysical () {
-        @if($appointment->physical != '')
-        var physicalInitial = <?php echo $appointment->physical; ?>;
-        @else
-        var physicalInitial = [];
-        @endif
-
-        $('#printerPhysicalOptions').html('');
-        
-        var totalAdd = 0;
-        var arrayOfArrays = [];
-
-        $(physicalInitial).each(function(i, elem){
-            var row = '';
-            if(elem.subopt != '') {
-                if(elem.value != '') {
-                    row = '<div class="cyanBg py-2 px-3 rounded">'+elem.cat+' <i class="fa-solid fa-arrow-right-long small mx-1"></i>  '+elem.opt+' <i class="fa-solid fa-arrow-right-long small mx-1"></i> '+elem.subopt+': <strong>'+elem.value+'</strong></div>';
-                }else{
-                    row = '<div class="cyanBg py-2 px-3 rounded">'+elem.cat+' <i class="fa-solid fa-arrow-right-long small mx-1"></i>  '+elem.opt+': <strong>'+elem.subopt+'</strong></div>';
-                }
-            }else{
-                if(elem.value != '') {
-                    row = '<div class="cyanBg py-2 px-3 rounded">'+elem.cat+' <i class="fa-solid fa-arrow-right-long small mx-1"></i> '+elem.opt+': <strong>'+elem.value+'</strong></div>';
-                }else{
-                    row = '<div class="cyanBg py-2 px-3 rounded">'+elem.cat+' <i class="fa-solid fa-arrow-right-long small mx-1"></i> <strong>'+elem.opt+'</strong></div>';
-                }
-            }
-
-            if(row != '') {
-                $('#printerPhysicalOptions').append(row);
-                totalAdd++;
-
-                var groupArray = {'idcat':elem.idcat, 'cat':elem.cat, 'idopt':elem.idopt, 'opt':elem.opt, 'idsubopt':elem.idsubopt, 'subopt':elem.subopt, 'value': elem.value};
-                arrayOfArrays.push(groupArray);
-            }
-        });
-
-        if(totalAdd > 0) {
-            @if((isset($physicalComplete)) && ($physicalComplete == true))
-            $('#printerPhysicalOptions').append('<button type="button" class="editR4" data-bs-toggle="modal" data-bs-target="#physicalExam"><i class="fa-solid fa-pencil"></i></button>');
-            @endif
-            $('#physicalExamButton').hide();
-            $('#printerPhysicalOptions').show();
-        }else{
-            @if((isset($physicalComplete)) && ($physicalComplete == true))
-            $('#physicalExamButton').show();
-            @endif
-            $('#printerPhysicalOptions').hide();
-        }
-
-        $('#physicalExamData').val(JSON.stringify(arrayOfArrays));
-
-    }
-    printerInitialPhysical();
-
-    $(document).ready(function () {
-        $('#physicalExam').on('hidden.bs.modal', function () {
-            var totalAdd = 0;
-
-            $('#printerPhysicalOptions').html('');
-
-            var arrayOfArrays = [];
-            
-            $('.inputPhysical').each(function(i, elem){
-                var type = $(elem).attr('type');
-
-                var value = '';
-
-                var row = '';
-
-                var category  = $(elem).attr('data-cat');
-                var option    = $(elem).attr('data-opt');
-                var suboption = $(elem).attr('data-subopt');
-                
-                var idcategory  = $(elem).attr('id-cat');
-                var idoption    = $(elem).attr('id-opt');
-                var idsuboption = $(elem).attr('id-subopt');
-                
-                switch(type){
-                    case 'text':
-                        if($(elem).val() != '') {
-                            value = $(elem).val();
-
-                            if(suboption != '') {
-                                row = '<div class="cyanBg py-2 px-3 rounded">'+category+' <i class="fa-solid fa-arrow-right-long small mx-1"></i>  '+option+' <i class="fa-solid fa-arrow-right-long small mx-1"></i> '+suboption+': <strong>'+value+'</strong></div>';
-                            }else{
-                                row = '<div class="cyanBg py-2 px-3 rounded">'+category+' <i class="fa-solid fa-arrow-right-long small mx-1"></i> '+option+': <strong>'+value+'</strong></div>';
-                            }
-                        }
-                        break;
-                    case 'number':
-                        if($(elem).val() != '') {
-                            value = $(elem).val();
-
-                            if(suboption != '') {
-                                row = '<div class="cyanBg py-2 px-3 rounded">'+category+' <i class="fa-solid fa-arrow-right-long small mx-1"></i>  '+option+' <i class="fa-solid fa-arrow-right-long small mx-1"></i> '+suboption+': <strong>'+value+'</strong></div>';
-                            }else{
-                                row = '<div class="cyanBg py-2 px-3 rounded">'+category+' <i class="fa-solid fa-arrow-right-long small mx-1"></i> '+option+': <strong>'+value+'</strong></div>';
-                            }
-                        }
-                        break;
-                    case 'radio':
-                        if ($(elem).is(':checked')) {
-                            if(suboption != '') {
-                                row = '<div class="cyanBg py-2 px-3 rounded">'+category+' <i class="fa-solid fa-arrow-right-long small mx-1"></i>  '+option+': <strong>'+suboption+'</strong></div>';
-                            }else{
-                                row = '<div class="cyanBg py-2 px-3 rounded">'+category+' <i class="fa-solid fa-arrow-right-long small mx-1"></i> <strong>'+option+'</strong></div>';
-                            }
-                        }
-                        break;
-                }
-
-                if(row != '') {
-                    $('#printerPhysicalOptions').append(row);
-                    totalAdd++;
-
-                    var groupArray = {'idcat':idcategory, 'cat':category, 'idopt':idoption, 'opt':option, 'idsubopt':idsuboption, 'subopt':suboption, 'value': value};
-                    arrayOfArrays.push(groupArray);
-                }
-            });
-
-            if(totalAdd > 0) {
-                $('#printerPhysicalOptions').append('<button type="button" class="editR4" data-bs-toggle="modal" data-bs-target="#physicalExam"><i class="fa-solid fa-pencil"></i></button>');
-                $('#physicalExamButton').hide();
-                $('#printerPhysicalOptions').show();
-            }else{
-                $('#physicalExamButton').show();
-                $('#printerPhysicalOptions').hide();
-            }
-
-            $('#physicalExamData').val(JSON.stringify(arrayOfArrays));
-
-            updateRecipe();
-        });
-    });
+    window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+    window.APPOINT_MODAL_CONFIG.physicalExam = {
+        ids: {
+            modal: 'physicalExam',
+            printer: 'printerPhysicalOptions',
+            button: 'physicalExamButton',
+            dataField: 'physicalExamData'
+        },
+        initial: @if($appointment->physical != '') {!! $appointment->physical !!} @else [] @endif,
+        physicalComplete: {{ (isset($physicalComplete) && $physicalComplete == true) ? 'true' : 'false' }}
+    };
 </script>
 @endpush

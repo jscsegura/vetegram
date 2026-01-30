@@ -18,7 +18,7 @@
                                 <input type="text" name="criteria" id="magicSearch" class="form-control fw-normal" placeholder="Veterinaria, nombre doctor" autocomplete="off">
                             </div>
                             <div>
-                                <button onclick="search();" class="btn btn-primary px-3 px-lg-4 w-100" type="button">{{ trans('dash.menu.search') }}</button>
+                                <button data-action="Home.search" data-action-event="click" class="btn btn-primary px-3 px-lg-4 w-100" type="button">{{ trans('dash.menu.search') }}</button>
                             </div>
                         </div>
                     </form>
@@ -196,7 +196,7 @@
                                         @if((Auth::guard('web')->check())&&(Auth::guard('web')->user()->rol_id == 8))
                                         <a href="{{ route('search.book', App\Models\User::encryptor('encrypt', $doctor->id)) }}" class="btn btn-primary btn-sm px-3 text-uppercase">{{ trans('dash.label.btn.schedule') }}</a>
                                         @else
-                                        <a href="javascript:void(0);" onclick="$('#loginModal').modal('show');" class="btn btn-primary btn-sm px-3 text-uppercase">{{ trans('dash.label.btn.login') }}</a>
+                                        <a href="javascript:void(0);" data-action="modal.show" data-action-event="click" data-action-args="#loginModal" class="btn btn-primary btn-sm px-3 text-uppercase">{{ trans('dash.label.btn.login') }}</a>
                                         @php $startSession = true; @endphp
                                         @endif
                                         @else
@@ -232,7 +232,7 @@
               <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-3 p-md-4">
-                <form id="loginForm" name="loginForm" method="post" action="" onsubmit="return startlogin();">
+                <form id="loginForm" name="loginForm" method="post" action="" data-action="Home.startlogin" data-action-event="submit">
                     @csrf
 
                     <input type="hidden" name="rol" id="rol" value="8">
@@ -284,118 +284,18 @@
     <script src="{{ asset('js/front/magicsearch.min.js') }}"></script>
 
     <script>
-        @if (isset($startSession))
-        const passwordInput = document.getElementById('passwordInput');
-        const passwordToggleBtn = document.querySelector('.btn-toggle-password');
-        
-        passwordToggleBtn.addEventListener('click', function() {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                passwordToggleBtn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
-            } else {
-                passwordInput.type = 'password';
-                passwordToggleBtn.innerHTML = '<i class="fa-regular fa-eye"></i>';
+        window.HOME_SEARCH_CONFIG = {
+            startSession: @json(isset($startSession)),
+            querys: {!! json_encode($querys) !!},
+            routes: {
+                searchIndex: @json(route('search.index')),
+                loginAjax: @json(route('login.loginAjax'))
+            },
+            texts: {
+                noResult: @json('No hay resultados')
             }
-        });
-        @endif
-
-		function normalizeString(str) {
-			return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-		}
-        
-		function search() {
-			var criteria = $('#magicSearch').attr('data-id');
-
-			// Normalizar el criterio de búsqueda
-			criteria = normalizeString(criteria);
-
-			criteria = btoa(criteria);
-
-			location.href = '{{ route('search.index') }}/?search=' + criteria;
-		}
-
-		$(function() {
-			var dataSource = {!! json_encode($querys) !!};
-
-			// Normalizar cada campo del dataSource
-			dataSource = dataSource.map(function(item) {
-				item.company = normalizeString(item.company);
-				item.address = normalizeString(item.address);
-				return item;
-			});
-
-			$('#magicSearch').magicsearch({
-				dataSource: dataSource,
-				fields: ['socialname', 'company', 'email', 'website', 'address', 'resume', 'schedule'],
-				id: 'id',
-				format: '%company% · %address%',
-				multiple: true,
-				focusShow: false,
-				noResult: 'No hay resultados',
-				multiField: 'company',
-				multiStyle: {
-					space: 4,
-					width: 80
-				}
-			});
-
-		});
-        
-        @if (isset($startSession))
-        function startlogin() {
-            var validate = true;
-
-            $('#emailInput').removeClass('is-invalid');
-            $('#passwordInput').removeClass('is-invalid');
-
-            if(!validaEmail($('#emailInput').val())){
-                $('#emailInput').addClass('is-invalid');
-                validate = false;
-            }
-
-            if($('#passwordInput').val() == ''){
-                $('#passwordInput').addClass('is-invalid');
-                validate = false;
-            }
-
-            if(validate == true) {
-                setCharge();
-
-                $.ajax({
-                    url: '{{ route('login.loginAjax') }}',
-                    type: 'POST',
-                    data: new FormData(document.getElementById('loginForm')),
-                    contentType: false,
-                    cache: false,
-                    processData: false,
-                    success: function(data, status, xhr) {  
-                        if(data.login == 'success') {
-                            location.reload();
-                        }else{
-                            $('#loginError').show();
-                            $('#loginErrorAlert').html('<strong>Error!</strong> ' + data.error);
-                        }
-
-                        hideCharge();
-                    },
-                    error: function(xhr, status, error) {
-                        hideCharge();
-                    }
-                });
-            }
-
-            return false;
-        }
-
-        function validaEmail(email) {
-            var reg=/^[0-9a-z_\-\+.]+@[0-9a-z\-\.]+\.[a-z]{2,8}$/i;
-            if(reg.test(email)){
-                return true;
-            }else{
-                return false;
-            }
-        }
-        @endif
+        };
     </script>
+    <script src="{{ asset('js/home/search.js') }}"></script>
     
 @endpush

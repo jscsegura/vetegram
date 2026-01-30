@@ -19,10 +19,10 @@
                 <div class="dropdown d-inline-block">
                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
                         @if((in_array($doctype, [0]))&&(($invoice['APPROVED'] == 1)))
-                        <li><button type="button" class="dropdown-item small" data-bs-toggle="modal" data-bs-target="#creditNoteModal" onclick="setIdInvoiceNc('{{ $invoice['CLAVE'] }}');">{{ trans('dash.label.invoice.credit') }}</button></li>
+                        <li><button type="button" class="dropdown-item small" data-bs-toggle="modal" data-bs-target="#creditNoteModal" data-invoice-action="credit-note-open" data-clave="{{ $invoice['CLAVE'] }}" data-action="Invoice.setIdInvoiceNc" data-action-event="click" data-action-args="$el">{{ trans('dash.label.invoice.credit') }}</button></li>
                         @endif
                         @if($invoice['APPROVED'] != 1)
-                        <li><a class="dropdown-item small" onclick="resendDocument(0, '{{ $invoice['CLAVE'] }}');">{{ trans('dash.invoice.index.btn.resend') }}</a></li>
+                        <li><a class="dropdown-item small" data-invoice-action="resend" data-type="0" data-clave="{{ $invoice['CLAVE'] }}">{{ trans('dash.invoice.index.btn.resend') }}</a></li>
                         @endif
                         
                         @if($invoice['CLAVE'] != '')
@@ -198,55 +198,17 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    $('.select2').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    } );
-    
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-    })
-
-    function resendDocument(type, clave) {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.invoice.index.msg.resend') }}',
-            text: '{{ trans('dash.invoice.index.msg.resend.text') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.invoice.index.yes') }}',
-            cancelButtonText: '{{ trans('dash.invoice.index.no') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('invoice.resend') }}', {type:type, clave:clave},
-                    function (data){
-                        location.reload();
-
-                        hideCharge();
-                    }
-                );
-            }
-        });
-    }
+    window.INVOICE_DETAIL_CONFIG = {
+        routes: {
+            resend: "{{ route('invoice.resend') }}"
+        },
+        labels: {
+            resendTitle: "{{ trans('dash.invoice.index.msg.resend') }}",
+            resendText: "{{ trans('dash.invoice.index.msg.resend.text') }}",
+            resendYes: "{{ trans('dash.invoice.index.yes') }}",
+            resendNo: "{{ trans('dash.invoice.index.no') }}"
+        }
+    };
 </script>
+<script src="{{ asset('js/invoice/detail.js') }}"></script>
 @endpush

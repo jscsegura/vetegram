@@ -112,7 +112,7 @@
 							<input type="text" name="criteria" id="magicSearch" class="form-control fw-normal" placeholder="{{ trans('landing.placeholder.search') }}" autocomplete="off">
 						</div>
 						<div>
-							<button onclick="search();" class="btn btn-primary px-3 px-lg-4 w-100" type="button">{{ trans('landing.menu.search') }}</button>
+							<button data-action="Home.search" data-action-event="click" class="btn btn-primary px-3 px-lg-4 w-100" type="button">{{ trans('landing.menu.search') }}</button>
 						</div>
 					</div>
 				</form>
@@ -187,7 +187,7 @@
 									<label for="message" class="form-label text-white">{{ trans('landing.label.Mensaje') }}</label>
 									<textarea class="form-control" id="message" name="message" rows="3"></textarea>
 								</div>
-								<button type="button" onclick="validaFrmContact();" class="btn btn-outline-light px-4 py-2 rounded-3 text-uppercase" id="btnsender">{{ trans('landing.label.Enviar') }}</button>
+								<button type="button" data-action="Home.validaFrmContact" data-action-event="click" class="btn btn-outline-light px-4 py-2 rounded-3 text-uppercase" id="btnsender">{{ trans('landing.label.Enviar') }}</button>
 							</form>
 
 							<div class="mt-3" style="display: none;" id="printerSend">
@@ -265,141 +265,20 @@
 	<script src="https://vetegram.com/staging/js/front/magicsearch.min.js"></script>
 
 	<script>
-		//scroll
-		const scrollSpy = new bootstrap.ScrollSpy(document.body, {
-			target: '#navBarMain',
-			threshold: '0,1',
-			rootMargin: '-30% 0% -70%',
-			smoothScroll: true,
-		})
-
-        //Top
-        let mybutton = document.getElementById("btTop");
-
-        window.onscroll = function () {
-            scrollFunction();
-        };
-
-        function scrollFunction() {
-            if (
-                document.body.scrollTop > 300 ||
-                document.documentElement.scrollTop > 300
-            ) {
-                mybutton.style.display = "block";
-            } else {
-                mybutton.style.display = "none";
-            }
-        }
-        mybutton.addEventListener("click", backToTop);
-
-        function backToTop() {
-            document.body.scrollTop = 0;
-            document.documentElement.scrollTop = 0;
-        }
-
-		function validaFrmContact() {
-			var validate = true;
-
-			$('#fname').removeClass('is-invalid');
-			$('#email').removeClass('is-invalid');
-			$('#message').removeClass('is-invalid');
-
-			if($('#fname').val() == ''){
-				$('#fname').addClass('is-invalid');
-				validate = false;
+		window.HOME_LANDING_CONFIG = {
+			querys: {!! json_encode($querys) !!},
+			routes: {
+				contact: @json(route('home.contact')),
+				searchIndex: @json(route('search.index'))
+			},
+			texts: {
+				sending: @json(trans('landing.label.Enviando')),
+				send: @json(trans('landing.label.Enviar')),
+				noResult: @json('No hay resultados')
 			}
-
-			if(!validaEmail($('#email').val())){
-				$('#email').addClass('is-invalid');
-				validate = false;
-			}
-
-			if($('#message').val() == ''){
-				$('#message').addClass('is-invalid');
-				validate = false;
-			}
-
-			if(validate) {
-				var fname = $('#fname').val();
-				var email = $('#email').val();
-				var message = $('#message').val();
-
-				$('#btnsender').html('{{ trans('landing.label.Enviando') }}');
-				$('#btnsender').attr('disabled', true);
-
-				$.ajax({
-					type: 'POST',
-					url: '{{ route('home.contact') }}',
-					dataType: "json",
-					headers: {
-						"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-					},
-					data: {
-						fname: fname,
-						email: email,
-						message: message
-					},
-					beforeSend: function(){},
-					success: function(data){
-						$('#btnsender').html('{{ trans('landing.label.Enviar') }}');
-						$('#btnsender').attr('disabled', false);
-
-						$('#printerSend').css('display', 'block');
-					}
-				});
-			}
-		}
-
-		function validaEmail(email) {
-			var reg=/^[0-9a-z_\-\+.]+@[0-9a-z\-\.]+\.[a-z]{2,8}$/i;
-			if(reg.test(email)){
-				return true;
-			}else{
-				return false;
-			}
-		}
-
-		function normalizeString(str) {
-			return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-		}
-
-		function search() {
-			var criteria = $('#magicSearch').attr('data-id');
-
-			// Normalizar el criterio de búsqueda
-			criteria = normalizeString(criteria);
-
-			criteria = btoa(criteria);
-
-			location.href = '{{ route('search.index') }}/?search=' + criteria;
-		}
-
-		$(function() {
-			var dataSource = {!! json_encode($querys) !!};
-
-			// Normalizar cada campo del dataSource
-			dataSource = dataSource.map(function(item) {
-				item.company = normalizeString(item.company);
-				item.address = normalizeString(item.address);
-				return item;
-			});
-
-			$('#magicSearch').magicsearch({
-				dataSource: dataSource,
-				fields: ['socialname', 'company', 'email', 'website', 'address', 'resume', 'schedule'],
-				id: 'id',
-				format: '%company% · %address%',
-				multiple: true,
-				focusShow: false,
-				noResult: 'No hay resultados',
-				multiField: 'company',
-				multiStyle: {
-					space: 4,
-					width: 80
-				}
-			});
-		});
+		};
 	</script>
+	<script src="{{ asset('js/home/landing.js') }}"></script>
 
 </body>
 

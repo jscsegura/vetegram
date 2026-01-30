@@ -18,60 +18,63 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="{{ asset('js/front/datedropper.js') }}"></script>
 <script>
-   $('.select2').select2({
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    });
-
-    $('.select3').select2({
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#recipeModal')
-    });
-
-    function setCalendar(value) {
-        $('.selTimeCalendar').html('');
-
-        if(value == 1) {
-            var txt = '<select id="selTime" name="selTime" class="form-select form-select-sm" aria-label="Seleccionar rango" onchange="setCalendar(this.value);">'+
-                        '<option value="1" selected>{{ trans('dash.label.cal.montly') }}</option>'+
-                        '<option value="2">{{ trans('dash.label.cal.week') }}</option>'+
-                        '<option value="3">{{ trans('dash.label.cal.daily') }}</option>'+
-                    '</select>';
-
-            $('#selTimeCalendarMensual').html(txt);
-
-            $('#mensual').show();
-            $('#semanal').hide();
-            $('#diario').hide();
-        }else if(value == 2) {
-            var txt = '<select id="selTime" name="selTime" class="form-select form-select-sm" aria-label="Seleccionar rango" onchange="setCalendar(this.value);">'+
-                        '<option value="1">{{ trans('dash.label.cal.montly') }}</option>'+
-                        '<option value="2" selected>{{ trans('dash.label.cal.week') }}</option>'+
-                        '<option value="3">{{ trans('dash.label.cal.daily') }}</option>'+
-                    '</select>';
-
-            $('#selTimeCalendarSemanal').html(txt);
-
-            $('#mensual').hide();
-            $('#semanal').show();
-            $('#diario').hide();
-        }else if(value == 3) {
-            var txt = '<select id="selTime" name="selTime" class="form-select form-select-sm" aria-label="Seleccionar rango" onchange="setCalendar(this.value);">'+
-                        '<option value="1">{{ trans('dash.label.cal.montly') }}</option>'+
-                        '<option value="2">{{ trans('dash.label.cal.week') }}</option>'+
-                        '<option value="3" selected>{{ trans('dash.label.cal.daily') }}</option>'+
-                    '</select>';
-
-            $('#selTimeCalendarDiario').html(txt);
-
-            $('#mensual').hide();
-            $('#semanal').hide();
-            $('#diario').show();
+    window.APPOINTMENTS_SCHEDULE_CONFIG = {
+        texts: {
+            monthly: @json(trans('dash.label.cal.montly')),
+            weekly: @json(trans('dash.label.cal.week')),
+            daily: @json(trans('dash.label.cal.daily'))
+        },
+        selectors: {
+            recipeModal: '#recipeModal',
+            monthlyContainer: '#mensual',
+            weeklyContainer: '#semanal',
+            dailyContainer: '#diario',
+            monthlySelectorContainer: '#selTimeCalendarMensual',
+            weeklySelectorContainer: '#selTimeCalendarSemanal',
+            dailySelectorContainer: '#selTimeCalendarDiario'
+        },
+        initialType: @json($type)
+    };
+    window.APPOINTMENTS_SCHEDULE_VIEW_CONFIG = {
+        routes: {
+            scheduleBase: @json(route('appointment.schedule'))
+        },
+        rangeTypes: {
+            month: 1,
+            week: 2,
+            day: 3
+        },
+        ranges: {
+            month: {
+                fromInput: '#from1',
+                toInput: '#to1',
+                userSelect: '#useridselectM',
+                prevFrom: '#monthPrevFrom',
+                prevTo: '#monthPrevTo',
+                nextFrom: '#monthNextFrom',
+                nextTo: '#monthNextTo'
+            },
+            week: {
+                fromInput: '#from2',
+                toInput: '#to2',
+                userSelect: '#useridselectW',
+                prevFrom: '#weekPrevFrom',
+                prevTo: '#weekPrevTo',
+                nextFrom: '#weekNextFrom',
+                nextTo: '#weekNextTo'
+            },
+            day: {
+                fromInput: '#from3',
+                toInput: '#to3',
+                userSelect: '#useridselectD',
+                prevFrom: '#dayPrevFrom',
+                prevTo: '#dayPrevTo',
+                nextFrom: '#dayNextFrom',
+                nextTo: '#dayNextTo'
+            }
         }
-    }
-    setCalendar('{{ $type }}');
+    };
 </script>
+<script src="{{ asset('js/appointments/schedule.js') }}"></script>
+<script src="{{ asset('js/appointments/schedules-common.js') }}"></script>
 @endpush

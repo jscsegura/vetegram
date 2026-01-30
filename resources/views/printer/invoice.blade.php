@@ -17,7 +17,7 @@
         </style>
     </head>
 
-    <body onload="window.print();">
+    <body data-auto-print="1">
 
         <section class="invoiceWidth pb-0 pb-lg-4">
             <div class="row px-2 px-lg-3 mt-2 mt-lg-4 mb-lg-5">
@@ -135,6 +135,8 @@
                 </div>
             </div>
         </section>
+        <script src="{{ asset('js/common/action-router.js') }}"></script>
+        <script src="{{ asset('js/common/auto-print.js') }}"></script>
     </body>
 
     </html>

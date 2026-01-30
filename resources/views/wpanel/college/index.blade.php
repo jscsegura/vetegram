@@ -47,36 +47,10 @@
     <script src="https://cdn.datatables.net/v/bs/dt-1.13.4/datatables.min.js"></script>
 
     <script>
-        var dataTable = $('#tableList').DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            order: [[0, 'desc']],
-            ajax: "{{ route('wp.college.list') }}",
-            paging: true,
-            pageLength: 25,
-            columns: [
-                {data:'id'},
-                {data:'code'},
-                {data:'dni'},
-                {data:'name'},
-                {data:'category'}                
-            ],
-            language: {
-                sLengthMenu: '',
-                sZeroRecords: 'No se encontraron resultados',
-                sEmptyTable: 'Ningún dato disponible en esta tabla',
-                sInfo: 'Registro _START_ al _END_ de un total de _TOTAL_ registros',
-                sInfoEmpty: 'Mostrando registros del 0 al 0 de un total de 0 registros',
-                sInfoFiltered: '',
-                sSearch: 'Buscar:',
-                oPaginate: {
-                    "sFirst": 'Primero',
-                    "sLast":  'Último',
-                    "sNext": 'Siguiente',
-                    "sPrevious": 'Anterior',
-                },
-            }
-        });
+        window.WPANEL_COLLEGE_INDEX_CONFIG = {
+            listUrl: "{{ route('wp.college.list') }}"
+        };
     </script>
+    <script src="{{ asset('js/wpanel/common.js') }}"></script>
+    <script src="{{ asset('js/wpanel/college/index.js') }}"></script>
 @stop

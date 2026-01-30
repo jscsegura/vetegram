@@ -116,6 +116,9 @@
     <script src="{{ asset('js/wpanel/library/notifications/jsNotifications.js') }}"></script>
     <script src="{{ asset('js/wpanel/library/notifications/bootbox.min.js') }}"></script>
     <script src="{{ asset('js/wpanel/library/tinymce/tinymce.min.js') }}"></script>
+    <script src="{{ asset('js/common/action-router.js') }}"></script>
+    <script src="{{ asset('js/wpanel/common.js') }}"></script>
+    <script src="{{ asset('js/wpanel/actions.js') }}"></script>
     <script src="{{ asset('js/wpanel/validate.js') }}"></script>
 
     @if((isset($activeImage))and($activeImage))

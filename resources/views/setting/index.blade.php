@@ -28,7 +28,7 @@
             </div>
 
             @if((count($template1) + count($template2) + count($template3) + count($template4) + count($template5) + count($template6) + count($template7)) == 0)
-                <form class="col-lg-10 col-xl-9 col-xxl-8 mx-auto mt-3 mt-md-4 p-4 p-lg-5 rounded-3 border border-2 border-secondary" id="initialFrm" action="{{ route('sett.generateTemplate') }}" method="post" onsubmit="return validategenerate();">
+                <form class="col-lg-10 col-xl-9 col-xxl-8 mx-auto mt-3 mt-md-4 p-4 p-lg-5 rounded-3 border border-2 border-secondary" id="initialFrm" action="{{ route('sett.generateTemplate') }}" method="post" data-action="Settings.validategenerate" data-action-event="submit">
                     
                     @csrf
 
@@ -137,7 +137,7 @@
                             </ul>
                         </div>
                         <div class="text-end">
-                            <a onclick="updateMode();" class="btn btn-outline-primary btn-sm text-uppercase px-3 text-nowrap" id="btn-mode"><i class="fa-regular fa-floppy-disk me-2"></i>{{ trans('dash.text.btn.save') }}</a>
+                            <a data-action="Settings.updateMode" data-action-event="click" class="btn btn-outline-primary btn-sm text-uppercase px-3 text-nowrap" id="btn-mode"><i class="fa-regular fa-floppy-disk me-2"></i>{{ trans('dash.text.btn.save') }}</a>
                         </div>
                     </div>
 
@@ -182,7 +182,7 @@
                                 </select>
                             </div>
                             <div>
-                                <a onclick="addHours();" id="btn-addhour" class="btn btn-primary btn-sm text-uppercase px-3"><i class="fa-solid fa-plus me-2"></i>{{ trans('dash.label.calendar.add.cup') }}</a>
+                                <a data-action="Settings.addHours" data-action-event="click" id="btn-addhour" class="btn btn-primary btn-sm text-uppercase px-3"><i class="fa-solid fa-plus me-2"></i>{{ trans('dash.label.calendar.add.cup') }}</a>
                             </div>
                         </div>
                     </div>
@@ -195,7 +195,7 @@
                                     <div id="setDay1" class="settingsDays @if(count($template1) > 0) d-flex flex-row flex-wrap align-items-start justify-content-center gap-2 @endif" data-counter="{{count($template1)}}">
                                         @if(count($template1) > 0)
                                             @foreach ($template1 as $template)
-                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist1">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="1" data-id="{{ $template->id }}" onclick="deleteHour(this);"><i class="fa-solid fa-xmark"></i></span></p>    
+                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist1">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="1" data-id="{{ $template->id }}" data-action="Settings.deleteHour" data-action-event="click" data-action-args="$el"><i class="fa-solid fa-xmark"></i></span></p>    
                                             @endforeach
                                         @else
                                             <p class="text-secondary fw-normal text-center opacity-75 m-0">{{ trans('dash.label.not.calendar') }}</p>
@@ -211,7 +211,7 @@
                                     <div id="setDay2" class="settingsDays @if(count($template2) > 0) d-flex flex-row flex-wrap align-items-start justify-content-center gap-2 @endif" data-counter="{{count($template2)}}">
                                         @if(count($template2) > 0)
                                             @foreach ($template2 as $template)
-                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist2">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="2" data-id="{{ $template->id }}" onclick="deleteHour(this);"><i class="fa-solid fa-xmark"></i></span></p>    
+                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist2">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="2" data-id="{{ $template->id }}" data-action="Settings.deleteHour" data-action-event="click" data-action-args="$el"><i class="fa-solid fa-xmark"></i></span></p>    
                                             @endforeach
                                         @else
                                             <p class="text-secondary fw-normal text-center opacity-75 m-0">{{ trans('dash.label.not.calendar') }}</p>
@@ -227,7 +227,7 @@
                                     <div id="setDay3" class="settingsDays @if(count($template3) > 0) d-flex flex-row flex-wrap align-items-start justify-content-center gap-2 @endif" data-counter="{{count($template3)}}">
                                         @if(count($template3) > 0)
                                             @foreach ($template3 as $template)
-                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist3">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="3" data-id="{{ $template->id }}" onclick="deleteHour(this);"><i class="fa-solid fa-xmark"></i></span></p>    
+                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist3">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="3" data-id="{{ $template->id }}" data-action="Settings.deleteHour" data-action-event="click" data-action-args="$el"><i class="fa-solid fa-xmark"></i></span></p>    
                                             @endforeach
                                         @else
                                             <p class="text-secondary fw-normal text-center opacity-75 m-0">{{ trans('dash.label.not.calendar') }}</p>
@@ -243,7 +243,7 @@
                                     <div id="setDay4" class="settingsDays @if(count($template4) > 0) d-flex flex-row flex-wrap align-items-start justify-content-center gap-2 @endif" data-counter="{{count($template4)}}">
                                         @if(count($template4) > 0)
                                             @foreach ($template4 as $template)
-                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist4">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="4" data-id="{{ $template->id }}" onclick="deleteHour(this);"><i class="fa-solid fa-xmark"></i></span></p>    
+                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist4">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="4" data-id="{{ $template->id }}" data-action="Settings.deleteHour" data-action-event="click" data-action-args="$el"><i class="fa-solid fa-xmark"></i></span></p>    
                                             @endforeach
                                         @else
                                             <p class="text-secondary fw-normal text-center opacity-75 m-0">{{ trans('dash.label.not.calendar') }}</p>
@@ -259,7 +259,7 @@
                                     <div id="setDay5" class="settingsDays @if(count($template5) > 0) d-flex flex-row flex-wrap align-items-start justify-content-center gap-2 @endif" data-counter="{{count($template5)}}">
                                         @if(count($template5) > 0)
                                             @foreach ($template5 as $template)
-                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist5">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="5" data-id="{{ $template->id }}" onclick="deleteHour(this);"><i class="fa-solid fa-xmark"></i></span></p>    
+                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist5">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="5" data-id="{{ $template->id }}" data-action="Settings.deleteHour" data-action-event="click" data-action-args="$el"><i class="fa-solid fa-xmark"></i></span></p>    
                                             @endforeach
                                         @else
                                             <p class="text-secondary fw-normal text-center opacity-75 m-0">{{ trans('dash.label.not.calendar') }}</p>
@@ -275,7 +275,7 @@
                                     <div id="setDay6" class="settingsDays @if(count($template6) > 0) d-flex flex-row flex-wrap align-items-start justify-content-center gap-2 @endif" data-counter="{{count($template6)}}">
                                         @if(count($template6) > 0)
                                             @foreach ($template6 as $template)
-                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist6">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="6" data-id="{{ $template->id }}" onclick="deleteHour(this);"><i class="fa-solid fa-xmark"></i></span></p>    
+                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist6">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="6" data-id="{{ $template->id }}" data-action="Settings.deleteHour" data-action-event="click" data-action-args="$el"><i class="fa-solid fa-xmark"></i></span></p>    
                                             @endforeach
                                         @else
                                             <p class="text-secondary fw-normal text-center opacity-75 m-0">{{ trans('dash.label.not.calendar') }}</p>
@@ -291,7 +291,7 @@
                                     <div id="setDay0" class="settingsDays @if(count($template7) > 0) d-flex flex-row flex-wrap align-items-start justify-content-center gap-2 @endif" data-counter="{{count($template7)}}">
                                         @if(count($template7) > 0)
                                             @foreach ($template7 as $template)
-                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist0">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="0" data-id="{{ $template->id }}" onclick="deleteHour(this);"><i class="fa-solid fa-xmark"></i></span></p>    
+                                                <p data-hour="{{ date("Hi", strtotime($template->hour)) }}" class="d-flex align-items-center m-0 datelist0">{{ date("h:i A", strtotime($template->hour)) }} <span class="deleteH" data-day="0" data-id="{{ $template->id }}" data-action="Settings.deleteHour" data-action-event="click" data-action-args="$el"><i class="fa-solid fa-xmark"></i></span></p>    
                                             @endforeach
                                         @else
                                             <p class="text-secondary fw-normal text-center opacity-75 m-0">{{ trans('dash.label.not.calendar') }}</p>
@@ -303,7 +303,7 @@
                     </div>
                 </div>
                 <div class="d-flex flex-column flex-md-row gap-2 gap-md-3 justify-content-center mt-4">
-                    <button onclick="deleteAllHour();" type="button" class="btn btn-outline-danger px-5">{{ trans('dash.label.erase.template') }}</button>
+                    <button data-action="Settings.deleteAllHour" data-action-event="click" type="button" class="btn btn-outline-danger px-5">{{ trans('dash.label.erase.template') }}</button>
                 </div>
 
             </form>
@@ -323,260 +323,23 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-    });
-
-    $('.select2').select2({
-        theme: "bootstrap-5",
-        placeholder: $( this ).data( 'placeholder' ),
-        closeOnSelect: false,
-    });
-
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-
-    function validategenerate() {
-        var valid = true;
-
-        $('.loadfield').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                valid = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        var start = $('#loadStart').val();
-        var end   = $('#loadEnd').val();
-
-        start = start.replace(/:/g, "");
-        end = end.replace(/:/g, "");
-
-        if(parseInt(start) >= parseInt(end)) {
-            valid = false;
-
-            $('#loadEnd').addClass('is-invalid');
-        }
-
-        if(valid == true) {
-            setCharge();
-        }
-
-        return valid;
-    }
-
-    function addHours() {
-        var valid = true;
-
-        $('.requeridoadd').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                valid = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if(valid == true) {
-            setLoad('btn-addhour', '{{ trans('dash.text.btn.save.process') }}');
-
-            var day = $('#templateDay').val();
-            var hour = $('#templateHour').val();
-            var minute = $('#templateMinute').val();
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                }
-            });
-            
-            $.post('{{ route('sett.addHour') }}', {day:day, hour:hour, minute:minute},
-                function (data){
-                    if(data.type == '200') {
-                        var counter = $('#setDay' + day).attr('data-counter');
-
-                        var html = '<p data-hour="'+data.text+'" class="d-flex align-items-center m-0 datelist'+day+'">'+data.hour+' <span class="deleteH" data-day="'+day+'" data-id="'+data.id+'" onclick="deleteHour(this);"><i class="fa-solid fa-xmark"></i></span></p>';
-
-                        if(counter == 0) {
-                            $('#setDay' + day).addClass('d-flex flex-row flex-wrap align-items-start justify-content-center gap-2');
-
-                            $('#setDay' + day).html(html);
-                            $('#setDay' + day).attr('data-counter', '1');
-                        }else{
-                            var lastElement = $('#setDay' + day);
-                            var insert = false;
-                            $('.datelist' + day).each(function(){
-                                var aux = $(this).attr('data-hour');
-
-                                if(parseInt(aux) > parseInt(data.text)) {
-                                    $(this).before(html);
-                                    insert = true;
-                                    return false;
-                                }else{
-                                    lastElement = $(this);
-                                }
-                            });
-
-                            if(insert == false) {
-                                $(lastElement).after(html);
-                            }
-                        }
-
-                        $('#initialFrm').hide();
-                    }
-
-                    if(data.type == '401') {
-                        Swal.fire({
-                            title: '{{ trans('dash.label.error.hour.exist') }}',
-                            showClass: {
-                                popup: 'animate__animated animate__fadeInDown'
-                            },
-                            hideClass: {
-                                popup: 'animate__animated animate__fadeOutUp'
-                            }
-                        });
-                    }
-
-                    stopLoad('btn-addhour', 'label.add');
-                }
-            );
-        }
-    }
-
-    function deleteHour(obj) {
-        var day = $(obj).attr('data-day');
-        var id  = $(obj).attr('data-id');
-
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.swal.title.delete.hour') }}',
-            text: "{{ trans('dash.swal.text.delete.hour') }}",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.label.yes.delete') }}',
-            cancelButtonText: '{{ trans('dash.label.no.cancel') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-                
-                setCharge();
-
-                $.post('{{ route('sett.delHour') }}', {id:id},
-                    function (data){
-                        if(data.isdelete == '1') {
-                            var p = $(obj).parent('p');
-                            var element = $(obj).parent('p').parent('div');
-
-                            $(p).remove();
-
-                            var quantity = $(element).find('p').toArray().length; 
-
-                            if(quantity == 0) {
-                                $('#setDay' + day).removeClass('d-flex flex-row flex-wrap align-items-start justify-content-center gap-2');
-
-                                var html = '<p class="text-secondary fw-normal text-center opacity-75 m-0">No hay horario</p>';
-
-                                $('#setDay' + day).html(html);
-
-                                $('#setDay' + day).attr('data-counter', '0');
-                            }
-                        }else{
-                            Swal.fire({
-                                title: '{{ trans('dash.swal.error.remove.hour.generic') }}',
-                                showClass: {
-                                    popup: 'animate__animated animate__fadeInDown'
-                                },
-                                hideClass: {
-                                    popup: 'animate__animated animate__fadeOutUp'
-                                }
-                            });
-                        }
-
-                        hideCharge();
-                    }
-                );
-            }
-        });
-    }
-
-    function deleteAllHour() {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.swal.title.remove.all.hour') }}',
-            text: "{{ trans('dash.swal.text.remove.all.hour') }}",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.label.yes.delete') }}',
-            cancelButtonText: '{{ trans('dash.label.no.cancel') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-                
-                setCharge();
-
-                $.post('{{ route('sett.delAllHour') }}', {template:true},
-                    function (data){
-                        location.reload();
-                    }
-                );
-            }
-        });
-    }
-
-    function updateMode() {
-        var mode = $("input[name='mode']:checked").val();
-
-        var onlineBooking = 0;
-        if ($('#onlineBooking').prop('checked')) {
-            onlineBooking = 1;
-        }
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-            }
-        });
-        
-        setLoad('btn-mode', '{{ trans('dash.text.btn.save.process') }}');
-
-        $.post('{{ route('sett.updateMode') }}', {mode:mode, onlineBooking:onlineBooking},
-            function (data){
-                stopLoad('btn-mode', '<i class="fa-regular fa-floppy-disk me-2"></i>{{ trans('dash.text.btn.save') }}');
-            }
-        );
-    }
+    window.SETTING_INDEX_CONFIG = {
+        addHourUrl: "{{ route('sett.addHour') }}",
+        deleteHourUrl: "{{ route('sett.delHour') }}",
+        deleteAllUrl: "{{ route('sett.delAllHour') }}",
+        updateModeUrl: "{{ route('sett.updateMode') }}",
+        saveProcessLabel: "{{ trans('dash.text.btn.save.process') }}",
+        saveLabelHtml: "<i class=\"fa-regular fa-floppy-disk me-2\"></i>{{ trans('dash.text.btn.save') }}",
+        hourExistsTitle: "{{ trans('dash.label.error.hour.exist') }}",
+        deleteHourTitle: "{{ trans('dash.swal.title.delete.hour') }}",
+        deleteHourText: "{{ trans('dash.swal.text.delete.hour') }}",
+        deleteHourErrorTitle: "{{ trans('dash.swal.error.remove.hour.generic') }}",
+        deleteAllTitle: "{{ trans('dash.swal.title.remove.all.hour') }}",
+        deleteAllText: "{{ trans('dash.swal.text.remove.all.hour') }}",
+        deleteYesLabel: "{{ trans('dash.label.yes.delete') }}",
+        deleteNoLabel: "{{ trans('dash.label.no.cancel') }}",
+        noHoursLabel: "No hay horario"
+    };
 </script>
+<script src="{{ asset('js/setting/index.js') }}"></script>
 @endpush

@@ -18,12 +18,12 @@
             <div class="row justify-content-end mb-3 mt-3 mt-lg-0">
                 <div class="col-md-3 col-xl-2 order-1 order-md-0 mt-3 mt-md-0 selTimeCalendar" id="selTimeCalendarDiario"></div>
                 <div class="col-md-6 col-xl-8 order-0 order-md-1 d-flex gap-2 justify-content-center">
-                    <a onclick="prevDay();" class="circleArrow"><i class="fa-solid fa-angle-left"></i></a>
+                    <a href="#" class="circleArrow" data-schedule-nav="day" data-direction="prev"><i class="fa-solid fa-angle-left"></i></a>
                     <h2 class="h4 fw-normal px-2 mb-0">{{ date('d', strtotime($params['from3'])) . ' ' . trans('dash.month.num' . (int)date('m', strtotime($params['from3']))) . ', ' . date('Y', strtotime($params['from3'])) }}</h2>
-                    <a onclick="nextDay();" class="circleArrow"><i class="fa-solid fa-angle-right"></i></a>
+                    <a href="#" class="circleArrow" data-schedule-nav="day" data-direction="next"><i class="fa-solid fa-angle-right"></i></a>
                 </div>
                 <div class="col-md-3 col-xl-2 order-2 mt-3 mt-md-0">
-                    <select name="useridselectD" id="useridselectD" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" onchange="getUserAppoinmentDay();">
+                    <select name="useridselectD" id="useridselectD" class="form-select form-select-sm" aria-label="{{ trans('dash.label.select.doctor') }}" data-schedule-user="day">
                         @foreach ($vets as $vet)
                             <option value="{{ $vet->id }}" @if($vet->id == $params['userid3']) selected='selected' @endif>{{ ($vet->id == $user->id) ? $vet->name . ' ('. trans('dash.its.me') . ')' : $vet->name }}</option>    
                         @endforeach
@@ -78,8 +78,8 @@
                                         <div class="d-none d-lg-block"></div>
                                     @else
                                         <div class="wrapIcons z-1">
-                                            <a onclick="setIdAppointmentToAttach('{{ $hours['id'] }}')" class="btn smIcon link-secondary fs-5" data-bs-toggle="modal" data-bs-target="#attachModal"><i class="fa-solid fa-paperclip"></i></a>
-                                            <a onclick="setIdAppointmentToMedicine('{{ $hours['id'] }}');" class="btn smIcon link-secondary fs-5" data-bs-toggle="modal" data-bs-target="#recipeModal"><i class="fa-regular fa-pen-to-square"></i></a>
+                                            <a data-action="Appointments.setIdAppointmentToAttach" data-action-event="click" data-action-args="{{ $hours['id'] }}" class="btn smIcon link-secondary fs-5" data-bs-toggle="modal" data-bs-target="#attachModal"><i class="fa-solid fa-paperclip"></i></a>
+                                            <a data-action="Appointments.setIdAppointmentToMedicine" data-action-event="click" data-action-args="{{ $hours['id'] }}" class="btn smIcon link-secondary fs-5" data-bs-toggle="modal" data-bs-target="#recipeModal"><i class="fa-regular fa-pen-to-square"></i></a>
                                         </div>
                                     @endif
                                 </div>
@@ -104,37 +104,7 @@ $endLastDay   = $thisFrom3->copy()->addDay();
 $startLastDay = $startLastDay->toDateString();
 $endLastDay   = $endLastDay->toDateString();
 @endphp
-
-<script>
-    function prevDay() {
-        var from = '{{ $startLastDay }}';
-        var to   = '{{ $startLastDay }}';
-        
-        $('#from3').val(from);
-        $('#to3').val(to);
-
-        getUserAppoinmentDay();
-    }
-
-    function nextDay() {
-        var from = '{{ $endLastDay }}';
-        var to   = '{{ $endLastDay }}';
-        
-        $('#from3').val(from);
-        $('#to3').val(to);
-
-        getUserAppoinmentDay();
-    }
-
-    function getUserAppoinmentDay() {
-        var time = $("#selTime").val();
-        var from = $("#from3").val();
-        var to   = $("#to3").val();
-
-        setCharge();
-
-        var userid = $('#useridselectD').val();
-
-        location.href = '{{ route('appointment.schedule') }}/' + btoa(userid) + '/' + btoa(from) + '/' + btoa(to) + '/3';
-    }
-</script>
+<input type="hidden" id="dayPrevFrom" value="{{ $startLastDay }}">
+<input type="hidden" id="dayPrevTo" value="{{ $startLastDay }}">
+<input type="hidden" id="dayNextFrom" value="{{ $endLastDay }}">
+<input type="hidden" id="dayNextTo" value="{{ $endLastDay }}">

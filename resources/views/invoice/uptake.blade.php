@@ -23,7 +23,7 @@
                 <br>
             @endif
 
-            <form name="frm" id="frm" action="{{ route('process.uptake') }}" method="POST" onsubmit="return validateXml();" enctype="multipart/form-data">
+            <form name="frm" id="frm" action="{{ route('process.uptake') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <h1 class="h4 text-uppercase justify-content-center justify-content-md-start fw-normal mb-2 mb-lg-3 flex-grow-1 d-flex gap-1 align-items-center">
                     <span>Aceptar <span class="text-info fw-bold">factura</span></span>
@@ -77,51 +77,12 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    $('.select2').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    } );
-    
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-    })
-
-    function validateXml() {
-        var inputFile = $('#uploadinvoice')[0].files[0];
-
-        if (!inputFile) {
-            $.toast({
-                text: '{{ trans('dash.msg.select.file') }}',
-                position: 'bottom-right',
-                textAlign: 'center',
-                loader: false,
-                hideAfter: 4000,
-                icon: 'warning'
-            });
-            event.preventDefault();
-            return false;
+    window.INVOICE_UPTAKE_CONFIG = {
+        labels: {
+            selectFile: "{{ trans('dash.msg.select.file') }}",
+            selectXml: "{{ trans('dash.msg.select.file.only.xml') }}"
         }
-
-        var tiposPermitidos = ['text/xml', 'xml'];
-        if ($.inArray(inputFile.type, tiposPermitidos) === -1) {
-            $.toast({
-                text: '{{ trans('dash.msg.select.file.only.xml') }}',
-                position: 'bottom-right',
-                textAlign: 'center',
-                loader: false,
-                hideAfter: 4000,
-                icon: 'warning'
-            });
-            event.preventDefault();
-            return false;
-        }
-
-        return true;
-
-    }
+    };
 </script>
+<script src="{{ asset('js/invoice/uptake.js') }}"></script>
 @endpush

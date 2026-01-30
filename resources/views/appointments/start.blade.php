@@ -48,7 +48,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <label for="reason" class="form-label small">{{ trans('dash.label.reason') }}</label>
-                    <input type="text" id="reason" name="reason" class="form-control fc requiredThisForm" value="{{ $appointment->reason }}" onchange="updateRecipe();">
+                    <input type="text" id="reason" name="reason" class="form-control fc requiredThisForm" value="{{ $appointment->reason }}" data-action="Appointments.updateRecipe" data-action-event="change">
                 </div>
             </div>
 
@@ -85,7 +85,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <label for="symptoms" class="form-label small">{{ trans('dash.label.Symptoms.only') }}</label>
-                    <input type="text" id="symptoms" name="symptoms" class="form-control fc requiredThisForm" maxlength="255" value="{{ $appointment->symptoms }}" autocomplete="off" onchange="updateRecipe();">
+                    <input type="text" id="symptoms" name="symptoms" class="form-control fc requiredThisForm" maxlength="255" value="{{ $appointment->symptoms }}" autocomplete="off" data-action="Appointments.updateRecipe" data-action-event="change">
                 </div>
             </div>
 
@@ -95,7 +95,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <label for="history" class="form-label small">{{ trans('dash.history.actual') }}</label>
-                    <input type="text" id="history" name="history" class="form-control fc" maxlength="255" value="{{ $appointment->history }}" autocomplete="off" onchange="updateRecipe();">
+                    <input type="text" id="history" name="history" class="form-control fc" maxlength="255" value="{{ $appointment->history }}" autocomplete="off" data-action="Appointments.updateRecipe" data-action-event="change">
                 </div>
             </div>
 
@@ -125,7 +125,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <label for="differential" class="form-label small">{{ trans('dash.differential.title') }}</label>
-                    <select id="differential" name="differential" class="form-select fc select2" data-placeholder="Seleccionar" onchange="updateOther('differential');">
+                    <select id="differential" name="differential" class="form-select fc select2" data-placeholder="Seleccionar" data-action="Appointments.updateOther" data-action-event="change" data-action-args="differential">
                         <option></option>
                         @foreach ($diagnostics as $diagnostic)
                         <option value="{{ $diagnostic['title_' . $weblang] }}" @if(in_array($appointment->differential, [$diagnostic['title_en'], $diagnostic['title_es']])) selected @endif>{{ $diagnostic['title_' . $weblang] }}</option>    
@@ -134,7 +134,7 @@
                     </select>
                     
                     <div class="mt-4" id="differentialOther" @if($appointment->differential != 'Otro') style="display:none" @endif>
-                        <input type="text" id="differentialOtherInput" name="differentialOtherInput" value="{{ $appointment->differential_other }}" class="form-control fc" placeholder="Escribir" onchange="updateRecipe();">
+                        <input type="text" id="differentialOtherInput" name="differentialOtherInput" value="{{ $appointment->differential_other }}" class="form-control fc" placeholder="Escribir" data-action="Appointments.updateRecipe" data-action-event="change">
                     </div>
                 </div>
             </div>
@@ -145,7 +145,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <label for="definitive" class="form-label small">{{ trans('dash.definitive.title') }}</label>
-                    <select id="definitive" name="definitive" class="form-select fc select2" data-placeholder="Seleccionar" onchange="updateOther('definitive');">
+                    <select id="definitive" name="definitive" class="form-select fc select2" data-placeholder="Seleccionar" data-action="Appointments.updateOther" data-action-event="change" data-action-args="definitive">
                         <option></option>
                         @foreach ($diagnostics as $diagnostic)
                         <option value="{{ $diagnostic['title_' . $weblang] }}" @if(in_array($appointment->definitive, [$diagnostic['title_en'], $diagnostic['title_es']])) selected @endif>{{ $diagnostic['title_' . $weblang] }}</option>    
@@ -154,7 +154,7 @@
                     </select>
                     
                     <div class="mt-4" id="definitiveOther" @if($appointment->definitive != 'Otro') style="display:none" @endif>
-                        <input type="text" id="definitiveOtherInput" name="definitiveOtherInput" value="{{ $appointment->definitive_other }}" class="form-control fc" placeholder="Escribir" onchange="updateRecipe();">
+                        <input type="text" id="definitiveOtherInput" name="definitiveOtherInput" value="{{ $appointment->definitive_other }}" class="form-control fc" placeholder="Escribir" data-action="Appointments.updateRecipe" data-action-event="change">
                     </div>
                 </div>
             </div>
@@ -165,7 +165,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <label for="treatment" class="form-label small">{{ trans('dash.treatment.title') }}</label>
-                    <textarea id="treatment" name="treatment" class="form-control fc" rows="1" onchange="updateRecipe();">{{ $appointment->treatment }}</textarea>
+                    <textarea id="treatment" name="treatment" class="form-control fc" rows="1" data-action="Appointments.updateRecipe" data-action-event="change">{{ $appointment->treatment }}</textarea>
                 </div>
             </div>
 
@@ -201,18 +201,18 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                                <button type="button" data-id="{{ $recipe->id }}" onclick="removeRecipe(this);" class="deleteR2"><i class="fa-solid fa-xmark"></i></button>
+                                <button type="button" data-id="{{ $recipe->id }}" data-action="Appointments.removeRecipe" data-action-event="click" data-action-args="$el" class="deleteR2"><i class="fa-solid fa-xmark"></i></button>
                                 <div class="d-flex gap-2 justify-content-end">
-                                    <a onclick="setIdAppointmentToSendRecipe('{{ $recipe->id }}');" class="btn btn-outline-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#sendModal"><i class="fa-regular fa-envelope me-2"></i>{{ trans('dash.btn.label.send') }}</a>
+                                    <a data-action="Appointments.setIdAppointmentToSendRecipe" data-action-event="click" data-action-args="{{ $recipe->id }}" class="btn btn-outline-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#sendModal"><i class="fa-regular fa-envelope me-2"></i>{{ trans('dash.btn.label.send') }}</a>
                                     <a href="{{ route('appoinment.printrecipe', App\Models\User::encryptor('encrypt', $recipe->id)) }}" target="_blank" class="btn btn-outline-primary btn-sm mt-3"><i class="fa-solid fa-print me-2"></i>{{ trans('dash.btn.label.printer') }}</a>
-                                    <a onclick="setIdAppointmentToRecipeEdit('{{ $recipe->id }}');" class="btn btn-outline-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#recipeModalEdit"><i class="fa-solid fa-pencil me-2"></i>{{ trans('dash.label.btn.edit') }}</a>
+                                    <a data-action="Appointments.setIdAppointmentToRecipeEdit" data-action-event="click" data-action-args="{{ $recipe->id }}" class="btn btn-outline-primary btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#recipeModalEdit"><i class="fa-solid fa-pencil me-2"></i>{{ trans('dash.label.btn.edit') }}</a>
                                 </div>
                             </div>
                         </div>
                     @endforeach
                     
                     <div class="pushLeft mt-2 mt-sm-0">
-                        <a onclick="setIdAppointmentToMedicine('{{ $appointment->id }}');" href="javascript:void(0);" class="d-flex gap-2 align-items-center justify-content-center bgGrey p-3 rounded link-secondary text-decoration-none" data-bs-toggle="modal" data-bs-target="#recipeModal">
+                        <a data-action="Appointments.setIdAppointmentToMedicine" data-action-event="click" data-action-args="{{ $appointment->id }}" href="javascript:void(0);" class="d-flex gap-2 align-items-center justify-content-center bgGrey p-3 rounded link-secondary text-decoration-none" data-bs-toggle="modal" data-bs-target="#recipeModal">
                             <i class="fa-solid fa-plus fs-5 text-primary"></i>
                             <div>
                                 <p class="fs-6 lh-sm mb-0 fw-medium"><small>{{ trans('dash.label.add.recipes') }}</small></p>
@@ -254,15 +254,15 @@
                                                 <p class="small lh-sm"><small>{{ date('d', strtotime($attach->created_at)) . ' de ' . strtolower(trans('dash.month.num' . (int)date('m', strtotime($attach->created_at)))) . ', ' . date('Y', strtotime($attach->created_at)) }}</small></p>
                                             </div>
                                         </a>
-                                        <button type="button" class="btn btn-link p-2 opacity-75" title="Enviar" onclick="setIdAppointmentToSendAttach('{{ $attach->id }}', '{{ $appointment['getClient']['email'] }}')" data-bs-toggle="modal" data-bs-target="#sendAttachModal"><i class="fa-regular fa-envelope"></i></button>
+                                        <button type="button" class="btn btn-link p-2 opacity-75" title="Enviar" data-action="Appointments.setIdAppointmentToSendAttach" data-action-event="click" data-action-args="{{ $attach->id }}|{{ $appointment['getClient']['email'] }}" data-bs-toggle="modal" data-bs-target="#sendAttachModal"><i class="fa-regular fa-envelope"></i></button>
                                         @if($attach->created_by == $thisUser)
-                                        <button type="button" data-id="{{ $attach->id }}" onclick="removeFile(this);" class="btn btn-link p-2 opacity-75" title="Borrar"><i class="fa-regular fa-trash-can"></i></button>
+                                        <button type="button" data-id="{{ $attach->id }}" data-action="Appointments.removeFile" data-action-event="click" data-action-args="$el" class="btn btn-link p-2 opacity-75" title="Borrar"><i class="fa-regular fa-trash-can"></i></button>
                                         @endif
                                     </div>
                                 </div>        
                             @endforeach
                             <div class="col-12 col-xl-6">
-                                <a href="javascript:void(0);" onclick="setIdAppointmentToAttach('{{ $appointment->id }}')" class="d-flex gap-2 gap-sm-3 align-items-center justify-content-center border border-2 border-secondary p-3 rounded link-secondary text-decoration-none h-100" data-bs-toggle="modal" data-bs-target="#attachModal">
+                                <a href="javascript:void(0);" data-action="Appointments.setIdAppointmentToAttach" data-action-event="click" data-action-args="{{ $appointment->id }}" class="d-flex gap-2 gap-sm-3 align-items-center justify-content-center border border-2 border-secondary p-3 rounded link-secondary text-decoration-none h-100" data-bs-toggle="modal" data-bs-target="#attachModal">
                                     <i class="fa-solid fa-plus fs-4 text-primary"></i>
                                     <div>
                                         <p class="fs-6 lh-sm mb-0 fw-medium"><small>{{ trans('dash.btn.add.new') }}</small></p>
@@ -290,7 +290,7 @@
                         @endforeach
 
                         <div>
-                            <a onclick="setIdAppointmentToNote('{{ $appointment->id }}', 0);" href="javascript:void(0);" class="d-flex gap-2 align-items-center justify-content-center bgGrey p-3 rounded link-secondary text-decoration-none" data-bs-toggle="modal" data-bs-target="#noteModal">
+                            <a data-action="Appointments.setIdAppointmentToNote" data-action-event="click" data-action-args="{{ $appointment->id }}|0" href="javascript:void(0);" class="d-flex gap-2 align-items-center justify-content-center bgGrey p-3 rounded link-secondary text-decoration-none" data-bs-toggle="modal" data-bs-target="#noteModal">
                                 <i class="fa-solid fa-plus fs-5 text-primary"></i>
                                 <div>
                                     <p class="fs-6 lh-sm mb-0 fw-medium"><small>{{ trans('dash.label.add.notes') }}</small></p>
@@ -317,7 +317,7 @@
                         @endforeach
 
                         <div>
-                            <a onclick="setIdAppointmentToNote('{{ $appointment->id }}', 1);" href="javascript:void(0);" class="d-flex gap-2 align-items-center justify-content-center bgGrey p-3 rounded link-secondary text-decoration-none" data-bs-toggle="modal" data-bs-target="#noteModal">
+                            <a data-action="Appointments.setIdAppointmentToNote" data-action-event="click" data-action-args="{{ $appointment->id }}|1" href="javascript:void(0);" class="d-flex gap-2 align-items-center justify-content-center bgGrey p-3 rounded link-secondary text-decoration-none" data-bs-toggle="modal" data-bs-target="#noteModal">
                                 <i class="fa-solid fa-plus fs-5 text-primary"></i>
                                 <div>
                                     <p class="fs-6 lh-sm mb-0 fw-medium"><small>{{ trans('dash.label.add.notes') }}</small></p>
@@ -329,8 +329,8 @@
             </div>
 
             <div class="d-flex flex-column flex-sm-row gap-2 ms-0 ms-sm-4 ms-md-5">
-                <button onclick="finishRecipe('{{ $appointment->id }}', 0);" type="button" class="btn btn-primary px-4">{{ trans('dash.label.appointment.finish') }}</button>
-                <button onclick="finishRecipe('{{ $appointment->id }}', 1);" type="button" class="btn btn-outline-primary px-4">{{ trans('dash.label.appointment.finish.facture') }}</button>
+                <button data-action="Appointments.finishRecipe" data-action-event="click" data-action-args="{{ $appointment->id }}|0" type="button" class="btn btn-primary px-4">{{ trans('dash.label.appointment.finish') }}</button>
+                <button data-action="Appointments.finishRecipe" data-action-event="click" data-action-args="{{ $appointment->id }}|1" type="button" class="btn btn-outline-primary px-4">{{ trans('dash.label.appointment.finish.facture') }}</button>
             </div>
         </form>
         <div class="col-lg-4 order-0 order-lg-1 ps-lg-5 mb-4 mb-lg-0">
@@ -398,7 +398,7 @@
                             @foreach ($vaccines as $vaccine)
                             <div class="d-flex justify-content-between small py-1">
                                 <span>{{ $vaccine->name }}, {{ date('d-m-Y', strtotime($vaccine->created_at)) }}</span>
-                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#detailVaccine" onclick="showAppointmentVaccine('{{ App\Models\User::encryptor('encrypt', $vaccine->id) }}');" class="fw-medium text-decoration-none"><i class="fa-solid fa-eye me-1"></i>Ver</a>
+                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#detailVaccine" data-action="Appointments.showAppointmentVaccine" data-action-event="click" data-action-args="{{ App\Models\User::encryptor('encrypt', $vaccine->id) }}" class="fw-medium text-decoration-none"><i class="fa-solid fa-eye me-1"></i>Ver</a>
                             </div>
                             @endforeach
                         @else
@@ -407,7 +407,7 @@
                             </div> 
                         @endif
                         <div class="d-flex justify-content-end">
-                            <a class="btn btn-outline-primary btn-sm mt-2 mb-2" onclick="setIdAppointmentToVaccine('{{ $appointment->id_pet }}', '{{ $appointment->id_owner }}');" data-bs-toggle="modal" data-bs-target="#addVaccine"><i class="fa-solid fa-plus me-2"></i>{{ trans('dash.label.add') }}</a>
+                            <a class="btn btn-outline-primary btn-sm mt-2 mb-2" data-action="Appointments.setIdAppointmentToVaccine" data-action-event="click" data-action-args="{{ $appointment->id_pet }}|{{ $appointment->id_owner }}" data-bs-toggle="modal" data-bs-target="#addVaccine"><i class="fa-solid fa-plus me-2"></i>{{ trans('dash.label.add') }}</a>
                         </div>
                     </div>
                   </div>
@@ -424,7 +424,7 @@
                               @foreach ($desparats as $desparat)
                               <div class="d-flex justify-content-between small py-1">
                                   <span>{{ $desparat->name }}, {{ date('d-m-Y', strtotime($desparat->created_at)) }}</span>
-                                  <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#detailVaccine" onclick="showAppointmentVaccine('{{ App\Models\User::encryptor('encrypt', $desparat->id) }}');" class="fw-medium text-decoration-none"><i class="fa-solid fa-eye me-1"></i>Ver</a>
+                                  <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#detailVaccine" data-action="Appointments.showAppointmentVaccine" data-action-event="click" data-action-args="{{ App\Models\User::encryptor('encrypt', $desparat->id) }}" class="fw-medium text-decoration-none"><i class="fa-solid fa-eye me-1"></i>Ver</a>
                               </div>
                               @endforeach
                           @else
@@ -433,7 +433,7 @@
                               </div> 
                           @endif
                           <div class="d-flex justify-content-end">
-                              <a class="btn btn-outline-primary btn-sm mt-2 mb-2" onclick="setIdAppointmentToDesparat('{{ $appointment->id_pet }}', '{{ $appointment->id_owner }}');" data-bs-toggle="modal" data-bs-target="#addDesparation"><i class="fa-solid fa-plus me-2"></i>{{ trans('dash.label.add') }}</a>
+                              <a class="btn btn-outline-primary btn-sm mt-2 mb-2" data-action="Appointments.setIdAppointmentToDesparat" data-action-event="click" data-action-args="{{ $appointment->id_pet }}|{{ $appointment->id_owner }}" data-bs-toggle="modal" data-bs-target="#addDesparation"><i class="fa-solid fa-plus me-2"></i>{{ trans('dash.label.add') }}</a>
                           </div>
                       </div>
                     </div>
@@ -450,7 +450,7 @@
                             @foreach ($prevRecipes as $recipe)
                             <div class="d-flex justify-content-between small py-1">
                                 <span>{{ date('d', strtotime($recipe->created_at)) . ' ' . strtolower(trans('dash.month.num' . (int)date('m', strtotime($recipe->created_at)))) . ', ' . date('Y', strtotime($recipe->created_at)) }}</span>
-                                <a href="javascript:void(0);" onclick="setIdAppointmentToShow('{{ $recipe->id }}');" data-bs-toggle="modal" data-bs-target="#showRecipe" class="fw-medium text-decoration-none"><i class="fa-solid fa-eye me-1"></i>{{ trans('dash.label.btn.see') }}</a>
+                                <a href="javascript:void(0);" data-action="Appointments.setIdAppointmentToShow" data-action-event="click" data-action-args="{{ $recipe->id }}" data-bs-toggle="modal" data-bs-target="#showRecipe" class="fw-medium text-decoration-none"><i class="fa-solid fa-eye me-1"></i>{{ trans('dash.label.btn.see') }}</a>
                             </div>
                             @endforeach
                         @else
@@ -487,7 +487,7 @@
             </div>
 
             <div class="mt-3">
-                <button type="button" onclick="setIdAppointmentToReminder('{{ $appointment->id }}', '0', '0', '{{ $appointment->id_pet }}');" data-bs-toggle="modal" data-bs-target="#reminderModal" class="btn btn-secondary btn-sm text-uppercase px-4 w-100">
+                <button type="button" data-action="Appointments.setIdAppointmentToReminder" data-action-event="click" data-action-args="{{ $appointment->id }}|0|0|{{ $appointment->id_pet }}" data-bs-toggle="modal" data-bs-target="#reminderModal" class="btn btn-secondary btn-sm text-uppercase px-4 w-100">
                     {{ trans('dash.reminder.add') }}
                 </button>
             </div>
@@ -509,7 +509,7 @@
           <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-3 p-md-4">
-            <form name="frmEditPet" id="frmEditPet" method="post" action="{{ route('pets.editPet') }}" enctype="multipart/form-data" onsubmit="return sendFormEdit();">
+            <form name="frmEditPet" id="frmEditPet" method="post" action="{{ route('pets.editPet') }}" enctype="multipart/form-data" data-action="Appointments.sendFormEdit" data-action-event="submit">
                 @csrf
 
                 <input type="hidden" name="petId" id="petId" value="{{ $pet->id }}">
@@ -520,7 +520,7 @@
 
                 <div class="mb-3">
                     <label for="animaltype" class="form-label small">{{ trans('dash.label.element.type.pet') }}</label>
-                    <select name="animaltype" id="animaltype" class="form-select fc select4 requeridoEditPet" onchange="getBreed();">
+                    <select name="animaltype" id="animaltype" class="form-select fc select4 requeridoEditPet" data-action="Appointments.getBreed" data-action-event="change">
                         <option value="">{{ trans('auth.register.complete.select') }}</option>
                         @foreach ($allTypes as $type)
                             <option value="{{ $type->id }}" @if($type->id == $pet->type) selected='selected' @endif>{{ $type['title_' . $weblang] }}</option>
@@ -612,7 +612,7 @@
             </form>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button onclick="sendFormEditValidate();" id="agendarBtn" type="button" class="btn btn-primary btn-sm fw-medium px-4">{{ trans('dash.text.btn.save') }}</button>
+          <button data-action="Appointments.sendFormEditValidate" data-action-event="click" id="agendarBtn" type="button" class="btn btn-primary btn-sm fw-medium px-4">{{ trans('dash.text.btn.save') }}</button>
         </div>
       </div>
     </div>
@@ -633,377 +633,49 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    var reloadToComplete = true;
-
-    $('.select2').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    } );
-
-    $('.select3').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#recipeModal')
-    });
-
-    $('.select5').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#addVaccine')
-    });
-
-    $('.select6').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#addDesparation')
-    });
-    
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-    })
-
-    function updateRecipe() {
-        var id = '{{ $appointment->id }}';
-        var reason = $('#reason').val();
-        var diagnosis = $('#diagnosis').val();
-        var symptoms = $('#symptoms').val();
-        var physical = $('#physicalExamData').val();
-        var history = $('#history').val();
-        var treatment = $('#treatment').val();
-
-        var differential = $('#differential').val();
-        var differentialOther = $('#differentialOtherInput').val();
-        var definitive = $('#definitive').val();
-        var definitiveOther = $('#definitiveOtherInput').val();
-        
-        $.ajaxSetup({
-          headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-          }
-        });
-
-        $.post('{{ route('appointment.update') }}', {id:id, reason:reason, diagnosis:diagnosis, symptoms:symptoms, physical:physical, history:history, treatment:treatment, differential:differential, differentialOther:differentialOther, definitive:definitive, definitiveOther:definitiveOther},
-            function (data) {
-              if(data.save == 1) {
-                $.toast({
-                    text: '{{ trans('dash.msg.update.appoinment') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'success'
-                });
-                $('#btn-not-save').hide();
-              }else{
-                $.toast({
-                  text: '{{ trans('dash.msg.error.appoinment') }}',
-                  position: 'bottom-right',
-                  textAlign: 'center',
-                  loader: false,
-                  hideAfter: 4000,
-                  icon: 'error'
-                });
-                $('#btn-not-save').show();
-              }           
-
-              hideCharge();
-            }
-        )
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            $.toast({
-                text: '{{ trans('dash.msg.error.appoinment') }}',
-                position: 'bottom-right',
-                textAlign: 'center',
-                loader: false,
-                hideAfter: 4000,
-                icon: 'error'
-            });
-            $('#btn-not-save').show();
-        });
-    }
-
-    function removeFile(obj) {
-        var id = $(obj).attr('data-id');
-
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.msg.delete.attach') }}',
-            text: '{{ trans('dash.msg.confir.delete.attach') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.label.yes.delete') }}',
-            cancelButtonText: '{{ trans('dash.label.no.cancel') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('appoinment.deleteAttach') }}', {id:id},
-                    function (data){
-                      if(data.process == '1') {
-                        $(obj).parent('div').parent('div').remove();
-                      }else if(data.process == '500') {
-                        $.toast({
-                            text: '{{ trans('dash.msg.error.perm.attach') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'error'
-                        });
-                      }else{
-                        $.toast({
-                            text: '{{ trans('dash.msg.error.delete.attach') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'error'
-                        });
-                      }
-
-                      hideCharge();
-                    }
-                );
-            }
-        });
-    }
-
-    function removeRecipe(obj) {
-        var id = $(obj).attr('data-id');
-
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.msg.delete.appoinment') }}',
-            text: '{{ trans('dash.msg.confir.delete.appoinment') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.label.yes.delete') }}',
-            cancelButtonText: '{{ trans('dash.label.no.cancel') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('appoinment.deleteRecipe') }}', {id:id},
-                    function (data){
-                        if(data.process == '1') {
-                            $(obj).parent('div').parent('div').remove();
-                        }else if(data.process == '500') {
-                            $.toast({
-                                text: '{{ trans('dash.msg.error.perm.appoinment') }}',
-                                position: 'bottom-right',
-                                textAlign: 'center',
-                                loader: false,
-                                hideAfter: 4000,
-                                icon: 'error'
-                            });
-                        }else{
-                            $.toast({
-                                text: '{{ trans('dash.msg.error.delete.appoinment') }}',
-                                position: 'bottom-right',
-                                textAlign: 'center',
-                                loader: false,
-                                hideAfter: 4000,
-                                icon: 'error'
-                            });
-                        }
-
-                        hideCharge();
-                    }
-                );
-            }
-        });
-    }
-
-    function finishRecipe(id, option) {
-
-        var validate = true;
-
-        $('.requiredThisForm').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                validate = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });        
-
-        if(validate) {
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                    cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-                },
-                buttonsStyling: false
-            });
-
-            var text = '{{ trans('dash.msg.confir.finish.appoinment') }}';
-            if(option == 1) {
-                var text = '{{ trans('dash.msg.confir.finish.appoinment.invoice') }}';
-            }
-
-            swalWithBootstrapButtons.fire({
-                title: '{{ trans('dash.msg.finish.appoinment') }}',
-                text: text,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '{{ trans('dash.label.yes.finish') }}',
-                cancelButtonText: '{{ trans('dash.label.no.cancel') }}',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                        }
-                    });
-
-                    setCharge();
-                    
-                    $.post('{{ route('appoinment.finish') }}', {id:id},
-                        function (data){
-                            if(data.process == '1') {
-                                if(option == 1) {
-                                    location.href = '{{ route('invoice.create') }}/' + data.id;
-                                }else{
-                                    location.href = '{{ route('appointment.index') }}';
-                                }
-                            }else{
-                                $.toast({
-                                    text: '{{ trans('dash.msg.error.finish.appoinment') }}',
-                                    position: 'bottom-right',
-                                    textAlign: 'center',
-                                    loader: false,
-                                    hideAfter: 4000,
-                                    icon: 'error'
-                                });
-                            }
-
-                            hideCharge();
-                        }
-                    );
-                }
-            });
-        }else{
-            $.toast({
-                text: '{{ trans('dash.label.fields.required') }}',
-                position: 'bottom-right',
-                textAlign: 'center',
-                loader: false,
-                hideAfter: 4000,
-                icon: 'error'
-            });
-            return false;
+    window.APPOINTMENTS_START_CONFIG = {
+        appointmentId: @json($appointment->id),
+        routes: {
+            update: @json(route('appointment.update')),
+            deleteAttach: @json(route('appoinment.deleteAttach')),
+            deleteRecipe: @json(route('appoinment.deleteRecipe')),
+            finish: @json(route('appoinment.finish')),
+            invoiceCreate: @json(route('invoice.create')),
+            index: @json(route('appointment.index')),
+            getBreed: @json(route('get.breed'))
+        },
+        texts: {
+            updateSuccess: @json(trans('dash.msg.update.appoinment')),
+            updateError: @json(trans('dash.msg.error.appoinment')),
+            deleteAttachTitle: @json(trans('dash.msg.delete.attach')),
+            deleteAttachConfirm: @json(trans('dash.msg.confir.delete.attach')),
+            deleteYes: @json(trans('dash.label.yes.delete')),
+            cancelNo: @json(trans('dash.label.no.cancel')),
+            deleteAttachPermError: @json(trans('dash.msg.error.perm.attach')),
+            deleteAttachError: @json(trans('dash.msg.error.delete.attach')),
+            deleteRecipeTitle: @json(trans('dash.msg.delete.appoinment')),
+            deleteRecipeConfirm: @json(trans('dash.msg.confir.delete.appoinment')),
+            deleteRecipePermError: @json(trans('dash.msg.error.perm.appoinment')),
+            deleteRecipeError: @json(trans('dash.msg.error.delete.appoinment')),
+            finishTitle: @json(trans('dash.msg.finish.appoinment')),
+            finishConfirm: @json(trans('dash.msg.confir.finish.appoinment')),
+            finishConfirmInvoice: @json(trans('dash.msg.confir.finish.appoinment.invoice')),
+            finishYes: @json(trans('dash.label.yes.finish')),
+            finishError: @json(trans('dash.msg.error.finish.appoinment')),
+            fieldsRequired: @json(trans('dash.label.fields.required')),
+            select: @json(trans('auth.register.complete.select')),
+            otherLabel: 'Otro'
+        },
+        selectors: {
+            recipeModal: '#recipeModal',
+            addVaccineModal: '#addVaccine',
+            addDesparationModal: '#addDesparation'
         }
-    }
-
-    function getBreed(obj) {
-
-        var type = $('#animaltype').val();
-
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('get.breed') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                type: type
-            },
-            beforeSend: function(){},
-            success: function(data){
-                var html = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-                $.each(data.rows, function(i, item) {
-                    html = html + '<option value="'+item.id+'">'+item.title+'</option>';
-                });
-
-                $('#breed').html(html);
-            }
-        });
-    }
-
-    function sendFormEditValidate() {
-        $('#frmEditPet').submit();
-    }
-
-    function sendFormEdit() {
-        var validate = true;
-
-        $('.requeridoEditPet').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                validate = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if(validate == true) {
-            setCharge2();
-
-            return true;
-        }
-
-        return false;
-    }
-
-    function updateOther(type) {
-        if (type == 'differential') {
-            if($('#differential').val() == 'Otro') {
-                $('#differentialOther').show();
-            }else{
-                $('#differentialOtherInput').val('');
-                $('#differentialOther').hide();
-            }
-        } else if (type == 'definitive') {
-            if($('#definitive').val() == 'Otro') {
-                $('#definitiveOther').show();
-            }else{
-                $('#definitiveOtherInput').val('');
-                $('#definitiveOther').hide();
-            }
-        }
-
-        updateRecipe();
-    }
+    };
 </script>
+<script src="{{ asset('js/appointments/start/core.js') }}"></script>
+<script src="{{ asset('js/appointments/start/ui.js') }}"></script>
+<script src="{{ asset('js/appointments/start/attachments.js') }}"></script>
+<script src="{{ asset('js/appointments/start/vaccines.js') }}"></script>
+<script src="{{ asset('js/appointments/start/recipe.js') }}"></script>
 @endpush

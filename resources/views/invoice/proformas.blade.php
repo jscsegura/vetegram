@@ -56,7 +56,7 @@
                                                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
                                                     <li><a class="dropdown-item small" href="{{ route('proform.detail', App\Models\User::encryptor('encrypt', $invoice->id)) }}">{{ trans('dash.label.detail') }}</a></li>
                                                     <li><a class="dropdown-item small" href="{{ route('proform.edit', App\Models\User::encryptor('encrypt', $invoice->id)) }}">{{ trans('dash.label.btn.edit') }}</a></li>
-                                                    <li><a class="dropdown-item small" href="javascript:void(0);" onclick="deleteProforma('{{ App\Models\User::encryptor('encrypt', $invoice->id) }}')">{{ trans('dash.label.btn.delete') }}</a></li>
+                                                    <li><a class="dropdown-item small" href="javascript:void(0);" data-invoice-action="delete-proforma" data-proforma-id="{{ App\Models\User::encryptor('encrypt', $invoice->id) }}">{{ trans('dash.label.btn.delete') }}</a></li>
                                                 </ul>
                                             </div>
                                         </td>
@@ -86,42 +86,17 @@
     <link rel="stylesheet" href="{{ asset('css/wpanel/library/jquery.toast.css') }}">
     <script src="{{ asset('js/wpanel/library/jquery.toast.js') }}"></script>
     <script>
-        function deleteProforma(id) {
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                    cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-                },
-                buttonsStyling: false
-            });
-            
-            swalWithBootstrapButtons.fire({
-                title: '{{ trans('dash.proform.msg.delete') }}',
-                text: '{{ trans('dash.proform.msg.delete.text') }}',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '{{ trans('dash.proform.delete.yes') }}',
-                cancelButtonText: '{{ trans('dash.proform.delete.no') }}',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                        }
-                    });
-
-                    setCharge();
-                    
-                    $.post('{{ route('invoice.delete') }}', {id:id},
-                        function (data){
-                            location.reload();
-
-                            hideCharge();
-                        }
-                    );
-                }
-            });
-        }
+        window.INVOICE_PROFORMAS_CONFIG = {
+            routes: {
+                delete: "{{ route('invoice.delete') }}"
+            },
+            labels: {
+                deleteTitle: "{{ trans('dash.proform.msg.delete') }}",
+                deleteText: "{{ trans('dash.proform.msg.delete.text') }}",
+                deleteYes: "{{ trans('dash.proform.delete.yes') }}",
+                deleteNo: "{{ trans('dash.proform.delete.no') }}"
+            }
+        };
     </script>
+    <script src="{{ asset('js/invoice/proformas.js') }}"></script>
 @endpush

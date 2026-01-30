@@ -21,7 +21,7 @@
                     </div>
 					<h1 class="h4 text-uppercase text-center text-md-start mb-2">{{ trans('auth.login.forgot') }}</h1>
                     <p class="mb-4">{{ trans('auth.login.forgot.instructions') }}</p>
-					<form method="post" action="{{ route('forgot.submit') }}" onsubmit="return validRecovery();">
+					<form method="post" action="{{ route('forgot.submit') }}">
 						@csrf
 						
 						<div class="mb-3">
@@ -60,30 +60,11 @@
 
 @push('scriptBottom')
 <script>
-	function validRecovery() {
-		var validate = true;
-
-		$('#email').removeClass('is-invalid');
-
-		if(!validaEmail($('#email').val())){
-			$('#email').addClass('is-invalid');
-			validate = false;
-		}
-
-		if(validate == true) {
-            setLoad('btnReset', '{{ trans('auth.text.btn.process') }}');
+    window.AUTH_FORGOT_CONFIG = {
+        labels: {
+            processing: "{{ trans('auth.text.btn.process') }}"
         }
-
-		return validate;
-	}
-
-	function validaEmail(email) {
-		var reg=/^[0-9a-z_\-\+.]+@[0-9a-z\-\.]+\.[a-z]{2,8}$/i;
-		if(reg.test(email)){
-			return true;
-		}else{
-			return false;
-		}
-	}
+    };
 </script>
+<script src="{{ asset('js/auth/forgot.js') }}"></script>
 @endpush

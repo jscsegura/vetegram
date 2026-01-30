@@ -10,7 +10,7 @@
 <section class="container-fluid pb-0 pb-lg-4">
     <div class="row px-2 px-lg-3 mt-2 mt-lg-4">
         
-        <form name="frmAddAppointment" id="frmAddAppointment" action="{{ route('appointment.store') }}" method="post" onsubmit="return validate();"  enctype="multipart/form-data" class="col-lg-10 col-xl-8 col-xxl-6 mx-auto mt-4 mt-lg-0 mb-lg-5">
+        <form name="frmAddAppointment" id="frmAddAppointment" action="{{ route('appointment.store') }}" method="post" data-action="Appointments.validate" data-action-event="submit"  enctype="multipart/form-data" class="col-lg-10 col-xl-8 col-xxl-6 mx-auto mt-4 mt-lg-0 mb-lg-5">
             <h1 class="h4 text-uppercase text-center text-md-start fw-normal mb-3">{{ trans('dash.label.add') }} <span class="text-info fw-bold">{{ trans('dash.label.apointment') }}</span></h1>
 
             @csrf
@@ -23,7 +23,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <label for="user" class="form-label small">{{ trans('dash.label.calendar') }}</label>
-                    <select id="user" name="user" class="form-select fc select2 requerido" data-placeholder="{{ trans('dash.label.selected') }}" onchange="getHours('groomer');">
+                    <select id="user" name="user" class="form-select fc select2 requerido" data-placeholder="{{ trans('dash.label.selected') }}" data-action="Appointments.getHours" data-action-event="change" data-action-args="groomer">
                         <option></option>
                         @foreach ($vets as $vet)
                             <option value="{{ $vet->id }}" @if($vet->id == $user->id) selected='selected' @endif data-rol="{{ $vet->rol_id }}">{{ ($vet->id == $user->id) ? $vet->name . ' ('. trans('dash.its.me') . ')' : $vet->name }}</option>    
@@ -39,7 +39,7 @@
                 <div class="flex-grow-1 d-flex flex-column flex-sm-row gap-3 align-items-sm-end">
                     <div class="flex-grow-1">
                         <label for="pet" class="form-label small">{{ trans('dash.label.pet') }}</label>
-                        <select id="pet" name="pet" class="form-select fc select2 requerido" data-placeholder="{{ trans('dash.label.selected') }}" onchange="selectedPet();">
+                        <select id="pet" name="pet" class="form-select fc select2 requerido" data-placeholder="{{ trans('dash.label.selected') }}" data-action="Appointments.selectedPet" data-action-event="change">
                             <option></option>
                             @foreach ($pets as $pet)
                                 <option value="{{ $pet->id . ':' . $pet->id_user }}">{{ $pet->name . ' (' . $pet['getUser']['name'] . ')' }}</option>
@@ -65,11 +65,11 @@
                 <div class="flex-grow-1 d-flex flex-column flex-sm-row gap-3 align-items-sm-end">
                     <div class="flex-grow-1">
                         <label for="date" class="form-label small">{{ trans('dash.label.date') }}</label>
-                        <input type="text" name="date" id="date" class="form-control fc dDropperHour requerido" onchange="getHours();" data-dd-opt-min-date="{{ date('Y/m/d') }}" size="14">
+                        <input type="text" name="date" id="date" class="form-control fc dDropperHour requerido" data-action="Appointments.getHours" data-action-event="change" data-dd-opt-min-date="{{ date('Y/m/d') }}" size="14">
                     </div>
                     <div>
                         <label for="dtime" class="form-label small">{{ trans('dash.label.hour') }}</label>
-                        <select id="hour" name="hour" class="form-select fc requerido" onchange="reserverHour(this);">
+                        <select id="hour" name="hour" class="form-select fc requerido" data-action="Appointments.reserverHour" data-action-event="change" data-action-args="$el">
                             <option value="">{{ trans('dash.label.selected') }}</option>
                         </select>
                     </div>
@@ -157,7 +157,7 @@
                     <i class="fa-regular fa-bell fa-fw fs-5 text-primary mtIcon"></i>
                 </div>
                 <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" value="1" id="addReminder" name="addReminder" onclick="setNotified();">
+                    <input class="form-check-input" type="checkbox" value="1" id="addReminder" name="addReminder" data-action="Appointments.setNotified" data-action-event="click">
                     <label class="form-check-label small" for="addReminder">
                         {{ trans('dash.label.title.reminder') }}
                     </label>
@@ -259,312 +259,39 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    $('.select2').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    });
-
-    $('.select3').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#recipeModal')
-    });
-
-    $('.select4').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#createNewUser')
-    });
-
-    $('.select5').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#createUserModal')
-    });
-
-    $('.select6').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#createNewPet')
-    });
-    
-    new dateDropper({
-        selector: '.dDropperHour',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-        onDropdownExit: getHours
-    })
-
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true
-    })
-
-    function setUrlDate () {
-        var date = $('#date').val();
-
-        if(date != '') {
-            $('#urlToAvailable').attr('href', '{{ route('sett.edit') }}/' + btoa(date));
-        }else{
-            $('#urlToAvailable').attr('href', '{{ route('sett.edit') }}');
+    window.APPOINTMENTS_ADD_CONFIG = {
+        routes: {
+            settingsEdit: @json(route('sett.edit')),
+            getHours: @json(route('appoinment.getHours')),
+            reserveHour: @json(route('appoinment.reserveHour'))
+        },
+        texts: {
+            selected: @json(trans('dash.label.selected')),
+            selectedNotAvailable: @json(trans('dash.label.selected.notavailable')),
+            hourNotAvailable: @json(trans('dash.msg.error.hour.not.available')),
+            errorExtFile: @json(trans('dash.msg.error.ext.file')),
+            errorRecipeFields: @json(trans('dash.msg.error.recipe.fields')),
+            imageNotChoose: @json(trans('dash.image.not.choose')),
+            imageNotChoosePersonalize: @json(trans('dash.image.not.choose.personalize')),
+            saveProcessing: @json(trans('dash.text.btn.save.process')),
+            todayDate: @json(date('j/n/Y'))
+        },
+        data: {
+            types: @json($types),
+            medicines: @json($medicines)
+        },
+        selectors: {
+            recipeModal: '#recipeModal',
+            createNewUser: '#createNewUser',
+            createUserModal: '#createUserModal',
+            createNewPet: '#createNewPet',
+            dateInput: '#date',
+            userSelect: '#user',
+            hourSelect: '#hour',
+            urlToAvailable: '#urlToAvailable',
+            groomingContainer: '#contGrooming'
         }
-    }
-
-    function getHours(callGroomer = '') {
-        var userid = $('#user').val();
-        var date = $('#date').val();
-
-        if((userid != '')&&(date != '')) {
-            
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                }
-            });
-            
-            $.post('{{ route('appoinment.getHours') }}', {userid:userid, date:date},
-                function (data){
-                    var existHours = 0;
-                    var htmlData = '';
-                    var html = '<option value="">{{ trans('dash.label.selected') }}</option>';
-                    $.each(data.rows, function(i, item) {
-                        html = html + '<option value="'+item.id+'">'+item.hour+'</option>';
-                        htmlData = htmlData + '<div class="col-6 col-sm-4 col-lg-3 p-2">' +
-                                                '<a href="javascript:void(0);" data-id="'+item.id+'" onclick="selectedDay(this);" class="selectDays d-block thisAvailableDiv">'+convertirHora(item.hour)+'</a>' +
-                                            '</div>';
-                        existHours = 1;
-                    });
-
-                    if(existHours == 0) {
-                        var html = '<option value="">{{ trans('dash.label.selected.notavailable') }}</option>';
-                        htmlData = '{{ trans('dash.label.selected.notavailable') }}';
-                    }
-
-                    $('#hour').html(html);
-                    $('.printerHoursAvailable').html(htmlData);
-                }
-            );
-        }else{
-            var html = '<option value="">{{ trans('dash.label.selected') }}</option>';
-            $('#hour').html(html);
-        }
-
-        setUrlDate();
-
-        if(callGroomer == 'groomer') {
-            var rolid = $('#user').find('option:selected').attr('data-rol');
-            if(rolid == 6) {
-                $('#contGrooming').show();
-                selectedPet();
-            }else{
-                $('#contGrooming').hide();
-            }
-        }
-    }
-    getHours('groomer');
-
-    function selectedDay(obj) {
-        var id = $(obj).attr('data-id');
-
-        $('.thisAvailableDiv').removeClass('active');
-        $(obj).addClass('active');
-
-        $('#hour').val(id);
-    }
-
-    function reserverHour(obj) {
-        var id = $(obj).val();
-        if(id != '') {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                }
-            });
-            
-            $.post('{{ route('appoinment.reserveHour') }}', {id:id},
-                function (data){
-                    if(data.reserve != '1') {
-                        $.toast({
-                            text: '{{ trans('dash.msg.error.hour.not.available') }}',
-                            position: 'bottom-right',
-                            textAlign: 'center',
-                            loader: false,
-                            hideAfter: 4000,
-                            icon: 'warning'
-                        });
-                        getHours();
-                    }
-                }
-            );
-        }
-    }
-
-    function setNotified() {
-        if($("#addReminder").prop("checked")) {
-        	$('#containerNotified').show();
-    	}else{
-            $('#containerNotified').hide();
-        }        
-    }
-
-    function validate() {
-        var valid = true;
-
-        var extValid = ['.jpg','.JPG','.jpeg','.JPEG','.png','.PNG','.gif','.GIF','.pdf','.PDF','.mp3','.mp4','.avi','.zip','.rar','.doc','.docx','.ppt','.pptx','.pptm','.pps','.ppsm','.ppsx','.xls','.xlsx'];
-  
-        $('.requerido').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                valid = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if($("#addReminder").prop("checked")) {
-        	$('.requeridoReminder').each(function(i, elem){
-                var value = $(elem).val();
-                var value = value.trim();
-                if(value == ''){
-                    $(elem).addClass('is-invalid');
-                    valid = false;
-                }else{
-                    $(elem).removeClass('is-invalid');
-                }
-            });
-
-            if(valid == true) {
-                if($('#reminder_date').val() == '{{ date('j/n/Y') }}') {
-                    var horaInput = $("#reminder_time").val();
-                    var horaActual = new Date().toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit'});
-      
-                    var tiempoEntrada = new Date('2000-01-01T' + horaInput);
-                    var tiempoActual  = new Date('2000-01-01T' + horaActual);
-
-                    if (tiempoEntrada < tiempoActual) {
-                        $("#reminder_time").addClass('is-invalid');
-                        valid = false;
-                    }
-                }
-            }
-    	}
-
-        for (var i = 0; i < $('#fileModalMultiple').get(0).files.length; ++i) {
-            var name = $('#fileModalMultiple').get(0).files[i].name;
-    
-            var extension = name.substring(name.lastIndexOf("."));
-            var position = jQuery.inArray(extension, extValid);
-            if(position == -1) {
-                valid = false;
-                
-                $.toast({
-                    text: '{{ trans('dash.msg.error.ext.file') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'warning'
-                });
-            }
-        }
-
-        var showAlert = false;
-        $('.requeridoModalMedicineAdd').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                valid = false;
-                showAlert = true;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if(showAlert == true) {
-            $.toast({
-                text: '{{ trans('dash.msg.error.recipe.fields') }}',
-                position: 'bottom-right',
-                textAlign: 'center',
-                loader: false,
-                hideAfter: 4000,
-                icon: 'warning'
-            });
-        }
-
-        var rolid = $('#user').find('option:selected').attr('data-rol');
-        if(rolid == 6) {
-            if($('#imageSelected').val() == '') {
-                $.toast({
-                    text: '{{ trans('dash.image.not.choose') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'error'
-                });
-                valid = false;
-            }
-            if($('#imageSelected').val() == '0') {
-                if($('#grooming_personalize').val() == '') {
-                    $.toast({
-                        text: '{{ trans('dash.image.not.choose.personalize') }}',
-                        position: 'bottom-right',
-                        textAlign: 'center',
-                        loader: false,
-                        hideAfter: 4000,
-                        icon: 'error'
-                    });
-                    valid = false;
-                }
-            }
-        }
-
-        if(valid == true) {
-            setCharge();
-            setLoad('btnSave', '{{ trans('dash.text.btn.save.process') }}');
-        }
-
-        return valid;
-    }
-
-    var medicines;
-    var typesRecipe;
-    function loadRecipeData() {
-        var types = <?php echo json_encode($types); ?>;
-        var medical = <?php echo json_encode($medicines); ?>;
-
-        typesRecipe = '<option value="">{{ trans('dash.label.selected') }}</option>';
-        $.each(types, function(i, item) {
-          typesRecipe = typesRecipe + '<option value="'+item.id+'">'+item.title+'</option>';
-        });
-
-        medicines = '<option value=""></option>';
-        $.each(medical, function(i, item) {
-          medicines = medicines + '<option value="'+item.id+'" data-instruction="'+item.instructions+'">'+item.title+'</option>';
-        });
-    }
-    loadRecipeData();
-
-    function convertirHora(hora24) {
-        var partes = hora24.split(':');
-        var horas = parseInt(partes[0], 10);
-        var minutos = partes[1];
-        var segundos = partes[2];
-        var periodo = horas >= 12 ? 'pm' : 'am';
-        horas = horas % 12;
-        horas = horas ? horas : 12; // El '0' debe convertirse en '12'
-        return (horas < 10 ? '0' + horas : horas) + ':' + minutos + ' ' + periodo;
-    }
+    };
 </script>
+<script src="{{ asset('js/appointments/add.js') }}"></script>
 @endpush

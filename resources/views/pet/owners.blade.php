@@ -15,8 +15,8 @@
                 <h1 class="h4 text-uppercase text-center text-sm-start fw-bold m-0">{{ trans('dash.label.owners') }}</h1>
                 <div class="d-flex gap-2 align-items-center">
                     <input class="form-control fc" type="text" name="searchOwner" id="searchOwner" placeholder="Buscar" aria-label="default input example" value="{{ $search }}">
-                    <button type="button" onclick="search();" class="btn btn-light btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
-                    <a href="javascript:void(0);" class="btn btn-secondary btn-sm text-nowrap ms-1" data-bs-toggle="modal" data-bs-target="#createNewUser" onclick="setCreateUser();">
+                    <button type="button" class="btn btn-light btn-sm" data-owners-action="search"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <a href="javascript:void(0);" class="btn btn-secondary btn-sm text-nowrap ms-1" data-bs-toggle="modal" data-bs-target="#createNewUser" data-owners-action="create-user">
                         <i class="fa-solid fa-plus me-1"></i>{{ trans('dash.label.create') }}
                     </a>
                 </div>
@@ -92,16 +92,15 @@
 
 @push('scriptBottom')
 <script>
-    function search() {
-        var text = $('#searchOwner').val();
-
-        setCharge();
-
-        location.href = '{{ route('pet.owners') }}/' + btoa(text);
-    }
-
-    function setCreateUser() {
-        $('#associateUserDoctor').val('1');
-    }
+    window.OWNERS_CONFIG = {
+        routes: {
+            owners: "{{ route('pet.owners') }}"
+        },
+        ids: {
+            searchInput: "searchOwner",
+            associateInput: "associateUserDoctor"
+        }
+    };
 </script>
+<script src="{{ asset('js/pet/owners.js') }}"></script>
 @endpush

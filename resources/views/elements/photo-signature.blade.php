@@ -6,7 +6,7 @@
           <button type="button" class="btn-close small" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-3 p-md-4">
-            <form method="post" id="formPhoto" name="formPhoto" enctype="multipart/form-data" method="post" action="{{ route('profile.updatePhoto') }}" onsubmit="return validaImage();">
+            <form method="post" id="formPhoto" name="formPhoto" enctype="multipart/form-data" method="post" action="{{ route('profile.updatePhoto') }}">
                 @csrf
                 <div>
                   <label for="profilePhoto" class="form-label small mb-1">{{ trans('dash.label.element.select.file') }}</label>
@@ -15,7 +15,7 @@
             </form>
         </div>
         <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-          <button type="button" onclick="sendFormPhoto();" class="btn btn-primary btn-sm px-4">{{ trans('dash.text.btn.save') }}</button>
+          <button type="button" class="btn btn-primary btn-sm px-4" data-photo-action="photo-submit">{{ trans('dash.text.btn.save') }}</button>
         </div>
       </div>
     </div>
@@ -44,160 +44,23 @@
 
 @push('scriptBottom')
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+@php
+  $exts = explode(',', App\Models\AppointmentAttachment::getExtensions(true));
+@endphp
 <script>
-    //firma
-    const myModalEl = document.getElementById('signatureModal')
-    myModalEl.addEventListener('shown.bs.modal', event => {
-        
-        var canvas = document.getElementById('signature-pad');
-
-        function resizeCanvas() {
-            var ratio =  Math.max(window.devicePixelRatio || 1, 1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-        }
-
-        window.onresize = resizeCanvas;
-        resizeCanvas();
-
-        var signaturePad = new SignaturePad(canvas, {
-            backgroundColor: 'rgb(255, 255, 255)' // necessary for saving image as JPEG; can be removed is only saving as PNG or SVG
-        });
-
-        document.getElementById('clear').addEventListener('click', function () {
-            signaturePad.clear();
-        });
-
-        document.getElementById('saveSignature').addEventListener('click', function () {
-            if(signaturePad.isEmpty()) {
-                $.toast({
-                    text: '{{ trans('dash.msg.draw.signature') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 3000,
-                    icon: 'warning'
-                });
-            }else{
-                var signature = signaturePad.toDataURL('image/png');
-
-                setCharge();
-                
-                $.ajax({
-                    type: 'POST',
-                    url: '{{ route('profile.setSignature') }}',
-                    dataType: "json",
-                    headers: {
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-                    },
-                    data: {
-                        signature: signature
-                    },
-                    beforeSend: function(){},
-                    success: function(data){
-                        location.reload();
-                    }
-                });
-            }
-        });
-    })
-
-    function sendFormPhoto() {
-        $('#formPhoto').submit();
-    }
-
-    @php
-    $exts = explode(',', App\Models\AppointmentAttachment::getExtensions(true));
-    @endphp
-    function validaImage() {
-        var extValid = <?php echo json_encode($exts); ?>;
-
-        var validate = true;
-
-        var img = document.getElementById('profilePhoto');
-
-        if (img.files.length > 0) {
-            
-            var nameFile = img.files[0].name;
-            
-            var extension = nameFile.split('.').pop();
-            
-            var position = jQuery.inArray(extension, extValid);
-            if(position == -1) {
-                validate = false;
-                
-                $.toast({
-                    text: '{{ trans('dash.msg.ext.not.valid') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'warning'
-                });
-            }
-        }else{
-            validate = false;
-
-            $.toast({
-              text: '{{ trans('dash.msg.select.image') }}',
-              position: 'bottom-right',
-              textAlign: 'center',
-              loader: false,
-              hideAfter: 4000,
-              icon: 'warning'
-            });
-        }
-
-        if(validate == true) {
-            setCharge2();
-
-            return true;
-        }else{
-            return false;
-        }
-
-    }
-
-    function changeNotified() {
-        var mailer = 0;
-        var sms = 0;
-        var whatsapp = 0;
-
-        if($('#notifiedEmail').is(':checked')) {
-            mailer = 1;
-        }
-        if($('#notifiedSms').is(':checked')) {
-            sms = 1;
-        }
-        if($('#notifiedWhatsapp').is(':checked')) {
-            whatsapp = 1;
-        }
-                
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('profile.setNotifications') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                mailer : mailer,
-                sms : sms,
-                whatsapp : whatsapp
-            },
-            beforeSend: function(){},
-            success: function(data){
-                $.toast({
-                    text: '{{ trans('dash.notified.change') }}',
-                    position: 'bottom-right',
-                    textAlign: 'center',
-                    loader: false,
-                    hideAfter: 4000,
-                    icon: 'success'
-                });
-            }
-        });
-    }
+  window.PHOTO_SIGNATURE_CONFIG = {
+    routes: {
+      setSignature: "{{ route('profile.setSignature') }}",
+      setNotifications: "{{ route('profile.setNotifications') }}"
+    },
+    labels: {
+      drawSignature: "{{ trans('dash.msg.draw.signature') }}",
+      extNotValid: "{{ trans('dash.msg.ext.not.valid') }}",
+      selectImage: "{{ trans('dash.msg.select.image') }}",
+      notifiedChange: "{{ trans('dash.notified.change') }}"
+    },
+    allowedExtensions: <?php echo json_encode($exts); ?>
+  };
 </script>
+<script src="{{ asset('js/common/photo-signature.js') }}"></script>
 @endpush

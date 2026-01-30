@@ -17,12 +17,12 @@
         </style>
     </head>
 
-    <body @if($printerNow == '') onload="window.print();" @endif>
+    <body @if($printerNow == '') data-auto-print="1" @endif>
 
         <div class="p-4">
             <div class="d-flex align-items-center justify-content-center gap-4 mb-3">
                 <img src="{{ asset('img/logo.png') }}" alt="Vetegram" style="width: 200px">
-                <button type="button" class="btn btn-dark" onclick="window.print()">{{ trans('dash.btn.label.printer') }}</button>
+                <button type="button" class="btn btn-dark" data-action="print" data-action-event="click">{{ trans('dash.btn.label.printer') }}</button>
             </div>
 
             <div class="d-flex align-items-center mb-1">
@@ -78,6 +78,8 @@
             @endif
             
         </div>
+        <script src="{{ asset('js/common/action-router.js') }}"></script>
+        <script src="{{ asset('js/common/auto-print.js') }}"></script>
 
     </body>
 

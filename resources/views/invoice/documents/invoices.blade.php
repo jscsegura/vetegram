@@ -52,11 +52,11 @@
                                         <li><a class="dropdown-item small" href="{{ route('invoice.detail', ['id' => $invoice['CLAVE'], 'doctype' => 0]) }}">{{ trans('dash.label.detail') }}</a></li>
                                         
                                         @if($invoice['APPROVED'] == 1)
-                                            <li><button type="button" class="dropdown-item small" data-bs-toggle="modal" data-bs-target="#creditNoteModal" onclick="setIdInvoiceNc('{{ $invoice['CLAVE'] }}');">{{ trans('dash.label.invoice.credit') }}</button></li>
+                                            <li><button type="button" class="dropdown-item small" data-bs-toggle="modal" data-bs-target="#creditNoteModal" data-invoice-action="credit-note-open" data-clave="{{ $invoice['CLAVE'] }}" data-action="Invoice.setIdInvoiceNc" data-action-event="click" data-action-args="$el">{{ trans('dash.label.invoice.credit') }}</button></li>
                                         @endif
                                         
                                         @if($invoice['APPROVED'] != 1)
-                                            <li><a class="dropdown-item small" onclick="resendDocument(0, '{{ $invoice['CLAVE'] }}');">{{ trans('dash.invoice.index.btn.resend') }}</a></li>
+                                            <li><a class="dropdown-item small" data-invoice-action="resend" data-type="0" data-clave="{{ $invoice['CLAVE'] }}">{{ trans('dash.invoice.index.btn.resend') }}</a></li>
                                         @endif
                                         
                                         @if($invoice['CLAVE'] != '')

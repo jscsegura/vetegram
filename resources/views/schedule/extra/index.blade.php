@@ -14,7 +14,7 @@
             </h1>
             <div class="d-flex gap-2 align-items-center">
                 <input class="form-control fc" type="text" name="searchExtra" id="searchExtra" placeholder="{{ trans('dash.schedule.extra.search') }}" aria-label="default input example" value="{{ $search }}">
-                <button type="button" onclick="searchRows();" class="btn btn-light btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <button type="button" class="btn btn-light btn-sm" data-schedule-action="extra-search"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
             <a href="{{ route('schedule.extra.add') }}" class="btn btn-primary btn-sm d-block text-uppercase px-4">{{ trans('dash.schedule.extra.add') }}</a>
         </div>
@@ -48,7 +48,7 @@
                                             <a class="apIcon d-md-inline-block" href="{{ route('schedule.extra.edit', $rowid) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('dash.schedule.extra.edit') }}">
                                                 <i class="fa-solid fa-pencil"></i>
                                             </a>
-                                            <a class="apIcon d-md-inline-block" href="javascript:void(0);" onclick="removeExtraAvailability('{{ $rowid }}', this);" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('dash.schedule.extra.delete') }}">
+                                            <a class="apIcon d-md-inline-block" href="javascript:void(0);" data-schedule-action="extra-delete" data-row-id="{{ $rowid }}" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('dash.schedule.extra.delete') }}">
                                                 <i class="fa-regular fa-trash-can"></i>
                                             </a>
                                         </div>
@@ -77,76 +77,19 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl, {
-                delay: { 
-                    "show": 0,
-                    "hide": 100
-                } // Mostrar de inmediato, ocultar con 100ms de retraso
-            });
-        });
-    }); 
-
-    function searchRows() {
-        var search = $('#searchExtra').val();
-
-        location.href = '{{ url('schedule/extra/index') }}/' + btoa(search);
-    }
-
-    function removeExtraAvailability(id, obj) {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.schedule.extra.msg.delete') }}',
-            text: '{{ trans('dash.schedule.extra.msg.confirm.delete') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.schedule.extra.yes.delete') }}',
-            cancelButtonText: '{{ trans('dash.schedule.extra.not.delete') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('schedule.extra.delete') }}', {id:id},
-                    function (data){
-                        if(data.process == '1') {
-                            $('#row' + id).remove();
-                        }else{
-                            $.toast({
-                                text: '{{ trans('dash.schedule.extra.msg.error.delete') }}',
-                                position: 'bottom-right',
-                                textAlign: 'center',
-                                loader: false,
-                                hideAfter: 4000,
-                                icon: 'error'
-                            });
-                        }
-
-                        hideCharge();
-                    }
-                );
-            }
-        });
-    }
-
-   
+    window.SCHEDULE_EXTRA_INDEX_CONFIG = {
+        routes: {
+            searchBase: @json(url('schedule/extra/index')),
+            delete: @json(route('schedule.extra.delete'))
+        },
+        texts: {
+            deleteTitle: @json(trans('dash.schedule.extra.msg.delete')),
+            deleteConfirm: @json(trans('dash.schedule.extra.msg.confirm.delete')),
+            deleteYes: @json(trans('dash.schedule.extra.yes.delete')),
+            deleteNo: @json(trans('dash.schedule.extra.not.delete')),
+            deleteError: @json(trans('dash.schedule.extra.msg.error.delete'))
+        }
+    };
 </script>
-
-
+<script src="{{ asset('js/schedule/extra-index.js') }}"></script>
 @endpush

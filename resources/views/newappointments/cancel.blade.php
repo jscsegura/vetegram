@@ -26,7 +26,7 @@
                     @else
                     <p class="fs-5 text-center mb-3">¿{{ trans('dash.msg.appoinment.title.cancel.nosimbol') }} @if(isset($appointment['getPet']['name'])) {{ trans('dash.label.of') }} <span class="text-uppercase fw-medium">{{ $appointment['getPet']['name'] }} </span>@endif {{ trans('dash.label.of.the') }} <span class="fw-medium">{{ date('d', strtotime($appointment->date)) . ' de ' . strtolower(trans('dash.month.num' . (int)date('m', strtotime($appointment->date)))) }}</span> {{ trans('dash.label.confirm.appointment.at') }} <span class="fw-medium">{{ date('h:i a', strtotime($appointment->hour)) }}</span>?</p>
                     <div class="mx-auto">
-                        <button type="submit" class="btn btn-primary px-5" onclick="setToCancel('{{ $appointment->id }}', '{{ $appointment->id_user }}')">{{ trans('dash.msg.yes.cancel') }}</button>
+                        <button type="submit" class="btn btn-primary px-5" data-action="Appointments.setToCancel" data-action-event="click" data-action-args="{{ $appointment->id }}|{{ $appointment->id_user }}">{{ trans('dash.msg.yes.cancel') }}</button>
                     </div>
                     @endif
                 </div>
@@ -46,55 +46,18 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    function setToCancel(id, user_id) {
-        var option = 'cancelar';
-
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dash.msg.cancel.appoinment') }}',
-            text: '{{ trans('dash.msg.confir.cancel.appoinment') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dash.msg.yes.cancel') }}',
-            cancelButtonText: 'No',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('appoinment.cancelOrReschedule') }}', {id:id, user_id:user_id, date:'', time:'', option:option},
-                    function (data){
-                        if(data.process == '1') {
-                            location.reload();
-                        }else if(data.process == '500') {
-                            $.toast({
-                                text: '{{ trans('dash.msg.error.cancel.appoinment') }}',
-                                position: 'bottom-right',
-                                textAlign: 'center',
-                                loader: false,
-                                hideAfter: 4000,
-                                icon: 'error'
-                            });
-                        }
-
-                        hideCharge();
-                    }
-                );
-            }
-        });
-    }
+    window.APPOINTMENTS_CANCEL_CONFIG = {
+        routes: {
+            cancelOrReschedule: @json(route('appoinment.cancelOrReschedule'))
+        },
+        texts: {
+            cancelTitle: @json(trans('dash.msg.cancel.appoinment')),
+            cancelConfirm: @json(trans('dash.msg.confir.cancel.appoinment')),
+            cancelYes: @json(trans('dash.msg.yes.cancel')),
+            cancelNo: 'No',
+            cancelError: @json(trans('dash.msg.error.cancel.appoinment'))
+        }
+    };
 </script>
+<script src="{{ asset('js/appointments/cancel.js') }}"></script>
 @endpush

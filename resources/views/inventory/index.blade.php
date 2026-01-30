@@ -14,7 +14,7 @@
             </h1>
             <div class="d-flex gap-2 align-items-center">
                 <input class="form-control fc" type="text" name="searchMedicine" id="searchMedicine" placeholder="{{ trans('dashadmin.label.inventory.searh') }}" aria-label="default input example" value="{{ $search }}">
-                <button type="button" onclick="searchRows();" class="btn btn-light btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <button type="button" data-action="Inventory.searchRows" data-action-event="click" class="btn btn-light btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
             <a href="{{ route('inventory.upload') }}" class="btn btn-primary btn-sm d-block text-uppercase px-4">{{ trans('dashadmin.label.add.product.xml') }}</a>
             <a href="{{ route('inventory.add') }}" class="btn btn-primary btn-sm d-block text-uppercase px-4">{{ trans('dashadmin.label.add.product') }}</a>
@@ -69,7 +69,7 @@
                                     </td>-->
                                     <td class="px-2 px-lg-3 py-1 py-lg-3 text-center" data-label="{{ trans('dashadmin.label.inventory.enabled') }}:">
                                         <div class="form-check fs-6 form-switch d-inline-block align-middle">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="enabledRow{{ $rowid }}" name="enabledRow" onclick="changeStatus('{{ $rowid }}', this);" @if($row->enabled == 1) checked @endif>
+                                            <input class="form-check-input" type="checkbox" role="switch" id="enabledRow{{ $rowid }}" name="enabledRow" data-action="Inventory.changeStatus" data-action-event="click" data-action-args="{{ $rowid }}|$el" @if($row->enabled == 1) checked @endif>
                                         </div>
                                     </td>
                                     <td class="px-2 px-lg-3 py-1 py-lg-3 text-center" data-label="{{ trans('dashadmin.label.inventory.options') }}:">
@@ -80,7 +80,7 @@
                                             <a class="apIcon d-md-inline-block" href="{{ route('inventory.history', $rowid) }}" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('dashadmin.label.title.history') }}">
                                                 <i class="fa-solid fa-history"></i> 
                                             </a>
-                                            <a class="apIcon d-md-inline-block" href="javascript:void(0);" onclick="removeMedicine('{{ $rowid }}', this);" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('dashadmin.label.inventory.delete') }}">
+                                            <a class="apIcon d-md-inline-block" href="javascript:void(0);" data-action="Inventory.removeMedicine" data-action-event="click" data-action-args="{{ $rowid }}|$el" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('dashadmin.label.inventory.delete') }}">
                                                 <i class="fa-regular fa-trash-can"></i>
                                             </a>
                                         </div>
@@ -109,112 +109,28 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl, {
-                delay: { 
-                    "show": 0,
-                    "hide": 100
-                } // Mostrar de inmediato, ocultar con 100ms de retraso
-            });
-        });
-    }); 
-
-    function searchRows() {
-        var search = $('#searchMedicine').val();
-
-        location.href = '{{ url('inventory/list') }}/' + btoa(search);
-    }
-
-    function removeMedicine(id, obj) {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans('dashadmin.msg.delete.medicine') }}',
-            text: '{{ trans('dashadmin.msg.confir.delete.medicine') }}',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans('dashadmin.label.yes.delete') }}',
-            cancelButtonText: '{{ trans('dashadmin.label.not.delete') }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-                    }
-                });
-
-                setCharge();
-                
-                $.post('{{ route('inventory.delete') }}', {id:id},
-                    function (data){
-                        if(data.process == '1') {
-                            $('#row' + id).remove();
-                        }else{
-                            $.toast({
-                                text: '{{ trans('dashadmin.msg.error.delete.medicine') }}',
-                                position: 'bottom-right',
-                                textAlign: 'center',
-                                loader: false,
-                                hideAfter: 4000,
-                                icon: 'error'
-                            });
-                        }
-
-                        hideCharge();
-                    }
-                );
-            }
-        });
-    }
-
-    function changeStatus(id, obj) {
-        var status = 0;
-
-        if($(obj).is(':checked')) {
-            var status = 1;
+    window.INVENTORY_INDEX_CONFIG = {
+        routes: {
+            searchBase: @json(url('inventory/list')),
+            deleteUrl: @json(route('inventory.delete')),
+            changeEnabledUrl: @json(route('inventory.changeEnabled'))
+        },
+        texts: {
+            deleteTitle: @json(trans('dashadmin.msg.delete.medicine')),
+            deleteConfirm: @json(trans('dashadmin.msg.confir.delete.medicine')),
+            deleteYes: @json(trans('dashadmin.label.yes.delete')),
+            deleteNo: @json(trans('dashadmin.label.not.delete')),
+            deleteError: @json(trans('dashadmin.msg.error.delete.medicine')),
+            enabledSuccess: @json(trans('dashadmin.msg.success.enabled.medicine')),
+            enabledError: @json(trans('dashadmin.msg.error.enabled.medicine'))
+        },
+        selectors: {
+            searchInput: '#searchMedicine',
+            rowPrefix: '#row'
         }
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr("content")
-            }
-        });
-        
-        $.post('{{ route('inventory.changeEnabled') }}', {id:id, status: status},
-            function (data){
-                if(data.process == '1') {
-                    $.toast({
-                        text: '{{ trans('dashadmin.msg.success.enabled.medicine') }}',
-                        position: 'bottom-right',
-                        textAlign: 'center',
-                        loader: false,
-                        hideAfter: 4000,
-                        icon: 'success'
-                    });
-                }else{
-                    $.toast({
-                        text: '{{ trans('dashadmin.msg.error.enabled.medicine') }}',
-                        position: 'bottom-right',
-                        textAlign: 'center',
-                        loader: false,
-                        hideAfter: 4000,
-                        icon: 'error'
-                    });
-                }
-            }
-        );
-    }
+    };
 </script>
+<script src="{{ asset('js/inventory/index.js') }}"></script>
 
 
 @endpush

@@ -26,31 +26,31 @@
 
                         <div class="col-8">
                             <label for="Clave" class="form-label small">Clave</label>
-                            <input type="text" class="form-control" id="Clave" name="Clave" value="{{ $Clave }}" onfocus="blur();">
+                            <input type="text" class="form-control" id="Clave" name="Clave" value="{{ $Clave }}" readonly>
                         </div>
                         <div class="col-4">
                             <label for="NumeroConsecutivo" class="form-label small">Numero Consecutivo</label>
-                            <input type="text" class="form-control" id="NumeroConsecutivo" name="NumeroConsecutivo" value="{{ $NumeroConsecutivo }}" onfocus="blur();">
+                            <input type="text" class="form-control" id="NumeroConsecutivo" name="NumeroConsecutivo" value="{{ $NumeroConsecutivo }}" readonly>
                         </div>
                         <div class="col-12">
                             <label for="nombreEmisor" class="form-label small">Nombre Emisor</label>
-                            <input type="text" class="form-control" id="nombreEmisor" name="nombreEmisor" value="{{ $emisor['Nombre'] }}" onfocus="blur();">
+                            <input type="text" class="form-control" id="nombreEmisor" name="nombreEmisor" value="{{ $emisor['Nombre'] }}" readonly>
                         </div>
                         <div class="col-4">
                             <label for="typeEmisor" class="form-label small">Tipo Identificación</label>
-                            <input type="text" class="form-control" id="typeEmisor" name="typeEmisor" value="{{ $emisor['Identificacion']['Tipo'] }}" onfocus="blur();">
+                            <input type="text" class="form-control" id="typeEmisor" name="typeEmisor" value="{{ $emisor['Identificacion']['Tipo'] }}" readonly>
                         </div>
                         <div class="col-8">
                             <label for="dniEmisor" class="form-label small">Identificación Emisor</label>
-                            <input type="text" class="form-control" id="dniEmisor" name="dniEmisor" value="{{ $emisor['Identificacion']['Numero'] }}" onfocus="blur();">
+                            <input type="text" class="form-control" id="dniEmisor" name="dniEmisor" value="{{ $emisor['Identificacion']['Numero'] }}" readonly>
                         </div>
                         <div class="col-6">
                             <label for="totalTaxes" class="form-label small">Total Impuestos</label>
-                            <input type="text" class="form-control" id="totalTaxes" name="totalTaxes" value="{{ $TotalImpuesto }}" onfocus="blur();">
+                            <input type="text" class="form-control" id="totalTaxes" name="totalTaxes" value="{{ $TotalImpuesto }}" readonly>
                         </div>
                         <div class="col-6">
                             <label for="totalFactura" class="form-label small">Total Factura</label>
-                            <input type="text" class="form-control" id="totalFactura" name="totalFactura" value="{{ $TotalComprobante }}" onfocus="blur();">
+                            <input type="text" class="form-control" id="totalFactura" name="totalFactura" value="{{ $TotalComprobante }}" readonly>
                         </div>
                         
                         <div class="col-6 col-md-6">

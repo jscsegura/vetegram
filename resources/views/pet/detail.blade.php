@@ -89,21 +89,18 @@
 <script src="{{ asset('js/wpanel/library/jquery.toast.js') }}"></script>
 
 <script>
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-
-    new dateDropper({
-        selector: '.dDropper',
-        format: 'd/m/y',
-        expandable: true,
-        showArrowsOnHover: true,
-   })
-
-   $('.select4').select2( {
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-        dropdownParent: $('#petEditModal')
-    });
+    window.PET_COMMON_CONFIG = {
+        selectors: {
+            petEditModal: '#petEditModal'
+        },
+        routes: {
+            getBreed: "{{ route('get.breed') }}"
+        },
+        texts: {
+            selectLabel: "{{ trans('auth.register.complete.select') }}"
+        }
+    };
 </script>
+<script src="{{ asset('js/pet/common.js') }}"></script>
+<script src="{{ asset('js/pet/detail.js') }}"></script>
 @endpush

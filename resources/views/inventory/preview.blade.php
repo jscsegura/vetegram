@@ -92,7 +92,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <label for="searchCabys" class="form-label small mb-1">{{ trans('dashadmin.label.cabys.criteria') }}</label>
-                            <input type="text" name="searchCabys" id="searchCabys" class="form-control" value="" onkeyup="searchCabysMethod(this);">
+                            <input type="text" name="searchCabys" id="searchCabys" class="form-control" value="" data-action="Inventory.searchCabysMethod" data-action-event="keyup" data-action-args="$el">
                         </div>
                     </div>
 
@@ -110,7 +110,7 @@
                 </form>
             </div>
             <div class="modal-footer px-3 px-md-4 pb-3 pb-md-4 pt-0">
-                <button type="button" class="btn btn-primary btn-sm px-4" onclick="getCode();">{{ trans('dashadmin.label.select') }}</button>
+                <button type="button" class="btn btn-primary btn-sm px-4" data-action="Inventory.getCode" data-action-event="click">{{ trans('dashadmin.label.select') }}</button>
             </div>
         </div>
     </div>
@@ -126,100 +126,20 @@
 
 
 <script>
-    $('.select3').select2({
-        theme: "bootstrap-5",
-        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-        placeholder: $(this).data('placeholder'),
-        dropdownParent: $('#cabysCode')
-    });
-    //let currentInput = null;
-
-    /*document.querySelectorAll('.cabys-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            +
-
-            console.log(this.getAttribute('data-input'));
-            const inputSelector = this.getAttribute('data-input');
-            currentInput = document.querySelector(`input[id="${CSS.escape(inputSelector)}"]`);
-        });
-    });*/
-
-    function changeCurrentInput(input) {
-        let cinput = document.getElementById('currentInput');
-        cinput.value = input;
-    }
-
-    function searchCabysMethod(obj) {
-        var text = $(obj).val();
-
-        var options = '';
-
-        if (text != '') {
-            if (!isNaN(parseFloat(text)) && isFinite(text)) {
-                $.getJSON("https://api.hacienda.go.cr/fe/cabys?codigo=" + text, function(json) {
-                    $.each(json, function(key, val) {
-                        if (val.codigo) {
-                            options += '<option value="' + val.codigo + '">' + val.descripcion + ' (' + val.codigo + ') ' + val.impuesto + '%</option>';
-                        } else {
-                            options = '<option value="">{{ trans("dashadmin.label.cabys.not.search") }}</option>';
-                        }
-
-                        $('#cabysModal').html(options);
-                    });
-                });
-            } else {
-                $.getJSON("https://api.hacienda.go.cr/fe/cabys?q=" + text, function(json) {
-                    if (json.total > 0) {
-                        $.each(json.cabys, function(key, val) {
-                            options += '<option value="' + val.codigo + '">' + val.descripcion + ' (' + val.codigo + ') ' + val.impuesto + '%</option>';
-                        });
-                    } else {
-                        options = '<option value="">{{ trans("dashadmin.label.cabys.not.search") }}</option>';
-                    }
-
-                    $('#cabysModal').html(options);
-                });
-            }
-        } else {
-            options = '<option value="">{{ trans("dashadmin.label.cabys.not.search") }}</option>';
-            $('#cabysModal').html(options);
+    window.INVENTORY_PREVIEW_CONFIG = {
+        texts: {
+            cabysNotSearch: @json(trans('dashadmin.label.cabys.not.search')),
+            deleteTitle: @json(trans('dashadmin.msg.delete.medicine')),
+            deleteConfirm: @json(trans('dashadmin.msg.confir.delete.medicine')),
+            deleteYes: @json(trans('dashadmin.label.yes.delete')),
+            deleteNo: @json(trans('dashadmin.label.not.delete'))
+        },
+        selectors: {
+            cabysModal: '#cabysModal',
+            cabysModalParent: '#cabysCode',
+            currentInput: '#currentInput'
         }
-    }
-
-    function getCode() {
-        cinput = document.getElementById('currentInput');
-        var code = $('#cabysModal').val();
-        if (cinput && code != '') {
-
-            let currentInput = document.getElementById(cinput.value);
-            currentInput.value = code;
-
-            $('#cabysCode').modal('toggle');
-        }
-    }
-
-    function removeMedicine(id, obj) {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-primary btn-sm text-uppercase px-4 marginleft20',
-                cancelButton: 'btn btn-danger btn-sm text-uppercase px-4'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: '{{ trans("dashadmin.msg.delete.medicine") }}',
-            text: "{{ trans('dashadmin.msg.confir.delete.medicine') }}",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: '{{ trans("dashadmin.label.yes.delete") }}',
-            cancelButtonText: '{{ trans("dashadmin.label.not.delete") }}',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $('#row' + id).remove();
-            }
-        });
-    }
+    };
 </script>
+<script src="{{ asset('js/inventory/preview.js') }}"></script>
 @endpush

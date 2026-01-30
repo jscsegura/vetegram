@@ -63,35 +63,5 @@
 @endsection
 
 @push('scriptBottom')
-<script>
-
-    //accordion
-    var accordion = document.getElementById('marketNav');
-
-    function toggleAcordeonEnAncho(ancho) {
-        var collapseOne = accordion.querySelector('#collapseOne');
-        var collapseBtn = accordion.querySelector('#catBtn');
-        if (window.innerWidth <= ancho) {
-            if (collapseOne.classList.contains('show')) {
-                collapseOne.classList.remove('show');
-            }
-            collapseBtn.classList.add('collapsed');
-        } else {
-            if (!collapseOne.classList.contains('show')) {
-                collapseOne.classList.add('show');
-            }
-            collapseBtn.classList.remove('collapsed');
-        }
-    }
-
-    toggleAcordeonEnAncho(1200);
-
-    const query = matchMedia('(max-width: 1200px)');
-    console.log(query.matches);
-
-    query.addEventListener('change', (event) => {
-        console.log(event.matches);
-        toggleAcordeonEnAncho(1200);
-    });
-</script>
+<script src="{{ asset('js/home/store-accordion.js') }}"></script>
 @endpush

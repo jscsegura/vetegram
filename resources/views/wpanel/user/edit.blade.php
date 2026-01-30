@@ -19,7 +19,7 @@
     <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
     
-    <form method="post" name="frm" id="frm" role="form" enctype="multipart/form-data" action="{{ url('wpanel/users/' . $user->id) }}" onsubmit="return validate(1);">
+    <form method="post" name="frm" id="frm" role="form" enctype="multipart/form-data" action="{{ url('wpanel/users/' . $user->id) }}" data-action="wpanel.validate" data-action-event="submit" data-action-args="password|$el">
         
         {{ method_field('PUT') }}
         @csrf
@@ -40,7 +40,7 @@
         <div class="row">
             <div class="col-md-12">
                 <label>Correo:</label>
-                <input type="text" name="email" id="email" class="form-control requeridoEmail" value="{{ $user->email }}" maxlength="255" onfocus="blur()">
+                <input type="text" name="email" id="email" class="form-control requeridoEmail" value="{{ $user->email }}" maxlength="255" readonly>
             </div>
         </div>
         <div class="row">
@@ -65,7 +65,7 @@
                 <div id="divPhoto">
                     @if($user->photo != "")
                         <img align="middle" src="{{ asset('files/user/image/' . $user->photo) }}" style="max-width: 200px;">
-                        <img src="{{ asset('img/wpanel/deleteFile.png') }}" class="pointer" onclick="eliminateRegisterFile('{{ route('wp.users.deletefile') }}', 'id={{ $user->id }}', 'divPhoto');">
+                        <img src="{{ asset('img/wpanel/deleteFile.png') }}" class="pointer" data-action="delete-file" data-url="{{ route('wp.users.deletefile') }}" data-payload="id={{ $user->id }}" data-target="divPhoto">
                     @else
                         <input type="file" name="photo" id="photo">
                     @endif
@@ -91,7 +91,7 @@
             <div class="col-md-12">
                 <br />
                 <input type="submit" name="btnSubmit" id="btnSubmit" class="btn btn-primary" value="ACEPTAR">
-                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" onclick="window.open('{{ route('wp.users.index') }}','_self');">
+                <input type="button" name="btnCancel" id="btnCancel" class="btn btn-danger" value="CANCELAR" data-action="navigate" data-url="{{ route('wp.users.index') }}">
             </div>
         </div>
     </form>

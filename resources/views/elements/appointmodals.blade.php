@@ -77,3 +77,11 @@
 @if((isset($PhysicalExam))&&($PhysicalExam == true))
 @include('elements.appoint-modal.physical-exam')
 @endif
+
+@push('scriptBottom')
+<script>
+  window.APPOINT_MODAL_CONFIG = window.APPOINT_MODAL_CONFIG || {};
+  window.APPOINT_MODAL_CONFIG.assetsBase = "{{ rtrim(asset('js/appointments/modals/'), '/') }}/";
+</script>
+<script src="{{ asset('js/appointments/modals/index.js') }}"></script>
+@endpush

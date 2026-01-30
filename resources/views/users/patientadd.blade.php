@@ -10,7 +10,7 @@
 <section class="container-fluid pb-0 pb-lg-4">
     <div class="row px-2 px-lg-3 mt-2 mt-lg-4">
         
-        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmProfile" name="frmProfile" method="post" action="{{ route('adminpatient.store') }}" onsubmit="return validSend();">
+        <form class="col-xl-9 mx-auto mt-4 mt-lg-0 mb-lg-5" id="frmProfile" name="frmProfile" method="post" action="{{ route('adminpatient.store') }}" data-action="Users.validSend" data-action-event="submit">
             <h1 class="text-center text-md-start text-uppercase h4 fw-normal mb-3">
                 <a href="{{ route('adminpatient.index') }}" class="btn btn-sm smIcon"><i class="fa-solid fa-arrow-left-long"></i></a>
                 {{ trans('dashadmin.label.title.add') }} <span class="text-info fw-bold">{{ trans('dashadmin.label.title.patient') }}</span>
@@ -28,7 +28,7 @@
                 <div class="col-md-3">
                     <div class="mb-4">
                         <label for="dname" class="form-label small">{{ trans('auth.register.complete.type') }}</label>
-                        <select class="form-select fc select2 requerido" id="type" name="type" onchange="getBreed(this);">
+                        <select class="form-select fc select2 requerido" id="type" name="type" data-action="Users.getBreed" data-action-event="change" data-action-args="$el">
                             <option value="">{{ trans('auth.register.complete.select') }}</option>
                             @foreach ($animalTypes as $type)
                                 <option value="{{ $type->id }}">{{ $type['title_' . $weblang] }}</option>
@@ -70,56 +70,19 @@
 @push('scriptBottom')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    $('.select2').select2({
-        theme: "bootstrap-5",
-        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-        placeholder: $( this ).data( 'placeholder' ),
-    });
-
-    function getBreed(obj) {
-        var type = $('#type').val();
-
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('get.breed') }}',
-            dataType: "json",
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-            },
-            data: {
-                type: type
-            },
-            beforeSend: function(){},
-            success: function(data){
-                var html = '<option value="">{{ trans('auth.register.complete.select') }}</option>';
-                $.each(data.rows, function(i, item) {
-                    html = html + '<option value="'+item.id+'">'+item.title+'</option>';
-                });
-
-                $('#breed').html(html);
-            }
-        });
-    }
-
-    function validSend() {
-        var validate = true;
-
-        $('.requerido').each(function(i, elem){
-            var value = $(elem).val();
-            var value = value.trim();
-            if(value == ''){
-                $(elem).addClass('is-invalid');
-                validate = false;
-            }else{
-                $(elem).removeClass('is-invalid');
-            }
-        });
-
-        if(validate == true) {
-            setCharge();
+    window.USERS_COMMON_CONFIG = {
+        routes: {
+            getBreed: @json(route('get.breed'))
+        },
+        texts: {
+            selectLabel: @json(trans('auth.register.complete.select'))
+        },
+        selectors: {
+            type: '#type',
+            breed: '#breed'
         }
-
-        return validate;
-    }
+    };
 </script>
+<script src="{{ asset('js/users/common.js') }}"></script>
+<script src="{{ asset('js/users/patient-add.js') }}"></script>
 @endpush
